@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      products: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string
+          features: string[] | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          price: number | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description: string
+          features?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          price?: number | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string
+          features?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          price?: number | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quotations: {
+        Row: {
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          company: string | null
+          created_at: string
+          id: string
+          message: string | null
+          product_ids: string[] | null
+          quotation_type: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_email: string
+          client_name: string
+          client_phone?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          product_ids?: string[] | null
+          quotation_type?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          product_ids?: string[] | null
+          quotation_type?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          client_name: string
+          company: string | null
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          rating: number | null
+          role: string | null
+        }
+        Insert: {
+          client_name: string
+          company?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          rating?: number | null
+          role?: string | null
+        }
+        Update: {
+          client_name?: string
+          company?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          rating?: number | null
+          role?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
