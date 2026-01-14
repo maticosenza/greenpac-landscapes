@@ -92,8 +92,8 @@ const Products = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-greenpac-dark/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
-                <div className="p-6">
-                  <h3 className="font-display text-xl font-bold text-foreground mb-3">
+                <div className="p-6 transition-colors duration-300 group-hover:bg-primary/5">
+                  <h3 className="font-display text-xl font-bold text-foreground mb-3 transition-colors duration-300 group-hover:text-primary">
                     {product.name}
                   </h3>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
