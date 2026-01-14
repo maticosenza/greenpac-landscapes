@@ -121,6 +121,7 @@ export type Database = {
       }
       quotations: {
         Row: {
+          assigned_to: string | null
           client_email: string
           client_name: string
           client_phone: string | null
@@ -136,6 +137,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           client_email: string
           client_name: string
           client_phone?: string | null
@@ -151,6 +153,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           client_email?: string
           client_name?: string
           client_phone?: string | null
