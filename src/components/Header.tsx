@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X, Mail, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/greenpac-logo.png";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,8 +67,13 @@ const Header = () => {
             <Mail className="h-4 w-4" />
             <span className="text-sm">info@greenpacargentina.com</span>
           </a>
-          <Button variant="hero" size="sm" asChild>
-            <a href="#contacto">Contactar</a>
+          <Button
+            variant="hero"
+            size="sm"
+            onClick={() => navigate(user ? "/panel" : "/auth")}
+          >
+            <User className="h-4 w-4 mr-2" />
+            {user ? "Mi Panel" : "Ingresar"}
           </Button>
         </div>
 
@@ -101,6 +110,18 @@ const Header = () => {
             <Mail className="h-4 w-4" />
             <span>info@greenpacargentina.com</span>
           </a>
+          <Button
+            variant="hero"
+            size="sm"
+            className="mt-2"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate(user ? "/panel" : "/auth");
+            }}
+          >
+            <User className="h-4 w-4 mr-2" />
+            {user ? "Mi Panel" : "Ingresar"}
+          </Button>
         </nav>
       </div>
     </header>
