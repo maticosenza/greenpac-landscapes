@@ -50,7 +50,7 @@ const quotationSchema = z.object({
 type QuotationFormData = z.infer<typeof quotationSchema>;
 
 const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: products } = useQuery({
@@ -111,6 +111,28 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
       });
 
       if (error) throw error;
+
+      // Get product names for email notification
+      const selectedProducts = products?.filter(p => data.product_ids.includes(p.id)).map(p => p.name) || [];
+
+      // Send email notification (fire and forget - don't block on errors)
+      try {
+        await supabase.functions.invoke("send-quotation-notification", {
+          body: {
+            client_name: data.client_name,
+            client_email: data.client_email,
+            client_phone: data.client_phone,
+            company: data.company,
+            quotation_type: data.quotation_type,
+            products: selectedProducts,
+            message: data.message,
+            created_by_employee: profile?.full_name,
+          },
+        });
+      } catch (emailError) {
+        console.error("Error sending email notification:", emailError);
+        // Don't throw - email failure shouldn't block quotation creation
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-quotations"] });
