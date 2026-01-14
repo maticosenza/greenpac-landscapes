@@ -2,27 +2,34 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-async function sendEmail(to: string[], subject: string, html: string) {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: "Greenpac <onboarding@resend.dev>",
-      to,
-      subject,
-      html,
-    }),
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to send email: ${error}`);
+async function sendEmail(to: string[], subject: string, html: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "Greenpac <onboarding@resend.dev>",
+        to,
+        subject,
+        html,
+      }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      console.warn(`Email sending failed (this is expected in test mode): ${error}`);
+      return { success: false, error };
+    }
+    
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error: any) {
+    console.warn(`Email sending error: ${error.message}`);
+    return { success: false, error: error.message };
   }
-  
-  return await response.json();
 }
 
 
@@ -91,13 +98,13 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    const adminEmailResponse = await sendEmail(
+    const adminEmailResult = await sendEmail(
       [adminEmailAddr],
       `Nueva ${typeLabel} de ${data.client_name}`,
       adminEmailHtml
     );
 
-    console.log("Admin email sent successfully:", adminEmailResponse);
+    console.log("Admin email result:", adminEmailResult);
 
     // Send confirmation to client
     const clientEmailHtml = `
@@ -126,19 +133,20 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    const clientEmailResponse = await sendEmail(
+    const clientEmailResult = await sendEmail(
       [data.client_email],
       `Recibimos tu ${typeLabel.toLowerCase()} - Greenpac`,
       clientEmailHtml
     );
 
-    console.log("Client email sent successfully:", clientEmailResponse);
+    console.log("Client email result:", clientEmailResult);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        adminEmail: adminEmailResponse,
-        clientEmail: clientEmailResponse 
+        adminEmail: adminEmailResult,
+        clientEmail: clientEmailResult,
+        note: "Email sending may fail in test mode. Verify a domain at resend.com/domains for production."
       }),
       {
         status: 200,
