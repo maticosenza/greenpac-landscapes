@@ -170,6 +170,27 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          identifier: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          identifier: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          identifier?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           client_name: string
@@ -232,6 +253,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_action: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
       has_role:
         | {
             Args: {
@@ -247,6 +277,10 @@ export type Database = {
             }
             Returns: boolean
           }
+      record_rate_limit: {
+        Args: { p_action: string; p_identifier: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "customer" | "employee" | "admin"

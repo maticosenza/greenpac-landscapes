@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const contactInfo = [
   {
@@ -34,6 +35,7 @@ const contactInfo = [
 
 const Contact = () => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,13 +43,48 @@ const Contact = () => {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Mensaje enviado",
-      description: "Nos pondremos en contacto contigo a la brevedad.",
-    });
-    setFormData({ name: "", email: "", phone: "", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('submit-contact', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          message: formData.message,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Mensaje enviado",
+        description: "Nos pondremos en contacto contigo a la brevedad.",
+      });
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error",
+        description: "Hubo un problema al enviar tu mensaje. Por favor, intentá de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -133,7 +170,7 @@ const Contact = () => {
             <div className="grid sm:grid-cols-2 gap-5 mb-5">
               <div>
                 <label htmlFor="name" className="block text-primary-foreground/80 text-sm font-medium mb-2">
-                  Nombre completo
+                  Nombre completo *
                 </label>
                 <Input
                   id="name"
@@ -142,12 +179,15 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Tu nombre"
                   required
+                  minLength={2}
+                  maxLength={100}
+                  disabled={isSubmitting}
                   className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40"
                 />
               </div>
               <div>
                 <label htmlFor="email" className="block text-primary-foreground/80 text-sm font-medium mb-2">
-                  Email
+                  Email *
                 </label>
                 <Input
                   id="email"
@@ -157,6 +197,8 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="tu@email.com"
                   required
+                  maxLength={255}
+                  disabled={isSubmitting}
                   className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40"
                 />
               </div>
@@ -172,12 +214,14 @@ const Contact = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+54 11 XXXX-XXXX"
+                maxLength={50}
+                disabled={isSubmitting}
                 className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40"
               />
             </div>
             <div className="mb-6">
               <label htmlFor="message" className="block text-primary-foreground/80 text-sm font-medium mb-2">
-                Mensaje
+                Mensaje *
               </label>
               <Textarea
                 id="message"
@@ -187,12 +231,24 @@ const Contact = () => {
                 placeholder="Contanos sobre tu proyecto o consulta..."
                 rows={5}
                 required
+                minLength={1}
+                maxLength={2000}
+                disabled={isSubmitting}
                 className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 resize-none"
               />
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full">
-              Enviar Mensaje
-              <Send className="ml-2 h-5 w-5" />
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  Enviar Mensaje
+                  <Send className="ml-2 h-5 w-5" />
+                </>
+              )}
             </Button>
           </form>
         </div>

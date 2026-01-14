@@ -1,1 +1,7 @@
 project_id = "mblnaviicbbxtxpbptnn"
+
+[functions.send-quotation-notification]
+verify_jwt = false
+
+[functions.submit-contact]
+verify_jwt = false
