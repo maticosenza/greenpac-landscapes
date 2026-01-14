@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,9 +80,10 @@ const Products = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {products?.map((product, index) => (
-              <div
+              <Link
                 key={product.id}
-                className="greenpac-card group"
+                to={`/productos/${product.id}`}
+                className="greenpac-card group block"
                 style={{ animationDelay: `${index * 0.15}s` }}
               >
                 <div className="relative overflow-hidden aspect-[4/3]">
@@ -96,12 +98,12 @@ const Products = () => {
                   <h3 className="font-display text-xl font-bold text-foreground mb-3 transition-colors duration-300 group-hover:text-primary">
                     {product.name}
                   </h3>
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-2">
                     {product.description}
                   </p>
                   {product.features && product.features.length > 0 && (
                     <ul className="flex flex-wrap gap-2 mb-5">
-                      {product.features.map((feature) => (
+                      {product.features.slice(0, 3).map((feature) => (
                         <li
                           key={feature}
                           className="text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full"
@@ -109,14 +111,19 @@ const Products = () => {
                           {feature}
                         </li>
                       ))}
+                      {product.features.length > 3 && (
+                        <li className="text-xs font-medium bg-muted text-muted-foreground px-3 py-1 rounded-full">
+                          +{product.features.length - 3} más
+                        </li>
+                      )}
                     </ul>
                   )}
-                  <Button variant="link" className="group/btn p-0 h-auto text-primary">
-                    Más información
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                  </Button>
+                  <span className="inline-flex items-center text-primary font-medium group-hover:underline">
+                    Ver detalles
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
