@@ -111,7 +111,7 @@ const Products = () => {
                       ))}
                     </ul>
                   )}
-                  <Button variant="ghost" className="group/btn p-0 h-auto text-primary hover:bg-transparent">
+                  <Button variant="link" className="group/btn p-0 h-auto text-primary">
                     Más información
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                   </Button>
