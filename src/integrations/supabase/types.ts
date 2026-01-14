@@ -22,6 +22,9 @@ export type Database = {
           message: string
           name: string
           phone: string | null
+          replied_at: string | null
+          replied_by: string | null
+          reply: string | null
           status: string | null
           updated_at: string
         }
@@ -32,6 +35,9 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
+          replied_at?: string | null
+          replied_by?: string | null
+          reply?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -42,6 +48,9 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
+          replied_at?: string | null
+          replied_by?: string | null
+          reply?: string | null
           status?: string | null
           updated_at?: string
         }

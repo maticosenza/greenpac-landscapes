@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
 import QuotationsList from "./QuotationsList";
 import CustomersList from "./CustomersList";
+import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
 
 const EmployeePanel = () => {
@@ -22,15 +24,17 @@ const EmployeePanel = () => {
   const { data: stats } = useQuery({
     queryKey: ["employee-stats"],
     queryFn: async () => {
-      const [quotationsRes, customersRes] = await Promise.all([
+      const [quotationsRes, customersRes, inquiriesRes] = await Promise.all([
         supabase.from("quotations").select("id, status", { count: "exact" }),
         supabase.from("profiles").select("id", { count: "exact" }),
+        supabase.from("contact_inquiries").select("id, status"),
       ]);
 
       return {
         totalQuotations: quotationsRes.count || 0,
         pendingQuotations: quotationsRes.data?.filter((q) => q.status === "pending").length || 0,
         totalCustomers: customersRes.count || 0,
+        pendingInquiries: inquiriesRes.data?.filter((i) => i.status === "pending").length || 0,
       };
     },
   });
@@ -72,7 +76,7 @@ const EmployeePanel = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Cotizaciones</CardTitle>
@@ -84,11 +88,25 @@ const EmployeePanel = () => {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
+              <CardTitle className="text-sm font-medium">Cotiz. Pendientes</CardTitle>
               <FileText className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.pendingQuotations || 0}</div>
+            </CardContent>
+          </Card>
+          <Card className={stats?.pendingInquiries ? "border-primary/50 bg-primary/5" : ""}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Consultas Nuevas</CardTitle>
+              <MessageSquare className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold">{stats?.pendingInquiries || 0}</span>
+                {(stats?.pendingInquiries || 0) > 0 && (
+                  <Badge variant="destructive" className="animate-pulse">Nuevas</Badge>
+                )}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -121,11 +139,23 @@ const EmployeePanel = () => {
         <Tabs defaultValue="quotations" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="quotations">Cotizaciones</TabsTrigger>
+            <TabsTrigger value="inquiries" className="relative">
+              Consultas
+              {(stats?.pendingInquiries || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+                  {stats?.pendingInquiries}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="customers">Clientes</TabsTrigger>
           </TabsList>
 
           <TabsContent value="quotations">
             <QuotationsList searchTerm={searchTerm} />
+          </TabsContent>
+
+          <TabsContent value="inquiries">
+            <ContactInquiriesList searchTerm={searchTerm} />
           </TabsContent>
 
           <TabsContent value="customers">
