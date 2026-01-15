@@ -105,7 +105,10 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
       });
 
       if (emailError) {
-        console.error("Email error:", emailError);
+        // Silent fail in production - don't expose internal errors
+        if (import.meta.env.DEV) {
+          console.error("Email error:", emailError);
+        }
         // Continue even if email fails - we'll still save the reply
       }
 

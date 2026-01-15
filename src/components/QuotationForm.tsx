@@ -104,7 +104,10 @@ const QuotationForm = () => {
           },
         });
       } catch (emailError) {
-        console.error("Error sending email notification:", emailError);
+        // Silent fail in production - don't expose internal errors
+        if (import.meta.env.DEV) {
+          console.error("Error sending email notification:", emailError);
+        }
         // Don't throw - email failure shouldn't block quotation submission
       }
     },

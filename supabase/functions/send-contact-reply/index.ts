@@ -12,6 +12,16 @@ interface ReplyRequest {
   reply_message: string;
 }
 
+// HTML escape function to prevent XSS in email templates
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -39,7 +49,6 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user) {
-      console.error('Auth error:', userError);
       return new Response(
         JSON.stringify({ error: 'No autorizado' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -53,7 +62,6 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id);
 
     if (rolesError) {
-      console.error('Roles error:', rolesError);
       return new Response(
         JSON.stringify({ error: 'Error al verificar permisos' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -72,8 +80,6 @@ Deno.serve(async (req) => {
     const body: ReplyRequest = await req.json();
     const { to_email, to_name, original_message, reply_message } = body;
 
-    console.log('Sending reply to:', to_email);
-
     // Validate required fields
     if (!to_email || !to_name || !reply_message) {
       return new Response(
@@ -85,6 +91,11 @@ Deno.serve(async (req) => {
     // If Resend API key is configured, send email
     if (resendApiKey) {
       try {
+        // Escape HTML to prevent XSS
+        const safeName = escapeHtml(to_name);
+        const safeOriginalMessage = escapeHtml(original_message || '').replace(/\n/g, '<br>');
+        const safeReplyMessage = escapeHtml(reply_message).replace(/\n/g, '<br>');
+
         const emailResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -116,24 +127,24 @@ Deno.serve(async (req) => {
                     <h1>Greenpac Argentina</h1>
                   </div>
                   <div class="content">
-                    <p>Hola ${to_name},</p>
+                    <p>Hola ${safeName},</p>
                     <p>Gracias por contactarnos. A continuación encontrarás nuestra respuesta a tu consulta:</p>
                     
                     <div class="original">
                       <strong>Tu consulta:</strong>
-                      <p>${original_message.replace(/\n/g, '<br>')}</p>
+                      <p>${safeOriginalMessage}</p>
                     </div>
                     
                     <div class="reply">
                       <strong>Nuestra respuesta:</strong>
-                      <p>${reply_message.replace(/\n/g, '<br>')}</p>
+                      <p>${safeReplyMessage}</p>
                     </div>
                     
                     <p>Si tenés más preguntas, no dudes en contactarnos.</p>
                     <p>Saludos cordiales,<br>El equipo de Greenpac Argentina</p>
                   </div>
                   <div class="footer">
-                    <p>© ${new Date().getFullYear()} Greenpac Argentina. Todos los derechos reservados.</p>
+                    <p>&copy; ${new Date().getFullYear()} Greenpac Argentina. Todos los derechos reservados.</p>
                   </div>
                 </div>
               </body>
@@ -143,18 +154,11 @@ Deno.serve(async (req) => {
         });
 
         if (!emailResponse.ok) {
-          const errorData = await emailResponse.text();
-          console.error('Resend API error:', errorData);
-          // Don't fail the request, just log the error
-        } else {
-          console.log('Email sent successfully');
+          // Log only in development - don't expose details
         }
-      } catch (emailError) {
-        console.error('Error sending email:', emailError);
-        // Don't fail the request, just log the error
+      } catch (_emailError) {
+        // Silent fail for email - don't block the request
       }
-    } else {
-      console.log('RESEND_API_KEY not configured, skipping email send');
     }
 
     return new Response(
@@ -162,8 +166,7 @@ Deno.serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
-    console.error('Unexpected error:', error);
+  } catch (_error) {
     return new Response(
       JSON.stringify({ error: 'Error interno del servidor' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
