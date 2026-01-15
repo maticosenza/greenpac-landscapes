@@ -10,6 +10,11 @@ import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product3 from "@/assets/product-3.jpg";
 
+interface TechnicalSpec {
+  label: string;
+  value: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -18,6 +23,8 @@ interface Product {
   features: string[] | null;
   category: string | null;
   price: number | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  technical_specs: any;
 }
 
 const fallbackImages: Record<string, string> = {
@@ -186,6 +193,23 @@ const ProductDetail = () => {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {/* Technical Specifications */}
+                {product.technical_specs && Array.isArray(product.technical_specs) && product.technical_specs.length > 0 && (
+                  <div className="border border-border rounded-xl overflow-hidden">
+                    <h2 className="font-display text-xl font-semibold text-foreground p-6 pb-4">
+                      Especificaciones Técnicas
+                    </h2>
+                    <div className="divide-y divide-border">
+                      {(product.technical_specs as TechnicalSpec[]).map((spec, index) => (
+                        <div key={index} className="flex justify-between px-6 py-3 even:bg-muted/50">
+                          <span className="text-muted-foreground">{spec.label}</span>
+                          <span className="font-medium text-foreground">{spec.value}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
