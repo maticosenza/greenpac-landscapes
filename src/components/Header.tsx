@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Mail, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/greenpac-logo.png";
@@ -9,7 +9,10 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+
+  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,22 +23,25 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { href: "#inicio", label: "Inicio" },
-    { href: "#productos", label: "Productos" },
-    { href: "#nosotros", label: "Nosotros" },
-    { href: "#contacto", label: "Contacto" },
+    { href: "/#inicio", label: "Inicio" },
+    { href: "/#productos", label: "Productos" },
+    { href: "/#nosotros", label: "Nosotros" },
+    { href: "/#contacto", label: "Contacto" },
   ];
+
+  // On non-home pages, always show dark background
+  const showDarkBg = !isHomePage || isScrolled;
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
+        showDarkBg
           ? "bg-greenpac-dark/95 backdrop-blur-md shadow-lg py-3"
           : "bg-transparent py-5"
       }`}
     >
       <div className="greenpac-container flex items-center justify-between">
-        <a href="#inicio" className="flex items-center gap-3 group">
+        <a href="/#inicio" className="flex items-center gap-3 group">
           <img
             src={logo}
             alt="Greenpac Logo"
