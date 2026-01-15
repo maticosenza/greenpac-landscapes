@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import CustomersList from "./CustomersList";
 import TeamManagement from "./TeamManagement";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
+import ProductManagement from "./ProductManagement";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -25,11 +26,12 @@ const AdminPanel = () => {
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [quotationsRes, customersRes, employeesRes, inquiriesRes] = await Promise.all([
+      const [quotationsRes, customersRes, employeesRes, inquiriesRes, productsRes] = await Promise.all([
         supabase.from("quotations").select("id, status", { count: "exact" }),
         supabase.from("profiles").select("id", { count: "exact" }),
         supabase.from("user_roles").select("id").eq("role", "employee"),
         supabase.from("contact_inquiries").select("id, status"),
+        supabase.from("products").select("id, is_active", { count: "exact" }),
       ]);
 
       return {
@@ -38,6 +40,8 @@ const AdminPanel = () => {
         totalCustomers: customersRes.count || 0,
         totalEmployees: employeesRes.data?.length || 0,
         pendingInquiries: inquiriesRes.data?.filter((i) => i.status === "pending").length || 0,
+        totalProducts: productsRes.count || 0,
+        activeProducts: productsRes.data?.filter((p) => p.is_active).length || 0,
       };
     },
   });
@@ -77,7 +81,7 @@ const AdminPanel = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-5 mb-8">
+        <div className="grid gap-6 md:grid-cols-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Cotizaciones</CardTitle>
@@ -108,6 +112,15 @@ const AdminPanel = () => {
                   <Badge variant="destructive" className="animate-pulse">Nuevas</Badge>
                 )}
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Productos</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.activeProducts || 0}/{stats?.totalProducts || 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -157,6 +170,10 @@ const AdminPanel = () => {
                 </span>
               )}
             </TabsTrigger>
+            <TabsTrigger value="products">
+              <Package className="h-4 w-4 mr-2" />
+              Productos
+            </TabsTrigger>
             <TabsTrigger value="customers">Clientes</TabsTrigger>
             <TabsTrigger value="team">
               <Settings className="h-4 w-4 mr-2" />
@@ -170,6 +187,10 @@ const AdminPanel = () => {
 
           <TabsContent value="inquiries">
             <ContactInquiriesList searchTerm={searchTerm} />
+          </TabsContent>
+
+          <TabsContent value="products">
+            <ProductManagement searchTerm={searchTerm} />
           </TabsContent>
 
           <TabsContent value="customers">
