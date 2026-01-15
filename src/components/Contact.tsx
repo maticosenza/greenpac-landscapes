@@ -75,8 +75,11 @@ const Contact = () => {
         description: "Nos pondremos en contacto contigo a la brevedad.",
       });
       setFormData({ name: "", email: "", phone: "", message: "" });
-    } catch (error: any) {
-      console.error('Error submitting contact form:', error);
+    } catch (error) {
+      // Silent fail in production - don't expose internal errors
+      if (import.meta.env.DEV) {
+        console.error('Error submitting contact form:', error);
+      }
       toast({
         title: "Error",
         description: "Hubo un problema al enviar tu mensaje. Por favor, intentá de nuevo.",
