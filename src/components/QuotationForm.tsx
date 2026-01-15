@@ -74,7 +74,14 @@ const QuotationForm = () => {
 
   const mutation = useMutation({
     mutationFn: async (data: QuotationFormData) => {
-      // Insert quotation
+      // Look up if there's a registered customer with the same email
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("email", data.client_email.toLowerCase())
+        .maybeSingle();
+
+      // Insert quotation, linking to customer account if found
       const { error } = await supabase.from("quotations").insert({
         client_name: data.client_name,
         client_email: data.client_email,
@@ -83,6 +90,7 @@ const QuotationForm = () => {
         product_ids: data.product_ids,
         quotation_type: data.quotation_type,
         message: data.message || null,
+        customer_id: existingProfile?.id || null,
       });
 
       if (error) throw error;
