@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_archived: boolean | null
           message: string
           name: string
           phone: string | null
@@ -32,6 +33,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_archived?: boolean | null
           message: string
           name: string
           phone?: string | null
@@ -45,6 +47,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_archived?: boolean | null
           message?: string
           name?: string
           phone?: string | null
@@ -142,6 +145,7 @@ export type Database = {
           created_by_employee_id: string | null
           customer_id: string | null
           id: string
+          is_archived: boolean | null
           message: string | null
           product_ids: string[] | null
           quotation_type: string | null
@@ -158,6 +162,7 @@ export type Database = {
           created_by_employee_id?: string | null
           customer_id?: string | null
           id?: string
+          is_archived?: boolean | null
           message?: string | null
           product_ids?: string[] | null
           quotation_type?: string | null
@@ -174,6 +179,7 @@ export type Database = {
           created_by_employee_id?: string | null
           customer_id?: string | null
           id?: string
+          is_archived?: boolean | null
           message?: string | null
           product_ids?: string[] | null
           quotation_type?: string | null

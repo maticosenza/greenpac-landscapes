@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Mail, Phone, Clock, MessageSquare, Send, Loader2, CheckCircle, AlertCircle, User } from "lucide-react";
+import { Mail, Phone, Clock, MessageSquare, Send, Loader2, CheckCircle, AlertCircle, User, Archive, ArchiveRestore, Trash2, MoreHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -38,6 +54,7 @@ interface ContactInquiry {
   replied_by: string | null;
   created_at: string;
   updated_at: string;
+  is_archived: boolean | null;
 }
 
 interface ContactInquiriesListProps {
@@ -58,6 +75,9 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
   const [replyText, setReplyText] = useState("");
   const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showArchived, setShowArchived] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [inquiryToDelete, setInquiryToDelete] = useState<string | null>(null);
 
   const { data: inquiries, isLoading } = useQuery({
     queryKey: ["contact-inquiries"],
@@ -140,6 +160,48 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
     },
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: async ({ id, archived }: { id: string; archived: boolean }) => {
+      const { error } = await supabase
+        .from("contact_inquiries")
+        .update({ is_archived: archived, updated_at: new Date().toISOString() })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { archived }) => {
+      queryClient.invalidateQueries({ queryKey: ["contact-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+      toast.success(archived ? "Consulta archivada" : "Consulta restaurada");
+    },
+    onError: () => {
+      toast.error("Error al archivar");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("contact_inquiries")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contact-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+      setDeleteDialogOpen(false);
+      setInquiryToDelete(null);
+      toast.success("Consulta eliminada");
+    },
+    onError: () => {
+      toast.error("Error al eliminar");
+    },
+  });
+
   const handleReply = (inquiry: ContactInquiry) => {
     setSelectedInquiry(inquiry);
     setReplyText(inquiry.reply || "");
@@ -151,6 +213,17 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
     sendReplyMutation.mutate({ inquiry: selectedInquiry, reply: replyText.trim() });
   };
 
+  const handleDelete = (id: string) => {
+    setInquiryToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (inquiryToDelete) {
+      deleteMutation.mutate(inquiryToDelete);
+    }
+  };
+
   const filteredInquiries = inquiries?.filter((inquiry) => {
     const matchesSearch =
       inquiry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,8 +231,9 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
       inquiry.message.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || inquiry.status === statusFilter;
+    const matchesArchived = showArchived ? inquiry.is_archived : !inquiry.is_archived;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesArchived;
   });
 
   const pendingCount = inquiries?.filter((i) => i.status === "pending").length || 0;
@@ -173,29 +247,51 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Consultas de Contacto</h3>
-          {pendingCount > 0 && (
-            <Badge variant="destructive" className="animate-pulse">
-              {pendingCount} nuevas
-            </Badge>
-          )}
+    <>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold">
+              {showArchived ? "Consultas Archivadas" : "Consultas de Contacto"}
+            </h3>
+            {!showArchived && pendingCount > 0 && (
+              <Badge variant="destructive" className="animate-pulse">
+                {pendingCount} nuevas
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filtrar por estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="pending">Pendientes</SelectItem>
+                <SelectItem value="in_progress">En Proceso</SelectItem>
+                <SelectItem value="replied">Respondidos</SelectItem>
+                <SelectItem value="closed">Cerrados</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowArchived(!showArchived)}
+            >
+              {showArchived ? (
+                <>
+                  <ArchiveRestore className="h-4 w-4 mr-2" />
+                  Ver Activas
+                </>
+              ) : (
+                <>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Ver Archivadas
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar por estado" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="pending">Pendientes</SelectItem>
-            <SelectItem value="in_progress">En Proceso</SelectItem>
-            <SelectItem value="replied">Respondidos</SelectItem>
-            <SelectItem value="closed">Cerrados</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
       {filteredInquiries?.length === 0 ? (
         <Card>
@@ -285,6 +381,43 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
                       Email Directo
                     </a>
                   </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          archiveMutation.mutate({
+                            id: inquiry.id,
+                            archived: !inquiry.is_archived,
+                          })
+                        }
+                      >
+                        {inquiry.is_archived ? (
+                          <>
+                            <ArchiveRestore className="h-4 w-4 mr-2" />
+                            Restaurar
+                          </>
+                        ) : (
+                          <>
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archivar
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => handleDelete(inquiry.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </CardContent>
             </Card>
@@ -353,7 +486,29 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar consulta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La consulta será eliminada permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+    </>
   );
 };
 
