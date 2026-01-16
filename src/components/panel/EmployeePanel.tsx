@@ -137,18 +137,20 @@ const EmployeePanel = () => {
         </div>
 
         <Tabs defaultValue="quotations" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="quotations">Cotizaciones</TabsTrigger>
-            <TabsTrigger value="inquiries" className="relative">
-              Consultas
-              {(stats?.pendingInquiries || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
-                  {stats?.pendingInquiries}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="customers">Clientes</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 mb-6">
+            <TabsList className="w-max min-w-full sm:w-auto">
+              <TabsTrigger value="quotations">Cotizaciones</TabsTrigger>
+              <TabsTrigger value="inquiries" className="relative">
+                Consultas
+                {(stats?.pendingInquiries || 0) > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+                    {stats?.pendingInquiries}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="customers">Clientes</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="quotations">
             <QuotationsList searchTerm={searchTerm} />
