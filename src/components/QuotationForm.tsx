@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Send, CheckCircle2, Loader2, LogIn } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Product {
   id: string;
@@ -45,6 +47,8 @@ type QuotationFormData = z.infer<typeof quotationSchema>;
 
 const QuotationForm = () => {
   const [submitted, setSubmitted] = useState(false);
+  const { user, profile, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   const { data: products } = useQuery({
     queryKey: ["products-list"],
@@ -62,26 +66,38 @@ const QuotationForm = () => {
   const form = useForm<QuotationFormData>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
-      client_name: "",
-      client_email: "",
-      client_phone: "",
-      company: "",
+      client_name: profile?.full_name || "",
+      client_email: profile?.email || "",
+      client_phone: profile?.phone || "",
+      company: profile?.company || "",
       product_ids: [],
       quotation_type: "quote",
       message: "",
     },
   });
 
+  // Update form values when profile loads
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        client_name: profile.full_name || "",
+        client_email: profile.email || "",
+        client_phone: profile.phone || "",
+        company: profile.company || "",
+        product_ids: form.getValues("product_ids"),
+        quotation_type: form.getValues("quotation_type"),
+        message: form.getValues("message"),
+      });
+    }
+  }, [profile, form]);
+
   const mutation = useMutation({
     mutationFn: async (data: QuotationFormData) => {
-      // Look up if there's a registered customer with the same email
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id, email")
-        .eq("email", data.client_email.toLowerCase())
-        .maybeSingle();
+      if (!user) {
+        throw new Error("Debés iniciar sesión para enviar una cotización");
+      }
 
-      // Insert quotation, linking to customer account if found
+      // Insert quotation with authenticated user's ID
       const { error } = await supabase.from("quotations").insert({
         client_name: data.client_name,
         client_email: data.client_email,
@@ -90,7 +106,7 @@ const QuotationForm = () => {
         product_ids: data.product_ids,
         quotation_type: data.quotation_type,
         message: data.message || null,
-        customer_id: existingProfile?.id || null,
+        customer_id: user.id, // Always use authenticated user's ID
       });
 
       if (error) throw error;
@@ -137,6 +153,40 @@ const QuotationForm = () => {
     { value: "purchase", label: "Compra directa" },
     { value: "deposit", label: "Seña / Reserva" },
   ];
+
+  // Show loading state while auth is being checked
+  if (authLoading) {
+    return (
+      <div className="bg-card rounded-xl p-8 text-center" style={{ boxShadow: "var(--shadow-card)" }}>
+        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+        <p className="text-muted-foreground">Cargando...</p>
+      </div>
+    );
+  }
+
+  // Show login prompt if user is not authenticated
+  if (!user) {
+    return (
+      <div className="bg-card rounded-xl p-8 text-center" style={{ boxShadow: "var(--shadow-card)" }}>
+        <LogIn className="h-16 w-16 text-primary mx-auto mb-4" />
+        <h3 className="font-display text-2xl font-bold text-foreground mb-2">
+          Iniciá sesión para cotizar
+        </h3>
+        <p className="text-muted-foreground mb-6">
+          Para solicitar una cotización, primero debés registrarte o iniciar sesión en tu cuenta.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button onClick={() => navigate("/auth")} size="lg">
+            <LogIn className="mr-2 h-5 w-5" />
+            Iniciar Sesión
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/auth")} size="lg">
+            Crear Cuenta
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
