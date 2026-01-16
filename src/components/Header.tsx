@@ -94,10 +94,30 @@ const Header = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden absolute top-full left-0 right-0 bg-greenpac-dark/98 backdrop-blur-md transition-all duration-300 overflow-hidden ${
-          isMobileMenuOpen ? "max-h-96 border-t border-primary/20" : "max-h-0"
+        className={`lg:hidden fixed top-0 left-0 right-0 bottom-0 bg-[#1a2e1a] z-50 transition-all duration-300 overflow-hidden ${
+          isMobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
       >
+        {/* Mobile Menu Header */}
+        <div className="greenpac-container flex items-center justify-between py-4">
+          <a href="/#inicio" className="flex items-center gap-3">
+            <img
+              src={logo}
+              alt="Greenpac Logo"
+              className="h-12 w-auto"
+            />
+            <span className="font-display text-xl font-bold text-primary-foreground tracking-wider">
+              GREEN PAC
+            </span>
+          </a>
+          <button
+            className="text-primary-foreground p-2"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
         <nav className="greenpac-container py-6 flex flex-col gap-4">
           {navLinks.map((link) => (
             <a
