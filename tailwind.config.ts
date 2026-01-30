@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         sans: ["Open Sans", "system-ui", "sans-serif"],
         display: ["Montserrat", "system-ui", "sans-serif"],
+        brand: ["Ethnocentric", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -47,7 +47,7 @@ const Header = () => {
             alt="Greenpac Logo"
             className="h-12 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
           />
-          <span className="font-display text-xl md:text-2xl font-bold text-primary-foreground tracking-wider">
+          <span className="font-brand text-xl md:text-2xl text-primary-foreground tracking-wider uppercase">
             GREEN PAC
           </span>
         </a>
@@ -106,7 +106,7 @@ const Header = () => {
               alt="Greenpac Logo"
               className="h-12 w-auto"
             />
-            <span className="font-display text-xl font-bold text-primary-foreground tracking-wider">
+            <span className="font-brand text-xl text-primary-foreground tracking-wider uppercase">
               GREEN PAC
             </span>
           </a>
