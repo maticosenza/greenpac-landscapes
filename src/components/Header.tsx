@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Mail, User } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -68,14 +68,7 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-4">
-          <a
-            href="mailto:info@greenpacargentina.com"
-            className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary transition-colors"
-          >
-            <Mail className="h-4 w-4" />
-            <span className="text-sm">info@greenpacargentina.com</span>
-          </a>
+        <div className="hidden lg:flex items-center">
           <Button
             variant="hero"
             size="sm"
@@ -134,13 +127,6 @@ const Header = () => {
               {link.label}
             </a>
           ))}
-          <a
-            href="mailto:info@greenpacargentina.com"
-            className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary transition-colors py-2"
-          >
-            <Mail className="h-4 w-4" />
-            <span>info@greenpacargentina.com</span>
-          </a>
           <Button
             variant="hero"
             size="sm"
