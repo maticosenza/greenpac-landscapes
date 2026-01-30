@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/greenpac-logo.png";
+import textLogo from "@/assets/greenpac-text.png";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,15 +42,17 @@ const Header = () => {
       }`}
     >
       <div className="greenpac-container flex items-center justify-between">
-        <a href="/#inicio" className="flex items-center gap-3 group">
+        <a href="/#inicio" className="flex items-center gap-2 group">
           <img
             src={logo}
             alt="Greenpac Logo"
-            className="h-12 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
+            className="h-10 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
           />
-          <span className="font-brand text-xl md:text-2xl text-primary-foreground tracking-wider uppercase">
-            GREEN PAC
-          </span>
+          <img
+            src={textLogo}
+            alt="Green Pac"
+            className="h-6 md:h-8 w-auto"
+          />
         </a>
 
         <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -100,15 +103,17 @@ const Header = () => {
       >
         {/* Mobile Menu Header */}
         <div className="greenpac-container flex items-center justify-between py-4">
-          <a href="/#inicio" className="flex items-center gap-3">
+          <a href="/#inicio" className="flex items-center gap-2">
             <img
               src={logo}
               alt="Greenpac Logo"
-              className="h-12 w-auto"
+              className="h-10 w-auto"
             />
-            <span className="font-brand text-xl text-primary-foreground tracking-wider uppercase">
-              GREEN PAC
-            </span>
+            <img
+              src={textLogo}
+              alt="Green Pac"
+              className="h-6 w-auto"
+            />
           </a>
           <button
             className="text-primary-foreground p-2"
