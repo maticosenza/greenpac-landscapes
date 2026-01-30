@@ -1,4 +1,5 @@
 import logo from "@/assets/greenpac-logo.png";
+import footerTextLogo from "@/assets/greenpac-footer-logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -9,9 +10,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <img src={logo} alt="Greenpac Logo" className="h-10 w-auto" />
-            <span className="font-display text-lg font-bold text-primary-foreground">
-              GREEN PAC
-            </span>
+            <img src={footerTextLogo} alt="Green Pac" className="h-8 w-auto" />
           </div>
 
           <p className="text-primary-foreground/60 text-sm text-center">
