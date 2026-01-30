@@ -51,7 +51,7 @@ const Header = () => {
           <img
             src={textLogo}
             alt="Green Pac"
-            className="h-12 md:h-14 w-auto"
+            className="h-24 md:h-28 w-auto"
           />
         </a>
 
@@ -112,7 +112,7 @@ const Header = () => {
             <img
               src={textLogo}
               alt="Green Pac"
-              className="h-12 w-auto"
+              className="h-24 w-auto"
             />
           </a>
           <button
