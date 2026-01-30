@@ -3,6 +3,7 @@ import { Menu, X, Mail, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import logo from "@/assets/greenpac-full-logo.png";
 
 
 const Header = () => {
@@ -42,9 +43,11 @@ const Header = () => {
     >
       <div className="greenpac-container flex items-center justify-between">
         <a href="/#inicio" className="flex items-center group">
-          <span className="font-brand text-lg md:text-xl text-primary-foreground tracking-widest uppercase">
-            GREEN PAC
-          </span>
+          <img
+            src={logo}
+            alt="Green Pac Logo"
+            className="h-8 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+          />
         </a>
 
         <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -96,9 +99,11 @@ const Header = () => {
         {/* Mobile Menu Header */}
         <div className="greenpac-container flex items-center justify-between py-4">
           <a href="/#inicio" className="flex items-center">
-            <span className="font-brand text-lg text-primary-foreground tracking-widest uppercase">
-              GREEN PAC
-            </span>
+            <img
+              src={logo}
+              alt="Green Pac Logo"
+              className="h-8 w-auto"
+            />
           </a>
           <button
             className="text-primary-foreground p-2"
