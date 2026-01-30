@@ -3,7 +3,7 @@ import { Menu, X, Mail, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/greenpac-logo.png";
+
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,13 +41,8 @@ const Header = () => {
       }`}
     >
       <div className="greenpac-container flex items-center justify-between">
-        <a href="/#inicio" className="flex items-center gap-3 group">
-          <img
-            src={logo}
-            alt="Greenpac Logo"
-            className="h-12 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
-          />
-          <span className="font-brand text-xl md:text-2xl text-primary-foreground tracking-wider uppercase">
+        <a href="/#inicio" className="flex items-center group">
+          <span className="font-brand text-lg md:text-xl text-primary-foreground tracking-widest uppercase">
             GREEN PAC
           </span>
         </a>
@@ -100,13 +95,8 @@ const Header = () => {
       >
         {/* Mobile Menu Header */}
         <div className="greenpac-container flex items-center justify-between py-4">
-          <a href="/#inicio" className="flex items-center gap-3">
-            <img
-              src={logo}
-              alt="Greenpac Logo"
-              className="h-12 w-auto"
-            />
-            <span className="font-brand text-xl text-primary-foreground tracking-wider uppercase">
+          <a href="/#inicio" className="flex items-center">
+            <span className="font-brand text-lg text-primary-foreground tracking-widest uppercase">
               GREEN PAC
             </span>
           </a>
