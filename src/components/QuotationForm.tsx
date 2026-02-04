@@ -304,7 +304,7 @@ const QuotationForm = () => {
             render={() => (
               <FormItem>
                 <FormLabel>Productos de interés *</FormLabel>
-                <div className="grid grid-cols-2 gap-3 mt-2">
+                <div className="flex flex-col gap-3 mt-2">
                   {products?.map((product) => (
                     <FormField
                       key={product.id}
