@@ -12,6 +12,24 @@ interface ContactRequest {
   message: string;
 }
 
+// Sanitize user input to prevent XSS attacks
+// Strips all HTML tags and escapes special characters
+function sanitizeInput(input: string): string {
+  return input
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Escape HTML entities
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    // Remove potential script injection patterns
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim();
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -29,7 +47,7 @@ Deno.serve(async (req) => {
     const body: ContactRequest = await req.json();
     const { name, email, phone, message } = body;
 
-    console.log('Received contact form submission:', { name, email: email?.substring(0, 5) + '***' });
+    console.log('Received contact form submission:', { name: name?.substring(0, 5) + '***', email: email?.substring(0, 5) + '***' });
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -84,7 +102,7 @@ Deno.serve(async (req) => {
       console.error('Rate limit check error:', rateLimitError);
       // Continue anyway if rate limit check fails
     } else if (!canProceed) {
-      console.log('Rate limit exceeded for email:', email.substring(0, 5) + '***');
+      console.log('Rate limit exceeded for email');
       return new Response(
         JSON.stringify({ error: 'Demasiados intentos. Por favor, intentá de nuevo más tarde.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -97,14 +115,20 @@ Deno.serve(async (req) => {
       p_action: 'contact_inquiry'
     });
 
-    // Insert the contact inquiry
+    // Sanitize all user inputs before storing
+    const safeName = sanitizeInput(name);
+    const safeEmail = email.toLowerCase().trim();
+    const safePhone = phone ? sanitizeInput(phone) : null;
+    const safeMessage = sanitizeInput(message);
+
+    // Insert the contact inquiry with sanitized data
     const { error: insertError } = await supabaseAdmin
       .from('contact_inquiries')
       .insert({
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        phone: phone?.trim() || null,
-        message: message.trim(),
+        name: safeName,
+        email: safeEmail,
+        phone: safePhone,
+        message: safeMessage,
         status: 'pending'
       });
 
