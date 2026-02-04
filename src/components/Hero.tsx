@@ -39,7 +39,7 @@ const Hero = () => {
               <a href="#productos">Ver Productos</a>
             </Button>
             <Button variant="heroOutline" size="lg" asChild>
-              <a href="#contacto">Solicitar Cotización</a>
+              <a href="#cotizacion">Solicitar Cotización</a>
             </Button>
           </div>
         </div>
