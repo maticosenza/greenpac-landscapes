@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `https://greenpac.com.ar/`;
 
     const { error } = await supabase.auth.signUp({
       email,
