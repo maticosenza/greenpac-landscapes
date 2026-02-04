@@ -17,7 +17,6 @@ const Index = () => {
       <main>
         <Hero />
         <Products />
-        <Testimonials />
         <section id="cotizacion" className="greenpac-section bg-muted">
           <div className="greenpac-container">
             <div className="grid lg:grid-cols-2 gap-12 items-start">
@@ -53,6 +52,7 @@ const Index = () => {
           </div>
         </section>
         <About />
+        <Testimonials />
         <Contact />
       </main>
       <Footer />
