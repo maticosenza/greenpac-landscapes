@@ -1,4 +1,4 @@
-import footerLogo from "@/assets/greenpac-footer-icon.png";
+import footerLogo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
 const Footer = () => {

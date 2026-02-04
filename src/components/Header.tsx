@@ -3,7 +3,7 @@ import { Menu, X, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/greenpac-logo.png";
+import logo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
 const Header = () => {
