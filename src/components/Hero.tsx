@@ -13,7 +13,8 @@ const Hero = () => {
         <img
           src={heroImage}
           alt="Campo argentino con silobolsas"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center md:object-center"
+          style={{ objectPosition: "60% center" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/70 via-greenpac-dark/50 to-greenpac-dark/80" />
       </div>
