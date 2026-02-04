@@ -43,7 +43,7 @@ const Header = () => {
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
-          <a href="/#inicio" className="flex items-center gap-3 group">
+          <a href="/#inicio" className="flex items-center gap-1 group">
             <img
               src={logo}
               alt="Greenpac Logo"
@@ -52,7 +52,7 @@ const Header = () => {
             <img
               src={textLogo}
               alt="Green Pac"
-              className="h-24 md:h-28 w-auto"
+              className="h-24 md:h-28 w-auto -ml-1"
             />
           </a>
 
@@ -98,7 +98,7 @@ const Header = () => {
       >
         {/* Mobile Menu Header */}
         <div className="greenpac-container flex items-center justify-between py-4">
-          <a href="/#inicio" className="flex items-center gap-3">
+          <a href="/#inicio" className="flex items-center gap-1">
             <img
               src={logo}
               alt="Greenpac Logo"
@@ -107,7 +107,7 @@ const Header = () => {
             <img
               src={textLogo}
               alt="Green Pac"
-              className="h-24 w-auto"
+              className="h-24 w-auto -ml-1"
             />
           </a>
           <button
