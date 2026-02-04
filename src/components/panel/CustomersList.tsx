@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { exportToCSV } from "@/lib/exportCsv";
 import {
   Table,
   TableBody,
@@ -123,6 +124,30 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
     );
   });
 
+  const handleExportCSV = () => {
+    if (!filteredCustomers || filteredCustomers.length === 0) {
+      toast.error("No hay clientes para exportar");
+      return;
+    }
+
+    const dataToExport = filteredCustomers.map((c) => ({
+      ...c,
+      quotation_count: quotationCounts?.[c.id] || 0,
+      created_at_formatted: new Date(c.created_at).toLocaleDateString("es-AR"),
+    }));
+
+    exportToCSV(dataToExport, `clientes-${new Date().toISOString().split("T")[0]}`, [
+      { key: "full_name", label: "Nombre" },
+      { key: "email", label: "Email" },
+      { key: "phone", label: "Teléfono" },
+      { key: "company", label: "Empresa" },
+      { key: "quotation_count", label: "Cotizaciones" },
+      { key: "created_at_formatted", label: "Fecha de Registro" },
+    ]);
+
+    toast.success("Archivo CSV descargado");
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Cargando clientes...</p>;
   }
@@ -130,8 +155,12 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Historial de Clientes</CardTitle>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 mr-2" />
+            Exportar CSV
+          </Button>
         </CardHeader>
         <CardContent>
           {filteredCustomers && filteredCustomers.length > 0 ? (
