@@ -7,8 +7,10 @@ import Contact from "@/components/Contact";
 import QuotationForm from "@/components/QuotationForm";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { useHashScroll } from "@/hooks/useHashScroll";
 
 const Index = () => {
+  useHashScroll();
   return (
     <div className="min-h-screen">
       <Header />
