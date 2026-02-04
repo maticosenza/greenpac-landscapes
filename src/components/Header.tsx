@@ -69,7 +69,15 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center">
+          <div className="hidden lg:flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              <a href="/#cotizacion">Solicitar Cotización</a>
+            </Button>
             <Button
               variant="hero"
               size="sm"
@@ -129,6 +137,15 @@ const Header = () => {
               {link.label}
             </a>
           ))}
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="mt-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <a href="/#cotizacion">Solicitar Cotización</a>
+          </Button>
           <Button
             variant="hero"
             size="sm"
