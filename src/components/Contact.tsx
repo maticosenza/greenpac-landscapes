@@ -10,8 +10,8 @@ const contactInfo = [
   {
     icon: Mail,
     label: "Email",
-    value: "info@greenpacargentina.com.ar",
-    href: "mailto:info@greenpacargentina.com.ar",
+    value: "info@greenpac.com.ar",
+    href: "mailto:info@greenpac.com.ar",
   },
   {
     icon: Phone,
