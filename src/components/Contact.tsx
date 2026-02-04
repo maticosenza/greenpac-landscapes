@@ -141,8 +141,8 @@ const Contact = () => {
                 Seguinos en redes
               </p>
               <div className="flex gap-4">
-                <a
-                  href="https://instagram.com/gaser.parts"
+              <a
+                  href="https://www.instagram.com/greenpac.arg/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary/30 flex items-center justify-center transition-colors"
