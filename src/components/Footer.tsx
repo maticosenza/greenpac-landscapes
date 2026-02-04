@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="greenpac-container py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src={footerLogo} alt="Greenpac Logo" className="h-40 w-auto" />
+            <img src={footerLogo} alt="Greenpac Logo" className="h-11 md:h-14 w-auto" />
             <img src={textLogo} alt="Green Pac" className="h-32 w-auto" />
           </div>
 
