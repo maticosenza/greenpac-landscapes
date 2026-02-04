@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -21,6 +21,7 @@ interface Product {
   name: string;
   description: string;
   image_url: string | null;
+  images: string[] | null;
   features: string[] | null;
   category: string | null;
   price: number | null;
@@ -39,10 +40,12 @@ const fallbackImages: Record<string, string> = {
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Scroll to top when component mounts or id changes
   useEffect(() => {
     window.scrollTo(0, 0);
+    setSelectedImageIndex(0);
   }, [id]);
 
   const { data: product, isLoading, error } = useQuery({
@@ -76,12 +79,25 @@ const ProductDetail = () => {
     enabled: !!product?.category,
   });
 
-  const getProductImage = (prod: Product) => {
-    if (prod.image_url) return prod.image_url;
-    if (prod.category && fallbackImages[prod.category]) {
-      return fallbackImages[prod.category];
+  const getProductImages = (prod: Product): string[] => {
+    // First check for images array
+    if (prod.images && prod.images.length > 0) {
+      return prod.images;
     }
-    return product1;
+    // Fall back to single image_url
+    if (prod.image_url) {
+      return [prod.image_url];
+    }
+    // Fall back to category images
+    if (prod.category && fallbackImages[prod.category]) {
+      return [fallbackImages[prod.category]];
+    }
+    return [product1];
+  };
+
+  const getProductImage = (prod: Product) => {
+    const images = getProductImages(prod);
+    return images[0];
   };
 
   if (isLoading) {
@@ -158,17 +174,72 @@ const ProductDetail = () => {
         <section className="greenpac-section">
           <div className="greenpac-container">
             <div className="grid lg:grid-cols-2 gap-12 items-start">
-              {/* Product Image */}
-              <div className="relative overflow-hidden rounded-xl shadow-lg">
-                <img
-                  src={getProductImage(product)}
-                  alt={product.name}
-                  className="w-full h-auto object-cover aspect-[4/3]"
-                />
-                {product.category && (
-                  <span className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium capitalize">
-                    {product.category}
-                  </span>
+              {/* Product Images Gallery */}
+              <div className="space-y-4">
+                {/* Main Image */}
+                <div className="relative overflow-hidden rounded-xl shadow-lg">
+                  <img
+                    src={getProductImages(product)[selectedImageIndex] || getProductImage(product)}
+                    alt={product.name}
+                    className="w-full h-auto object-cover aspect-[4/3]"
+                  />
+                  {product.category && (
+                    <span className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium capitalize">
+                      {product.category}
+                    </span>
+                  )}
+                  
+                  {/* Navigation Arrows */}
+                  {getProductImages(product).length > 1 && (
+                    <>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="secondary"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-90 hover:opacity-100"
+                        onClick={() => setSelectedImageIndex((prev) => 
+                          prev === 0 ? getProductImages(product).length - 1 : prev - 1
+                        )}
+                      >
+                        <ChevronLeft className="h-6 w-6" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="secondary"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-90 hover:opacity-100"
+                        onClick={() => setSelectedImageIndex((prev) => 
+                          prev === getProductImages(product).length - 1 ? 0 : prev + 1
+                        )}
+                      >
+                        <ChevronRight className="h-6 w-6" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {/* Thumbnails */}
+                {getProductImages(product).length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {getProductImages(product).map((img, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImageIndex === index 
+                            ? 'border-primary ring-2 ring-primary/20' 
+                            : 'border-transparent hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${product.name} - Imagen ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
 
