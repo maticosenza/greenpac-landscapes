@@ -34,63 +34,65 @@ const Header = () => {
   const showDarkBg = !isHomePage || isScrolled;
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        showDarkBg
-          ? "bg-greenpac-dark/95 backdrop-blur-md shadow-lg py-3"
-          : "bg-transparent py-5"
-      }`}
-    >
-      <div className="greenpac-container flex items-center justify-between">
-        <a href="/#inicio" className="flex items-center gap-3 group">
-          <img
-            src={logo}
-            alt="Greenpac Logo"
-            className="h-11 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
-          />
-          <img
-            src={textLogo}
-            alt="Green Pac"
-            className="h-24 md:h-28 w-auto"
-          />
-        </a>
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          showDarkBg
+            ? "bg-greenpac-dark/95 backdrop-blur-md shadow-lg py-3"
+            : "bg-transparent py-5"
+        }`}
+      >
+        <div className="greenpac-container flex items-center justify-between">
+          <a href="/#inicio" className="flex items-center gap-3 group">
+            <img
+              src={logo}
+              alt="Greenpac Logo"
+              className="h-11 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
+            />
+            <img
+              src={textLogo}
+              alt="Green Pac"
+              className="h-24 md:h-28 w-auto"
+            />
+          </a>
 
-        <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-primary-foreground/90 hover:text-primary font-medium transition-colors duration-300 relative group"
+          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-primary-foreground/90 hover:text-primary font-medium transition-colors duration-300 relative group"
+              >
+                {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+              </a>
+            ))}
+          </nav>
+
+          <div className="hidden lg:flex items-center">
+            <Button
+              variant="hero"
+              size="sm"
+              onClick={() => navigate(user ? "/panel" : "/auth")}
             >
-              {link.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-            </a>
-          ))}
-        </nav>
+              <User className="h-4 w-4 mr-2" />
+              {user ? "Mi Panel" : "Ingresar"}
+            </Button>
+          </div>
 
-        <div className="hidden lg:flex items-center">
-          <Button
-            variant="hero"
-            size="sm"
-            onClick={() => navigate(user ? "/panel" : "/auth")}
+          <button
+            className="lg:hidden text-primary-foreground p-2 relative z-[70]"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
           >
-            <User className="h-4 w-4 mr-2" />
-            {user ? "Mi Panel" : "Ingresar"}
-          </Button>
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+      </header>
 
-        <button
-          className="lg:hidden text-primary-foreground p-2"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Outside header for proper stacking */}
       <div
-        className={`lg:hidden fixed inset-0 bg-[#1a2e1a] z-[60] transition-all duration-300 overflow-hidden ${
+        className={`lg:hidden fixed inset-0 bg-[#1a2e1a] z-[60] transition-all duration-300 ${
           isMobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
       >
@@ -141,7 +143,7 @@ const Header = () => {
           </Button>
         </nav>
       </div>
-    </header>
+    </>
   );
 };
 
