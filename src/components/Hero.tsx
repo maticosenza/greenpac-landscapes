@@ -9,11 +9,11 @@ const Hero = () => {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {/* Background Image */}
-      <div className="absolute inset-0 bg-greenpac-dark">
+      <div className="absolute inset-0">
         <img
           src={heroImage}
           alt="Campo argentino con silobolsas"
-          className="w-full h-full object-contain object-center md:object-cover"
+          className="w-full h-full object-cover object-[50%_70%] md:object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/30 via-transparent to-greenpac-dark/40" />
       </div>
