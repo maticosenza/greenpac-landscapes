@@ -24,7 +24,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TechnicalSpec {
   label: string;
@@ -72,6 +89,58 @@ interface ProductManagementProps {
   searchTerm: string;
 }
 
+interface SortableFeatureItemProps {
+  id: string;
+  feature: string;
+  onRemove: () => void;
+}
+
+const SortableFeatureItem = ({ id, feature, onRemove }: SortableFeatureItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between bg-muted px-3 py-2 rounded"
+    >
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <span className="text-sm">{feature}</span>
+      </div>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        className="h-6 w-6"
+        onClick={onRemove}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
+
 const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -83,6 +152,27 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newSpec, setNewSpec] = useState({ label: "", value: "" });
   const [newFeature, setNewFeature] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleFeatureDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = formData.features.findIndex((_, i) => `feature-${i}` === active.id);
+      const newIndex = formData.features.findIndex((_, i) => `feature-${i}` === over.id);
+
+      setFormData({
+        ...formData,
+        features: arrayMove(formData.features, oldIndex, newIndex),
+      });
+    }
+  };
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -542,25 +632,27 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                   </Button>
                 </div>
                 {formData.features.length > 0 && (
-                  <div className="border rounded-lg p-3 space-y-2">
-                    {formData.features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between bg-muted px-3 py-2 rounded"
-                      >
-                        <span className="text-sm">{feature}</span>
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => removeFeature(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleFeatureDragEnd}
+                  >
+                    <SortableContext
+                      items={formData.features.map((_, i) => `feature-${i}`)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="border rounded-lg p-3 space-y-2">
+                        {formData.features.map((feature, index) => (
+                          <SortableFeatureItem
+                            key={`feature-${index}`}
+                            id={`feature-${index}`}
+                            feature={feature}
+                            onRemove={() => removeFeature(index)}
+                          />
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
               </div>
 
