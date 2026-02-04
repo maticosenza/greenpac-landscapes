@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -29,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { UserPlus, Shield, Trash2, Loader2 } from "lucide-react";
+import { UserPlus, Shield, Trash2, Loader2, Search } from "lucide-react";
 
 interface TeamManagementProps {
   searchTerm: string;
@@ -51,6 +52,7 @@ type BadgeVariant = "destructive" | "default" | "secondary" | "outline";
 const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [localSearchTerm, setLocalSearchTerm] = useState("");
   const [isAddRoleDialogOpen, setIsAddRoleDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<ProfileWithRoles | null>(null);
   const [selectedRole, setSelectedRole] = useState<AppRole>("employee");
@@ -60,6 +62,9 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     role: string;
     userName: string;
   }>({ open: false, userId: "", role: "", userName: "" });
+
+  // Combine global search with local search
+  const effectiveSearchTerm = localSearchTerm || searchTerm;
 
   const { data: usersWithRoles, isLoading } = useQuery({
     queryKey: ["users-with-roles"],
@@ -137,7 +142,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   });
 
   const filteredUsers = usersWithRoles?.filter((u) => {
-    const search = searchTerm.toLowerCase();
+    const search = effectiveSearchTerm.toLowerCase();
     return (
       u.full_name.toLowerCase().includes(search) ||
       u.email.toLowerCase().includes(search) ||
@@ -200,6 +205,17 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nombre, email o empresa..."
+          value={localSearchTerm}
+          onChange={(e) => setLocalSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
       {/* Team Members Card */}
       <Card>
         <CardHeader>
