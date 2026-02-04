@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, LogIn, UserPlus, ArrowLeft } from "lucide-react";
+import { Loader2, LogIn, UserPlus, ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import logo from "@/assets/greenpac-logo.png";
+import logo from "@/assets/greenpac-logo-new.png";
 
 const loginSchema = z.object({
   email: z.string().email("Ingresá un email válido"),
@@ -42,6 +42,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -92,9 +94,8 @@ const Auth = () => {
         toast.error("Error al registrarse. Intentá de nuevo.");
       }
     } else {
-      toast.success("¡Cuenta creada! Revisá tu email para confirmar tu cuenta antes de iniciar sesión.", {
-        duration: 8000,
-      });
+      setRegisteredEmail(data.email);
+      setShowEmailConfirmation(true);
     }
   };
 
@@ -102,6 +103,68 @@ const Auth = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show email confirmation screen after successful registration
+  if (showEmailConfirmation) {
+    return (
+      <div className="min-h-screen bg-muted flex flex-col">
+        <div className="p-4">
+          <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Volver al inicio
+          </Button>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="w-full max-w-md text-center">
+            <div className="bg-card rounded-xl p-8 shadow-lg">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Mail className="h-8 w-8 text-primary" />
+              </div>
+              
+              <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+                ¡Verificá tu email!
+              </h1>
+              
+              <p className="text-muted-foreground mb-4">
+                Te enviamos un email de confirmación a:
+              </p>
+              
+              <p className="font-medium text-foreground bg-muted px-4 py-2 rounded-lg mb-6">
+                {registeredEmail}
+              </p>
+              
+              <div className="space-y-3 text-left bg-muted/50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-muted-foreground flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  Revisá tu bandeja de entrada
+                </p>
+                <p className="text-sm text-muted-foreground flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  Si no lo encontrás, revisá la carpeta de spam
+                </p>
+                <p className="text-sm text-muted-foreground flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  Hacé clic en el enlace del email para activar tu cuenta
+                </p>
+              </div>
+              
+              <Button 
+                onClick={() => {
+                  setShowEmailConfirmation(false);
+                  signupForm.reset();
+                }}
+                className="w-full"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Ya confirmé, iniciar sesión
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
