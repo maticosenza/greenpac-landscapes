@@ -51,7 +51,7 @@ interface ProductFormData {
   description: string;
   category: string;
   price: string;
-  features: string;
+  features: string[];
   is_active: boolean;
   sort_order: string;
   technical_specs: TechnicalSpec[];
@@ -62,7 +62,7 @@ const emptyFormData: ProductFormData = {
   description: "",
   category: "",
   price: "",
-  features: "",
+  features: [],
   is_active: true,
   sort_order: "0",
   technical_specs: [],
@@ -82,6 +82,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newSpec, setNewSpec] = useState({ label: "", value: "" });
+  const [newFeature, setNewFeature] = useState("");
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -122,10 +123,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
 
   const createMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const featuresArray = data.features
-        .split(",")
-        .map((f) => f.trim())
-        .filter((f) => f);
+      const featuresArray = data.features.filter((f) => f.trim());
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const insertData: any = {
@@ -179,10 +177,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: ProductFormData }) => {
-      const featuresArray = data.features
-        .split(",")
-        .map((f) => f.trim())
-        .filter((f) => f);
+      const featuresArray = data.features.filter((f) => f.trim());
 
       // Combine existing images with new uploads
       let allImages = [...existingImages];
@@ -266,7 +261,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       description: product.description,
       category: product.category || "",
       price: product.price?.toString() || "",
-      features: product.features?.join(", ") || "",
+      features: product.features || [],
       is_active: product.is_active ?? true,
       sort_order: product.sort_order?.toString() || "0",
       technical_specs: specs,
@@ -307,6 +302,23 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       });
       setNewSpec({ label: "", value: "" });
     }
+  };
+
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setFormData({
+        ...formData,
+        features: [...formData.features, newFeature.trim()],
+      });
+      setNewFeature("");
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    setFormData({
+      ...formData,
+      features: formData.features.filter((_, i) => i !== index),
+    });
   };
 
   const removeSpec = (index: number) => {
@@ -510,16 +522,46 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="features">Características (separadas por coma)</Label>
-                <Input
-                  id="features"
-                  value={formData.features}
-                  onChange={(e) =>
-                    setFormData({ ...formData, features: e.target.value })
-                  }
-                  placeholder="ej: Alta capacidad, Fácil manejo, Durabilidad"
-                />
+              {/* Features */}
+              <div className="space-y-3">
+                <Label>Características</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Nueva característica"
+                    value={newFeature}
+                    onChange={(e) => setNewFeature(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addFeature();
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={addFeature}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {formData.features.length > 0 && (
+                  <div className="border rounded-lg p-3 space-y-2">
+                    {formData.features.map((feature, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-muted px-3 py-2 rounded"
+                      >
+                        <span className="text-sm">{feature}</span>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={() => removeFeature(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Technical Specifications */}
