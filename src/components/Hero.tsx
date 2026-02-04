@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-banner-greenpac-v3.jpg";
+import heroImage from "@/assets/hero-banner-greenpac-v4.jpg";
 
 const Hero = () => {
   return (
