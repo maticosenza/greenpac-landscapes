@@ -16,6 +16,7 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
+        <About />
         <Products />
         <section id="cotizacion" className="greenpac-section bg-muted">
           <div className="greenpac-container">
@@ -51,7 +52,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-        <About />
         <Testimonials />
         <Contact />
       </main>
