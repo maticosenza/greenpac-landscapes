@@ -67,8 +67,12 @@ const Auth = () => {
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
         toast.error("Email o contraseña incorrectos");
+      } else if (error.message.includes("Email not confirmed") || error.message.includes("email_not_confirmed")) {
+        toast.error("Debés confirmar tu email antes de iniciar sesión. Revisá tu bandeja de entrada y spam.", {
+          duration: 6000,
+        });
       } else {
-        toast.error("Error al iniciar sesión");
+        toast.error("Error al iniciar sesión. Intentá de nuevo.");
       }
     } else {
       toast.success("¡Bienvenido!");
@@ -83,13 +87,14 @@ const Auth = () => {
 
     if (error) {
       if (error.message.includes("already registered")) {
-        toast.error("Este email ya está registrado");
+        toast.error("Este email ya está registrado. Intentá iniciar sesión.");
       } else {
-        toast.error("Error al registrarse");
+        toast.error("Error al registrarse. Intentá de nuevo.");
       }
     } else {
-      toast.success("¡Cuenta creada exitosamente!");
-      navigate("/panel");
+      toast.success("¡Cuenta creada! Revisá tu email para confirmar tu cuenta antes de iniciar sesión.", {
+        duration: 8000,
+      });
     }
   };
 
