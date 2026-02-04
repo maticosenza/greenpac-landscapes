@@ -232,10 +232,10 @@ const ProductDetail = () => {
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button size="lg" asChild className="flex-1">
-                    <a href="/#cotizacion">
+                    <Link to="/#cotizacion">
                       Solicitar Cotización
                       <ArrowRight className="ml-2 h-5 w-5" />
-                    </a>
+                    </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild className="flex-1">
                     <a
