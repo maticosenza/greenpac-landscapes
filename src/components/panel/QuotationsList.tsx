@@ -35,8 +35,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { exportToCSV } from "@/lib/exportCsv";
 
 interface QuotationsListProps {
   searchTerm: string;
@@ -200,6 +201,57 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
     { value: "cancelled", label: "Cancelado" },
   ];
 
+  const getStatusLabel = (status: string | null) => {
+    const option = statusOptions.find((opt) => opt.value === status);
+    return option?.label || "Pendiente";
+  };
+
+  const getTypeLabel = (type: string | null) => {
+    switch (type) {
+      case "quote":
+        return "Cotización";
+      case "purchase":
+        return "Compra";
+      case "deposit":
+        return "Seña";
+      default:
+        return "Consulta";
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredQuotations || filteredQuotations.length === 0) {
+      toast.error("No hay cotizaciones para exportar");
+      return;
+    }
+
+    const dataToExport = filteredQuotations.map((q) => ({
+      ...q,
+      created_at_formatted: new Date(q.created_at).toLocaleDateString("es-AR"),
+      type_label: getTypeLabel(q.quotation_type),
+      status_label: getStatusLabel(q.status),
+      created_by: getEmployeeName(q.created_by_employee_id),
+    }));
+
+    exportToCSV(
+      dataToExport,
+      `cotizaciones-${showArchived ? "archivadas-" : ""}${new Date().toISOString().split("T")[0]}`,
+      [
+        { key: "created_at_formatted", label: "Fecha" },
+        { key: "client_name", label: "Cliente" },
+        { key: "client_email", label: "Email" },
+        { key: "client_phone", label: "Teléfono" },
+        { key: "company", label: "Empresa" },
+        { key: "type_label", label: "Tipo" },
+        { key: "status_label", label: "Estado" },
+        { key: "created_by", label: "Creada por" },
+        { key: "message", label: "Mensaje" },
+      ]
+    );
+
+    toast.success("Archivo CSV descargado");
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Cargando cotizaciones...</p>;
   }
@@ -207,25 +259,31 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
           <CardTitle>{showArchived ? "Cotizaciones Archivadas" : "Todas las Cotizaciones"}</CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowArchived(!showArchived)}
-          >
-            {showArchived ? (
-              <>
-                <ArchiveRestore className="h-4 w-4 mr-2" />
-                Ver Activas
-              </>
-            ) : (
-              <>
-                <Archive className="h-4 w-4 mr-2" />
-                Ver Archivadas
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportCSV}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowArchived(!showArchived)}
+            >
+              {showArchived ? (
+                <>
+                  <ArchiveRestore className="h-4 w-4 mr-2" />
+                  Ver Activas
+                </>
+              ) : (
+                <>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Ver Archivadas
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredQuotations && filteredQuotations.length > 0 ? (
