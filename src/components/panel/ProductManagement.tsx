@@ -36,6 +36,7 @@ interface Product {
   name: string;
   description: string;
   image_url: string | null;
+  images: string[] | null;
   features: string[] | null;
   category: string | null;
   price: number | null;
@@ -77,8 +78,9 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newSpec, setNewSpec] = useState({ label: "", value: "" });
 
   const { data: products, isLoading } = useQuery({
@@ -94,9 +96,10 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     },
   });
 
-  const uploadImage = async (file: File, productId: string): Promise<string> => {
+  const uploadImage = async (file: File, productId: string, index: number): Promise<string> => {
     const fileExt = file.name.split(".").pop();
-    const fileName = `${productId}.${fileExt}`;
+    const timestamp = Date.now();
+    const fileName = `${productId}_${index}_${timestamp}.${fileExt}`;
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -110,6 +113,11 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       .getPublicUrl(filePath);
 
     return urlData.publicUrl;
+  };
+
+  const uploadMultipleImages = async (files: File[], productId: string): Promise<string[]> => {
+    const uploadPromises = files.map((file, index) => uploadImage(file, productId, index));
+    return Promise.all(uploadPromises);
   };
 
   const createMutation = useMutation({
@@ -139,11 +147,16 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
 
       if (error) throw error;
 
-      if (imageFile && newProduct) {
-        const imageUrl = await uploadImage(imageFile, newProduct.id);
+      // Upload new images if any
+      if (imageFiles.length > 0 && newProduct) {
+        const newImageUrls = await uploadMultipleImages(imageFiles, newProduct.id);
+        const allImages = [...newImageUrls];
         await supabase
           .from("products")
-          .update({ image_url: imageUrl })
+          .update({ 
+            images: allImages,
+            image_url: allImages[0] || null 
+          })
           .eq("id", newProduct.id);
       }
 
@@ -171,10 +184,12 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         .map((f) => f.trim())
         .filter((f) => f);
 
-      let imageUrl = editingProduct?.image_url;
+      // Combine existing images with new uploads
+      let allImages = [...existingImages];
 
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile, id);
+      if (imageFiles.length > 0) {
+        const newImageUrls = await uploadMultipleImages(imageFiles, id);
+        allImages = [...allImages, ...newImageUrls];
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -187,7 +202,8 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         is_active: data.is_active,
         sort_order: parseInt(data.sort_order) || 0,
         technical_specs: data.technical_specs,
-        image_url: imageUrl,
+        images: allImages,
+        image_url: allImages[0] || null,
       };
 
       const { error } = await supabase
@@ -234,8 +250,9 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const resetForm = () => {
     setFormData(emptyFormData);
     setEditingProduct(null);
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImages([]);
     setIsDialogOpen(false);
   };
 
@@ -254,21 +271,32 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       sort_order: product.sort_order?.toString() || "0",
       technical_specs: specs,
     });
-    setImagePreview(product.image_url);
+    // Load existing images
+    const productImages = product.images || (product.image_url ? [product.image_url] : []);
+    setExistingImages(productImages);
+    setImagePreviews([]);
+    setImageFiles([]);
     setIsDialogOpen(true);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setImageFiles(prev => [...prev, ...files]);
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setImagePreviews(prev => [...prev, ...newPreviews]);
     }
+    // Reset input to allow selecting same file again
+    e.target.value = '';
   };
 
-  const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNewImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const addSpec = () => {
@@ -322,28 +350,69 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Image Upload */}
-              <div className="space-y-2">
-                <Label>Imagen del Producto</Label>
-                <div className="flex items-start gap-4">
-                  {imagePreview ? (
-                    <div className="relative">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-lg"
-                      />
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="destructive"
-                        className="absolute -top-2 -right-2 h-6 w-6"
-                        onClick={removeImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="w-32 h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+              <div className="space-y-3">
+                <Label>Imágenes del Producto</Label>
+                
+                {/* Existing Images */}
+                {existingImages.length > 0 && (
+                  <div className="flex flex-wrap gap-3">
+                    {existingImages.map((url, index) => (
+                      <div key={`existing-${index}`} className="relative">
+                        <img
+                          src={url}
+                          alt={`Imagen ${index + 1}`}
+                          className="w-24 h-24 object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          className="absolute -top-2 -right-2 h-6 w-6"
+                          onClick={() => removeExistingImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        {index === 0 && (
+                          <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-xs px-1 rounded">
+                            Principal
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* New Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-3">
+                    {imagePreviews.map((url, index) => (
+                      <div key={`new-${index}`} className="relative">
+                        <img
+                          src={url}
+                          alt={`Nueva imagen ${index + 1}`}
+                          className="w-24 h-24 object-cover rounded-lg border border-primary"
+                        />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          className="absolute -top-2 -right-2 h-6 w-6"
+                          onClick={() => removeNewImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        <span className="absolute bottom-1 left-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
+                          Nueva
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload Input */}
+                <div className="flex items-center gap-4">
+                  {existingImages.length === 0 && imagePreviews.length === 0 && (
+                    <div className="w-24 h-24 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
                       <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
                     </div>
                   )}
@@ -351,11 +420,12 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                     <Input
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleImageChange}
                       className="cursor-pointer"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      JPG, PNG o WebP. Máximo 5MB.
+                      JPG, PNG o WebP. Máximo 5MB por imagen. Podés seleccionar múltiples archivos.
                     </p>
                   </div>
                 </div>
