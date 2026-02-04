@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-banner.jpg";
+import heroImage from "@/assets/hero-banner-centered.jpg";
 
 const Hero = () => {
   return (
@@ -13,7 +13,7 @@ const Hero = () => {
         <img
           src={heroImage}
           alt="Campo argentino con silobolsas"
-          className="w-full h-full object-cover object-[50%_70%] md:object-center"
+          className="w-full h-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/30 via-transparent to-greenpac-dark/40" />
       </div>
