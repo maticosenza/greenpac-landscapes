@@ -6,7 +6,7 @@ const Hero = () => {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-start justify-center pt-32 md:pt-40 overflow-hidden"
+      className="relative min-h-screen flex flex-col overflow-hidden"
     >
       {/* Background Image */}
       <div className="absolute inset-0">
@@ -18,8 +18,8 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/30 via-transparent to-greenpac-dark/40" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 greenpac-container text-center">
+      {/* Top Content - Title */}
+      <div className="relative z-10 greenpac-container text-center pt-32 md:pt-40">
         <div className="animate-slide-up">
           <p className="text-primary font-display font-semibold text-lg md:text-xl mb-4 tracking-widest uppercase">
             Maquinaria Agrícola de Calidad
@@ -30,7 +30,13 @@ const Hero = () => {
             <br />
             del Campo Argentino
           </h1>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        </div>
+      </div>
+
+      {/* Bottom Content - Buttons */}
+      <div className="relative z-10 mt-auto mb-32 md:mb-40">
+        <div className="greenpac-container">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
             <Button variant="hero" size="lg" asChild>
               <a href="#productos">Ver Productos</a>
             </Button>
