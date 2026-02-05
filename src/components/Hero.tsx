@@ -48,7 +48,7 @@ const Hero = () => {
       {/* Bottom Content - Buttons */}
       <div className="relative z-10 mt-auto mb-32 md:mb-40">
         <div className="greenpac-container">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
+          <div className="flex flex-col-reverse sm:flex-row gap-4 justify-center animate-slide-up">
             <Button variant="hero" size="lg" asChild>
               <a href="#productos">Ver Productos</a>
             </Button>
