@@ -249,20 +249,20 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">
+            <h3 className="text-base sm:text-lg font-semibold">
               {showArchived ? "Consultas Archivadas" : "Consultas de Contacto"}
             </h3>
             {!showArchived && pendingCount > 0 && (
-              <Badge variant="destructive" className="animate-pulse">
+              <Badge variant="destructive" className="animate-pulse text-xs">
                 {pendingCount} nuevas
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -277,16 +277,19 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
               variant="outline"
               size="sm"
               onClick={() => setShowArchived(!showArchived)}
+              className="flex-1 sm:flex-none"
             >
               {showArchived ? (
                 <>
                   <ArchiveRestore className="h-4 w-4 mr-2" />
-                  Ver Activas
+                  <span className="hidden sm:inline">Ver Activas</span>
+                  <span className="sm:hidden">Activas</span>
                 </>
               ) : (
                 <>
                   <Archive className="h-4 w-4 mr-2" />
-                  Ver Archivadas
+                  <span className="hidden sm:inline">Ver Archivadas</span>
+                  <span className="sm:hidden">Archivadas</span>
                 </>
               )}
             </Button>
@@ -359,7 +362,7 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
                     value={inquiry.status || "pending"}
                     onValueChange={(value) => updateStatusMutation.mutate({ id: inquiry.id, status: value })}
                   >
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-full sm:w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -370,12 +373,13 @@ const ContactInquiriesList = ({ searchTerm = "" }: ContactInquiriesListProps) =>
                     </SelectContent>
                   </Select>
 
-                  <Button variant="outline" size="sm" onClick={() => handleReply(inquiry)}>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    {inquiry.reply ? "Ver/Editar Respuesta" : "Responder"}
+                  <Button variant="outline" size="sm" onClick={() => handleReply(inquiry)} className="flex-1 sm:flex-none">
+                    <MessageSquare className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">{inquiry.reply ? "Ver/Editar Respuesta" : "Responder"}</span>
+                    <span className="sm:hidden">{inquiry.reply ? "Respuesta" : "Responder"}</span>
                   </Button>
 
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
                     <a href={`mailto:${inquiry.email}`}>
                       <Mail className="h-4 w-4 mr-2" />
                       Email Directo

@@ -81,64 +81,64 @@ const AdminPanel = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-6 mb-8">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Cotizaciones</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Cotizaciones</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalQuotations || 0}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats?.totalQuotations || 0}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cotiz. Pendientes</CardTitle>
-              <FileText className="h-4 w-4 text-yellow-500" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Cotiz. Pendientes</CardTitle>
+              <FileText className="h-4 w-4 text-yellow-500 hidden sm:block" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.pendingQuotations || 0}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats?.pendingQuotations || 0}</div>
             </CardContent>
           </Card>
           <Card className={stats?.pendingInquiries ? "border-primary/50 bg-primary/5" : ""}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Consultas Nuevas</CardTitle>
-              <MessageSquare className="h-4 w-4 text-primary" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Consultas Nuevas</CardTitle>
+              <MessageSquare className="h-4 w-4 text-primary hidden sm:block" />
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold">{stats?.pendingInquiries || 0}</span>
+                <span className="text-xl sm:text-2xl font-bold">{stats?.pendingInquiries || 0}</span>
                 {(stats?.pendingInquiries || 0) > 0 && (
-                  <Badge variant="destructive" className="animate-pulse">Nuevas</Badge>
+                  <Badge variant="destructive" className="animate-pulse text-[10px] sm:text-xs">Nuevas</Badge>
                 )}
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Productos</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Productos</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.activeProducts || 0}/{stats?.totalProducts || 0}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats?.activeProducts || 0}/{stats?.totalProducts || 0}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Clientes</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Clientes</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalCustomers || 0}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats?.totalCustomers || 0}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Empleados</CardTitle>
-              <Shield className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Empleados</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalEmployees || 0}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats?.totalEmployees || 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -160,10 +160,12 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="quotations" className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 mb-6">
-            <TabsList className="w-max min-w-full sm:w-auto">
-              <TabsTrigger value="quotations">Cotizaciones</TabsTrigger>
-              <TabsTrigger value="inquiries" className="relative">
+          <div className="overflow-x-auto -mx-4 px-4 pb-1 mb-4">
+            <TabsList className="w-max min-w-full sm:w-auto h-auto p-1 flex-wrap">
+              <TabsTrigger value="quotations" className="text-xs sm:text-sm px-2 sm:px-3">
+                Cotizaciones
+              </TabsTrigger>
+              <TabsTrigger value="inquiries" className="relative text-xs sm:text-sm px-2 sm:px-3">
                 Consultas
                 {(stats?.pendingInquiries || 0) > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
@@ -171,13 +173,15 @@ const AdminPanel = () => {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="products">
-                <Package className="h-4 w-4 mr-2" />
+              <TabsTrigger value="products" className="text-xs sm:text-sm px-2 sm:px-3">
+                <Package className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Productos
               </TabsTrigger>
-              <TabsTrigger value="customers">Clientes</TabsTrigger>
-              <TabsTrigger value="team">
-                <Settings className="h-4 w-4 mr-2" />
+              <TabsTrigger value="customers" className="text-xs sm:text-sm px-2 sm:px-3">
+                Clientes
+              </TabsTrigger>
+              <TabsTrigger value="team" className="text-xs sm:text-sm px-2 sm:px-3">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Equipo
               </TabsTrigger>
             </TabsList>

@@ -155,64 +155,106 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Historial de Clientes</CardTitle>
-          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <CardTitle className="text-lg sm:text-xl">Historial de Clientes</CardTitle>
+          <Button variant="outline" size="sm" onClick={handleExportCSV} className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Exportar CSV
           </Button>
         </CardHeader>
         <CardContent>
           {filteredCustomers && filteredCustomers.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Teléfono</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Cotizaciones</TableHead>
-                    <TableHead>Registro</TableHead>
-                    <TableHead className="w-[80px]">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCustomers.map((customer) => (
-                    <TableRow key={customer.id}>
-                      <TableCell className="font-medium">{customer.full_name}</TableCell>
-                      <TableCell>{customer.email}</TableCell>
-                      <TableCell>{customer.phone || "-"}</TableCell>
-                      <TableCell>{customer.company || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {quotationCounts?.[customer.id] || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
+            <>
+              {/* Mobile card layout */}
+              <div className="block md:hidden space-y-4">
+                {filteredCustomers.map((customer) => (
+                  <div key={customer.id} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-sm truncate">{customer.full_name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{customer.email}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+                        onClick={() => setCustomerToDelete(customer)}
+                        disabled={deletingId === customer.id || customer.id === user?.id}
+                      >
+                        {deletingId === customer.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      {customer.phone && <span>{customer.phone}</span>}
+                      {customer.company && <span>• {customer.company}</span>}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="text-xs">
+                        {quotationCounts?.[customer.id] || 0} cotizaciones
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
                         {new Date(customer.created_at).toLocaleDateString("es-AR")}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => setCustomerToDelete(customer)}
-                          disabled={deletingId === customer.id || customer.id === user?.id}
-                          title={customer.id === user?.id ? "No podés eliminar tu propia cuenta" : "Eliminar cliente"}
-                        >
-                          {deletingId === customer.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TableCell>
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Teléfono</TableHead>
+                      <TableHead>Empresa</TableHead>
+                      <TableHead>Cotizaciones</TableHead>
+                      <TableHead>Registro</TableHead>
+                      <TableHead className="w-[80px]">Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCustomers.map((customer) => (
+                      <TableRow key={customer.id}>
+                        <TableCell className="font-medium">{customer.full_name}</TableCell>
+                        <TableCell>{customer.email}</TableCell>
+                        <TableCell>{customer.phone || "-"}</TableCell>
+                        <TableCell>{customer.company || "-"}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {quotationCounts?.[customer.id] || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {new Date(customer.created_at).toLocaleDateString("es-AR")}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setCustomerToDelete(customer)}
+                            disabled={deletingId === customer.id || customer.id === user?.id}
+                            title={customer.id === user?.id ? "No podés eliminar tu propia cuenta" : "Eliminar cliente"}
+                          >
+                            {deletingId === customer.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           ) : (
             <p className="text-muted-foreground text-center py-8">
               No hay clientes que coincidan con la búsqueda.

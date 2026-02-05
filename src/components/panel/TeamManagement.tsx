@@ -219,7 +219,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
       {/* Team Members Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Shield className="h-5 w-5" />
             Miembros del Equipo
           </CardTitle>
@@ -229,69 +229,127 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
         </CardHeader>
         <CardContent>
           {teamMembers && teamMembers.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Teléfono</TableHead>
-                    <TableHead>Roles</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teamMembers.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell className="font-medium">{member.full_name}</TableCell>
-                      <TableCell>{member.email}</TableCell>
-                      <TableCell>{member.phone || "-"}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {member.roles.map((role) => (
-                            <Badge
-                              key={role}
-                              variant={getRoleBadgeVariant(role)}
-                              className="text-xs"
-                            >
-                              {getRoleLabel(role)}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {!member.roles.includes("admin") && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAddRole(member)}
-                            >
-                              <UserPlus className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {member.roles
-                            .filter((role) => role !== "customer")
-                            .map((role) => (
-                              <Button
-                                key={role}
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive"
-                                onClick={() => handleRemoveRole(member.id, role, member.full_name)}
-                                disabled={member.id === user?.id && role === "admin"}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="ml-1 text-xs">{getRoleLabel(role)}</span>
-                              </Button>
-                            ))}
-                        </div>
-                      </TableCell>
+            <>
+              {/* Mobile card layout */}
+              <div className="block md:hidden space-y-4">
+                {teamMembers.map((member) => (
+                  <div key={member.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-sm truncate">{member.full_name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                        {member.phone && (
+                          <p className="text-xs text-muted-foreground">{member.phone}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {member.roles.map((role) => (
+                        <Badge
+                          key={role}
+                          variant={getRoleBadgeVariant(role)}
+                          className="text-xs"
+                        >
+                          {getRoleLabel(role)}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {!member.roles.includes("admin") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAddRole(member)}
+                        >
+                          <UserPlus className="h-4 w-4 mr-1" />
+                          Agregar Rol
+                        </Button>
+                      )}
+                      {member.roles
+                        .filter((role) => role !== "customer")
+                        .map((role) => (
+                          <Button
+                            key={role}
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleRemoveRole(member.id, role, member.full_name)}
+                            disabled={member.id === user?.id && role === "admin"}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            {getRoleLabel(role)}
+                          </Button>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Teléfono</TableHead>
+                      <TableHead>Roles</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {teamMembers.map((member) => (
+                      <TableRow key={member.id}>
+                        <TableCell className="font-medium">{member.full_name}</TableCell>
+                        <TableCell>{member.email}</TableCell>
+                        <TableCell>{member.phone || "-"}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1 flex-wrap">
+                            {member.roles.map((role) => (
+                              <Badge
+                                key={role}
+                                variant={getRoleBadgeVariant(role)}
+                                className="text-xs"
+                              >
+                                {getRoleLabel(role)}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            {!member.roles.includes("admin") && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAddRole(member)}
+                              >
+                                <UserPlus className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {member.roles
+                              .filter((role) => role !== "customer")
+                              .map((role) => (
+                                <Button
+                                  key={role}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={() => handleRemoveRole(member.id, role, member.full_name)}
+                                  disabled={member.id === user?.id && role === "admin"}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="ml-1 text-xs">{getRoleLabel(role)}</span>
+                                </Button>
+                              ))}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           ) : (
             <p className="text-muted-foreground text-center py-8">
               No hay miembros del equipo configurados.
@@ -303,62 +361,103 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
       {/* All Users Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Todos los Usuarios</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Todos los Usuarios</CardTitle>
           <CardDescription>
             Lista completa de usuarios registrados. Podés asignar roles de empleado o admin.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {filteredUsers && filteredUsers.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Roles Actuales</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((userItem) => (
-                    <TableRow key={userItem.id}>
-                      <TableCell className="font-medium">{userItem.full_name}</TableCell>
-                      <TableCell>{userItem.email}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {userItem.roles.length > 0 ? (
-                            userItem.roles.map((role) => (
-                              <Badge
-                                key={role}
-                                variant={getRoleBadgeVariant(role)}
-                                className="text-xs"
-                              >
-                                {getRoleLabel(role)}
-                              </Badge>
-                            ))
-                          ) : (
-                            <Badge variant="outline" className="text-xs">
-                              Sin roles
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAddRole(userItem)}
-                        >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Agregar Rol
-                        </Button>
-                      </TableCell>
+            <>
+              {/* Mobile card layout */}
+              <div className="block md:hidden space-y-4">
+                {filteredUsers.map((userItem) => (
+                  <div key={userItem.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-sm truncate">{userItem.full_name}</h3>
+                      <p className="text-xs text-muted-foreground truncate">{userItem.email}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {userItem.roles.length > 0 ? (
+                        userItem.roles.map((role) => (
+                          <Badge
+                            key={role}
+                            variant={getRoleBadgeVariant(role)}
+                            className="text-xs"
+                          >
+                            {getRoleLabel(role)}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          Sin roles
+                        </Badge>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddRole(userItem)}
+                      className="w-full"
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Agregar Rol
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Roles Actuales</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((userItem) => (
+                      <TableRow key={userItem.id}>
+                        <TableCell className="font-medium">{userItem.full_name}</TableCell>
+                        <TableCell>{userItem.email}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1 flex-wrap">
+                            {userItem.roles.length > 0 ? (
+                              userItem.roles.map((role) => (
+                                <Badge
+                                  key={role}
+                                  variant={getRoleBadgeVariant(role)}
+                                  className="text-xs"
+                                >
+                                  {getRoleLabel(role)}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Badge variant="outline" className="text-xs">
+                                Sin roles
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddRole(userItem)}
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Agregar Rol
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           ) : (
             <p className="text-muted-foreground text-center py-8">
               No hay usuarios que coincidan con la búsqueda.

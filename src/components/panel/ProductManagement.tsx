@@ -435,11 +435,11 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Gestión de Productos</CardTitle>
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <CardTitle className="text-lg sm:text-xl">Gestión de Productos</CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => resetForm()}>
+            <Button onClick={() => resetForm()} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Producto
             </Button>
@@ -731,60 +731,49 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
             ))}
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-20">Imagen</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead>Precio</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Orden</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            {/* Mobile card layout */}
+            <div className="block md:hidden space-y-4">
               {filteredProducts?.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
+                <div key={product.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-3">
                     {product.image_url ? (
                       <img
                         src={product.image_url}
                         alt={product.name}
-                        className="w-12 h-12 object-cover rounded"
+                        className="w-16 h-16 object-cover rounded flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                      <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
                       </div>
                     )}
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>
-                    {product.category && (
-                      <Badge variant="outline" className="capitalize">
-                        {product.category}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {product.price
-                      ? `$${product.price.toLocaleString("es-AR")}`
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={product.is_active ? "default" : "secondary"}
-                    >
-                      {product.is_active ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{product.sort_order}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm truncate">{product.name}</h3>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {product.category && (
+                          <Badge variant="outline" className="capitalize text-xs">
+                            {product.category}
+                          </Badge>
+                        )}
+                        <Badge
+                          variant={product.is_active ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {product.is_active ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </div>
+                      {product.price && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          ${product.price.toLocaleString("es-AR")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
                       <Button
                         size="icon"
                         variant="ghost"
+                        className="h-8 w-8"
                         onClick={() => handleEdit(product)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -792,7 +781,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="text-destructive hover:text-destructive"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={() => {
                           if (confirm("¿Eliminar este producto?")) {
                             deleteMutation.mutate(product.id);
@@ -802,11 +791,91 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+
+            {/* Desktop table layout */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-20">Imagen</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Precio</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Orden</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts?.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell>
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>
+                        {product.category && (
+                          <Badge variant="outline" className="capitalize">
+                            {product.category}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {product.price
+                          ? `$${product.price.toLocaleString("es-AR")}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={product.is_active ? "default" : "secondary"}
+                        >
+                          {product.is_active ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{product.sort_order}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleEdit(product)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => {
+                              if (confirm("¿Eliminar este producto?")) {
+                                deleteMutation.mutate(product.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
