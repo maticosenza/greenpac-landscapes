@@ -24,15 +24,23 @@ const Hero = () => {
       {/* Top Content - Title */}
       <div className="relative z-10 greenpac-container text-center pt-24 sm:pt-32 md:pt-60">
         <div className="animate-slide-up">
-          <p className="text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
+          <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
             Maquinaria Agrícola de Calidad
           </p>
           <h1 className="greenpac-title text-primary-foreground mb-6 max-w-4xl mx-auto leading-tight">
-            Construimos{" "}
-            <span className="greenpac-gradient-text">el Futuro</span>
-            <br className="hidden md:block" />
-            <span className="md:hidden"><br /></span>
-            del Campo Argentino
+            {/* Mobile: 3 líneas */}
+            <span className="md:hidden">
+              Construimos el<br />
+              <span className="greenpac-gradient-text">Futuro del</span><br />
+              Campo Argentino
+            </span>
+            {/* Desktop: 2 líneas */}
+            <span className="hidden md:inline">
+              Construimos{" "}
+              <span className="greenpac-gradient-text">el Futuro</span>
+              <br />
+              del Campo Argentino
+            </span>
           </h1>
         </div>
       </div>
