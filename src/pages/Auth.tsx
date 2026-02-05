@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import logo from "@/assets/greenpac-logo-new.png";
+import ForgotPasswordDialog from "@/components/auth/ForgotPasswordDialog";
 
 const loginSchema = z.object({
   email: z.string().email("Ingresá un email válido"),
@@ -44,6 +45,7 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -236,6 +238,17 @@ const Auth = () => {
                       )}
                       Iniciar Sesión
                     </Button>
+
+                    <div className="text-center">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-sm text-muted-foreground hover:text-primary"
+                        onClick={() => setShowForgotPassword(true)}
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </Button>
+                    </div>
                   </form>
                 </Form>
               </TabsContent>
@@ -328,6 +341,11 @@ const Auth = () => {
           </div>
         </div>
       </div>
+
+      <ForgotPasswordDialog
+        open={showForgotPassword}
+        onOpenChange={setShowForgotPassword}
+      />
     </div>
   );
 };
