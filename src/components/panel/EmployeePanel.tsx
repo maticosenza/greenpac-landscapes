@@ -137,24 +137,34 @@ const EmployeePanel = () => {
         </div>
 
         <Tabs defaultValue="quotations" className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 pb-1 mb-4">
-            <TabsList className="w-max min-w-full sm:w-auto h-auto p-1">
-              <TabsTrigger value="quotations" className="text-xs sm:text-sm px-3 sm:px-4">
-                Cotizaciones
-              </TabsTrigger>
-              <TabsTrigger value="inquiries" className="relative text-xs sm:text-sm px-3 sm:px-4">
-                Consultas
-                {(stats?.pendingInquiries || 0) > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
-                    {stats?.pendingInquiries}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="customers" className="text-xs sm:text-sm px-3 sm:px-4">
-                Clientes
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <TabsList className="w-full h-auto p-1 grid grid-cols-3 gap-1 mb-4">
+            <TabsTrigger value="quotations" className="text-[11px] sm:text-sm px-2 sm:px-4 py-2">
+              <span className="hidden sm:inline">Cotizaciones</span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <FileText className="h-4 w-4" />
+                <span>Cotizaciones</span>
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="inquiries" className="relative text-[11px] sm:text-sm px-2 sm:px-4 py-2">
+              <span className="hidden sm:inline">Consultas</span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <MessageSquare className="h-4 w-4" />
+                <span>Consultas</span>
+              </span>
+              {(stats?.pendingInquiries || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+                  {stats?.pendingInquiries}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="text-[11px] sm:text-sm px-2 sm:px-4 py-2">
+              <span className="hidden sm:inline">Clientes</span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <Users className="h-4 w-4" />
+                <span>Clientes</span>
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="quotations">
             <QuotationsList searchTerm={searchTerm} />

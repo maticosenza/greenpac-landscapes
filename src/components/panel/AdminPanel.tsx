@@ -160,32 +160,54 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="quotations" className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 pb-1 mb-4">
-            <TabsList className="w-max min-w-full sm:w-auto h-auto p-1 flex-wrap">
-              <TabsTrigger value="quotations" className="text-xs sm:text-sm px-2 sm:px-3">
-                Cotizaciones
-              </TabsTrigger>
-              <TabsTrigger value="inquiries" className="relative text-xs sm:text-sm px-2 sm:px-3">
-                Consultas
-                {(stats?.pendingInquiries || 0) > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
-                    {stats?.pendingInquiries}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="products" className="text-xs sm:text-sm px-2 sm:px-3">
-                <Package className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <TabsList className="w-full h-auto p-1 grid grid-cols-5 gap-1">
+            <TabsTrigger value="quotations" className="text-[10px] sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Cotizaciones</span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <FileText className="h-4 w-4" />
+                <span>Cotiz.</span>
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="inquiries" className="relative text-[10px] sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Consultas</span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <MessageSquare className="h-4 w-4" />
+                <span>Consult.</span>
+              </span>
+              {(stats?.pendingInquiries || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+                  {stats?.pendingInquiries}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="products" className="text-[10px] sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline flex items-center">
+                <Package className="h-4 w-4 mr-2" />
                 Productos
-              </TabsTrigger>
-              <TabsTrigger value="customers" className="text-xs sm:text-sm px-2 sm:px-3">
-                Clientes
-              </TabsTrigger>
-              <TabsTrigger value="team" className="text-xs sm:text-sm px-2 sm:px-3">
-                <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              </span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <Package className="h-4 w-4" />
+                <span>Prod.</span>
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="text-[10px] sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Clientes</span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <Users className="h-4 w-4" />
+                <span>Client.</span>
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="text-[10px] sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline flex items-center">
+                <Settings className="h-4 w-4 mr-2" />
                 Equipo
-              </TabsTrigger>
-            </TabsList>
-          </div>
+              </span>
+              <span className="sm:hidden flex flex-col items-center gap-0.5">
+                <Settings className="h-4 w-4" />
+                <span>Equipo</span>
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="quotations">
             <QuotationsList searchTerm={searchTerm} />
