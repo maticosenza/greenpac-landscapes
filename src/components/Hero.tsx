@@ -14,6 +14,9 @@ const Hero = () => {
           src={heroImage}
           alt="Campo argentino con silobolsas"
           className="w-full h-full object-cover object-center"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/30 via-transparent to-greenpac-dark/40" />
       </div>
