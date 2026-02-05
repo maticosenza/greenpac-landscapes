@@ -22,7 +22,7 @@ const Hero = () => {
       </div>
 
       {/* Top Content - Title */}
-      <div className="relative z-10 greenpac-container text-center pt-24 sm:pt-32 md:pt-60">
+      <div className="relative z-10 greenpac-container text-center pt-28 sm:pt-36 md:pt-60">
         <div className="animate-slide-up">
           <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
             Maquinaria Agrícola de Calidad
