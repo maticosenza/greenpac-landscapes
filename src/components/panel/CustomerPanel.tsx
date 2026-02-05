@@ -1,16 +1,19 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { LogOut, FileText, User, ArrowLeft, Clock } from "lucide-react";
+import { LogOut, FileText, User, ArrowLeft, Clock, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
+import ChangePasswordDialog from "@/components/auth/ChangePasswordDialog";
 
 const CustomerPanel = () => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["customer-quotations", user?.id],
@@ -76,6 +79,9 @@ const CustomerPanel = () => {
               <p className="text-sm font-medium">{profile?.full_name}</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
             </div>
+            <Button variant="ghost" size="sm" onClick={() => setShowChangePassword(true)} title="Cambiar contraseña">
+              <KeyRound className="h-4 w-4" />
+            </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Salir
@@ -158,6 +164,11 @@ const CustomerPanel = () => {
           </CardContent>
         </Card>
       </main>
+
+      <ChangePasswordDialog
+        open={showChangePassword}
+        onOpenChange={setShowChangePassword}
+      />
     </div>
   );
 };

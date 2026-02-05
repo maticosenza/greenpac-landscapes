@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,14 @@ import QuotationsList from "./QuotationsList";
 import CustomersList from "./CustomersList";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
+import ChangePasswordDialog from "@/components/auth/ChangePasswordDialog";
 
 const EmployeePanel = () => {
   const navigate = useNavigate();
   const { profile, signOut, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const { data: stats } = useQuery({
     queryKey: ["employee-stats"],
@@ -67,6 +69,9 @@ const EmployeePanel = () => {
               <p className="text-sm font-medium">{profile?.full_name}</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
             </div>
+            <Button variant="ghost" size="sm" onClick={() => setShowChangePassword(true)} title="Cambiar contraseña">
+              <KeyRound className="h-4 w-4" />
+            </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Salir
@@ -193,6 +198,11 @@ const EmployeePanel = () => {
         <CreateQuotationDialog
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
+        />
+
+        <ChangePasswordDialog
+          open={showChangePassword}
+          onOpenChange={setShowChangePassword}
         />
       </main>
     </div>

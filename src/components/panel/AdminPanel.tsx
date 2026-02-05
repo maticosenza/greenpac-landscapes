@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,14 @@ import TeamManagement from "./TeamManagement";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
 import ProductManagement from "./ProductManagement";
+import ChangePasswordDialog from "@/components/auth/ChangePasswordDialog";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
@@ -72,6 +74,9 @@ const AdminPanel = () => {
               <p className="text-sm font-medium">{profile?.full_name}</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
             </div>
+            <Button variant="ghost" size="sm" onClick={() => setShowChangePassword(true)} title="Cambiar contraseña">
+              <KeyRound className="h-4 w-4" />
+            </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Salir
@@ -250,6 +255,11 @@ const AdminPanel = () => {
         <CreateQuotationDialog
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
+        />
+
+        <ChangePasswordDialog
+          open={showChangePassword}
+          onOpenChange={setShowChangePassword}
         />
       </main>
     </div>
