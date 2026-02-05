@@ -28,17 +28,11 @@ const Hero = () => {
             Maquinaria Agrícola de Calidad
           </p>
           <h1 className="greenpac-title text-primary-foreground mb-6 max-w-4xl mx-auto leading-tight">
-            <span className="md:hidden">
-              Construimos el<br />
-              <span className="greenpac-gradient-text">Futuro del</span><br />
-              Campo Argentino
-            </span>
-            <span className="hidden md:inline">
-              Construimos{" "}
-              <span className="greenpac-gradient-text">el Futuro</span>
-              <br />
-              del Campo Argentino
-            </span>
+            Construimos{" "}
+            <span className="greenpac-gradient-text">el Futuro</span>
+            <br className="hidden md:block" />
+            <span className="md:hidden"><br /></span>
+            del Campo Argentino
           </h1>
         </div>
       </div>
