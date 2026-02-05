@@ -259,27 +259,31 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
-          <CardTitle>{showArchived ? "Cotizaciones Archivadas" : "Todas las Cotizaciones"}</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportCSV}>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <CardTitle className="text-lg sm:text-xl">{showArchived ? "Cotizaciones Archivadas" : "Todas las Cotizaciones"}</CardTitle>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-none">
               <Download className="h-4 w-4 mr-2" />
-              Exportar CSV
+              <span className="hidden sm:inline">Exportar CSV</span>
+              <span className="sm:hidden">CSV</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowArchived(!showArchived)}
+              className="flex-1 sm:flex-none"
             >
               {showArchived ? (
                 <>
                   <ArchiveRestore className="h-4 w-4 mr-2" />
-                  Ver Activas
+                  <span className="hidden sm:inline">Ver Activas</span>
+                  <span className="sm:hidden">Activas</span>
                 </>
               ) : (
                 <>
                   <Archive className="h-4 w-4 mr-2" />
-                  Ver Archivadas
+                  <span className="hidden sm:inline">Ver Archivadas</span>
+                  <span className="sm:hidden">Archivadas</span>
                 </>
               )}
             </Button>
@@ -287,54 +291,24 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
         </CardHeader>
         <CardContent>
           {filteredQuotations && filteredQuotations.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Creada por</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredQuotations.map((quotation) => (
-                    <TableRow key={quotation.id}>
-                      <TableCell className="whitespace-nowrap">
-                        {new Date(quotation.created_at).toLocaleDateString("es-AR")}
-                      </TableCell>
-                      <TableCell className="font-medium">{quotation.client_name}</TableCell>
-                      <TableCell>{quotation.client_email}</TableCell>
-                      <TableCell>{quotation.company || "-"}</TableCell>
-                      <TableCell>{getTypeBadge(quotation.quotation_type)}</TableCell>
-                      <TableCell>{getEmployeeName(quotation.created_by_employee_id)}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={quotation.status || "pending"}
-                          onValueChange={(value) =>
-                            updateMutation.mutate({ id: quotation.id, status: value })
-                          }
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {statusOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
+            <>
+              {/* Mobile card layout */}
+              <div className="block md:hidden space-y-4">
+                {filteredQuotations.map((quotation) => (
+                  <div key={quotation.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-sm truncate">{quotation.client_name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{quotation.client_email}</p>
+                        {quotation.company && (
+                          <p className="text-xs text-muted-foreground">{quotation.company}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {getTypeBadge(quotation.quotation_type)}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -368,12 +342,128 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(quotation.created_at).toLocaleDateString("es-AR")}
+                      </span>
+                      {quotation.created_by_employee_id && (
+                        <span className="text-xs text-muted-foreground">
+                          • {getEmployeeName(quotation.created_by_employee_id)}
+                        </span>
+                      )}
+                    </div>
+                    <Select
+                      value={quotation.status || "pending"}
+                      onValueChange={(value) =>
+                        updateMutation.mutate({ id: quotation.id, status: value })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Empresa</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Creada por</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="w-10"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredQuotations.map((quotation) => (
+                      <TableRow key={quotation.id}>
+                        <TableCell className="whitespace-nowrap">
+                          {new Date(quotation.created_at).toLocaleDateString("es-AR")}
+                        </TableCell>
+                        <TableCell className="font-medium">{quotation.client_name}</TableCell>
+                        <TableCell>{quotation.client_email}</TableCell>
+                        <TableCell>{quotation.company || "-"}</TableCell>
+                        <TableCell>{getTypeBadge(quotation.quotation_type)}</TableCell>
+                        <TableCell>{getEmployeeName(quotation.created_by_employee_id)}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={quotation.status || "pending"}
+                            onValueChange={(value) =>
+                              updateMutation.mutate({ id: quotation.id, status: value })
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {statusOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  archiveMutation.mutate({
+                                    id: quotation.id,
+                                    archived: !quotation.is_archived,
+                                  })
+                                }
+                              >
+                                {quotation.is_archived ? (
+                                  <>
+                                    <ArchiveRestore className="h-4 w-4 mr-2" />
+                                    Restaurar
+                                  </>
+                                ) : (
+                                  <>
+                                    <Archive className="h-4 w-4 mr-2" />
+                                    Archivar
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => handleDelete(quotation.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           ) : (
             <p className="text-muted-foreground text-center py-8">
               {showArchived
