@@ -195,8 +195,7 @@ const ProductDetail = () => {
                       <Button
                         type="button"
                         size="icon"
-                        variant="secondary"
-                        className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-90 hover:opacity-100"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-90 hover:opacity-100 bg-primary hover:bg-primary/90 text-primary-foreground"
                         onClick={() => setSelectedImageIndex((prev) => 
                           prev === 0 ? getProductImages(product).length - 1 : prev - 1
                         )}
@@ -206,8 +205,7 @@ const ProductDetail = () => {
                       <Button
                         type="button"
                         size="icon"
-                        variant="secondary"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-90 hover:opacity-100"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-90 hover:opacity-100 bg-primary hover:bg-primary/90 text-primary-foreground"
                         onClick={() => setSelectedImageIndex((prev) => 
                           prev === getProductImages(product).length - 1 ? 0 : prev + 1
                         )}
