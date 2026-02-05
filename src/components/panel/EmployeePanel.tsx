@@ -137,34 +137,45 @@ const EmployeePanel = () => {
         </div>
 
         <Tabs defaultValue="quotations" className="w-full">
-          <TabsList className="w-full h-auto p-1 grid grid-cols-3 gap-1 mb-4">
-            <TabsTrigger value="quotations" className="text-[11px] sm:text-sm px-2 sm:px-4 py-2">
-              <span className="hidden sm:inline">Cotizaciones</span>
-              <span className="sm:hidden flex flex-col items-center gap-0.5">
-                <FileText className="h-4 w-4" />
-                <span>Cotizaciones</span>
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="inquiries" className="relative text-[11px] sm:text-sm px-2 sm:px-4 py-2">
-              <span className="hidden sm:inline">Consultas</span>
-              <span className="sm:hidden flex flex-col items-center gap-0.5">
-                <MessageSquare className="h-4 w-4" />
-                <span>Consultas</span>
-              </span>
-              {(stats?.pendingInquiries || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
-                  {stats?.pendingInquiries}
+          <div className="bg-card rounded-xl border shadow-sm p-2 mb-6">
+            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg grid grid-cols-3 gap-1">
+              <TabsTrigger 
+                value="quotations" 
+                className="text-[11px] sm:text-sm px-2 sm:px-4 py-2.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all"
+              >
+                <span className="hidden sm:inline">Cotizaciones</span>
+                <span className="sm:hidden flex flex-col items-center gap-0.5">
+                  <FileText className="h-4 w-4" />
+                  <span>Cotizaciones</span>
                 </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="customers" className="text-[11px] sm:text-sm px-2 sm:px-4 py-2">
-              <span className="hidden sm:inline">Clientes</span>
-              <span className="sm:hidden flex flex-col items-center gap-0.5">
-                <Users className="h-4 w-4" />
-                <span>Clientes</span>
-              </span>
-            </TabsTrigger>
-          </TabsList>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="inquiries" 
+                className="relative text-[11px] sm:text-sm px-2 sm:px-4 py-2.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all"
+              >
+                <span className="hidden sm:inline">Consultas</span>
+                <span className="sm:hidden flex flex-col items-center gap-0.5">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Consultas</span>
+                </span>
+                {(stats?.pendingInquiries || 0) > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+                    {stats?.pendingInquiries}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="customers" 
+                className="text-[11px] sm:text-sm px-2 sm:px-4 py-2.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all"
+              >
+                <span className="hidden sm:inline">Clientes</span>
+                <span className="sm:hidden flex flex-col items-center gap-0.5">
+                  <Users className="h-4 w-4" />
+                  <span>Clientes</span>
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="quotations">
             <QuotationsList searchTerm={searchTerm} />
