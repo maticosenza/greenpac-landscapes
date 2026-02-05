@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import FileUploadField from "./FileUploadField";
 
 interface CreateQuotationDialogProps {
   open: boolean;
@@ -52,7 +54,7 @@ type QuotationFormData = z.infer<typeof quotationSchema>;
 const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProps) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
-
+  const [attachments, setAttachments] = useState<string[]>([]);
   const { data: products } = useQuery({
     queryKey: ["products-list"],
     queryFn: async () => {
@@ -108,10 +110,10 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
         customer_id: existingCustomer?.id || null,
         created_by_employee_id: user?.id,
         status: "pending",
+        attachments: attachments,
       });
 
       if (error) throw error;
-
       // Get product names for email notification
       const selectedProducts = products?.filter(p => data.product_ids.includes(p.id)).map(p => p.name) || [];
 
@@ -139,6 +141,7 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
       queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
       toast.success("Cotización creada exitosamente");
       form.reset();
+      setAttachments([]);
       onOpenChange(false);
     },
     onError: () => {
@@ -305,6 +308,14 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
                 </FormItem>
               )}
             />
+
+            <div>
+              <FormLabel className="mb-2 block">Archivos adjuntos</FormLabel>
+              <FileUploadField
+                files={attachments}
+                onFilesChange={setAttachments}
+              />
+            </div>
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
