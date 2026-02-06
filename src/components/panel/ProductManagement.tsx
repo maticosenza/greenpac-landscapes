@@ -24,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, GripVertical, Eye, EyeOff } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -737,17 +737,26 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
               {filteredProducts?.map((product) => (
                 <div key={product.id} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-start gap-3">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-16 h-16 object-cover rounded flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    <button
+                      type="button"
+                      className="flex-shrink-0 cursor-pointer relative group/img"
+                      onClick={() => handleEdit(product)}
+                    >
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-16 h-16 object-cover rounded transition-opacity group-hover/img:opacity-70"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-muted rounded flex items-center justify-center transition-colors group-hover/img:bg-primary/10">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                        <Pencil className="h-4 w-4 text-primary" />
                       </div>
-                    )}
+                    </button>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{product.name}</h3>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -770,6 +779,28 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                       )}
                     </div>
                     <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        title={product.is_active ? "Ocultar" : "Mostrar"}
+                        onClick={async () => {
+                          const newActive = !product.is_active;
+                          const { error } = await supabase
+                            .from("products")
+                            .update({ is_active: newActive })
+                            .eq("id", product.id);
+                          if (error) {
+                            toast({ title: "Error al cambiar visibilidad", description: error.message, variant: "destructive" });
+                          } else {
+                            queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+                            queryClient.invalidateQueries({ queryKey: ["products"] });
+                            toast({ title: newActive ? "Producto visible" : "Producto oculto" });
+                          }
+                        }}
+                      >
+                        {product.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                      </Button>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -814,17 +845,27 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                   {filteredProducts?.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
-                        {product.image_url ? (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-12 h-12 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        <button
+                          type="button"
+                          className="cursor-pointer group/img relative"
+                          onClick={() => handleEdit(product)}
+                          title="Editar producto"
+                        >
+                          {product.image_url ? (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-12 h-12 object-cover rounded transition-opacity group-hover/img:opacity-70"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center transition-colors group-hover/img:bg-primary/10">
+                              <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Pencil className="h-4 w-4 text-primary" />
                           </div>
-                        )}
+                        </button>
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>
@@ -849,6 +890,27 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                       <TableCell>{product.sort_order}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title={product.is_active ? "Ocultar en la página" : "Mostrar en la página"}
+                            onClick={async () => {
+                              const newActive = !product.is_active;
+                              const { error } = await supabase
+                                .from("products")
+                                .update({ is_active: newActive })
+                                .eq("id", product.id);
+                              if (error) {
+                                toast({ title: "Error al cambiar visibilidad", description: error.message, variant: "destructive" });
+                              } else {
+                                queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+                                queryClient.invalidateQueries({ queryKey: ["products"] });
+                                toast({ title: newActive ? "Producto visible en la página" : "Producto oculto de la página" });
+                              }
+                            }}
+                          >
+                            {product.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                          </Button>
                           <Button
                             size="icon"
                             variant="ghost"
