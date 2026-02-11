@@ -9,11 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
 import ChangePasswordDialog from "@/components/auth/ChangePasswordDialog";
+import QuotationDetailDialog from "@/components/panel/QuotationDetailDialog";
 
 const CustomerPanel = () => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [detailQuotationId, setDetailQuotationId] = useState<string | null>(null);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["customer-quotations", user?.id],
@@ -40,9 +42,13 @@ const CustomerPanel = () => {
       case "pending":
         return <Badge variant="secondary">Pendiente</Badge>;
       case "contacted":
-        return <Badge className="bg-blue-500">Contactado</Badge>;
+        return <Badge className="bg-blue-500 text-white">Contactado</Badge>;
+      case "approved":
+        return <Badge className="bg-green-600 text-white">Aprobada</Badge>;
+      case "rejected":
+        return <Badge variant="destructive">Rechazada</Badge>;
       case "completed":
-        return <Badge className="bg-primary">Completado</Badge>;
+        return <Badge className="bg-primary text-primary-foreground">Completado</Badge>;
       case "cancelled":
         return <Badge variant="destructive">Cancelado</Badge>;
       default:
@@ -133,10 +139,11 @@ const CustomerPanel = () => {
             ) : quotations && quotations.length > 0 ? (
               <div className="space-y-4">
                 {quotations.map((quotation) => (
-                  <div
-                    key={quotation.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4"
-                  >
+                    <div
+                      key={quotation.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => setDetailQuotationId(quotation.id)}
+                    >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         {getTypeBadge(quotation.quotation_type)}
@@ -168,6 +175,11 @@ const CustomerPanel = () => {
       <ChangePasswordDialog
         open={showChangePassword}
         onOpenChange={setShowChangePassword}
+      />
+      <QuotationDetailDialog
+        quotationId={detailQuotationId}
+        open={!!detailQuotationId}
+        onOpenChange={(open) => !open && setDetailQuotationId(null)}
       />
     </div>
   );
