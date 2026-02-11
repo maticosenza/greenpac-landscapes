@@ -178,6 +178,44 @@ export type Database = {
           },
         ]
       }
+      quotation_messages: {
+        Row: {
+          attachments: string[] | null
+          created_at: string
+          id: string
+          is_from_staff: boolean
+          message: string
+          quotation_id: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          created_at?: string
+          id?: string
+          is_from_staff?: boolean
+          message: string
+          quotation_id: string
+          user_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          created_at?: string
+          id?: string
+          is_from_staff?: boolean
+          message?: string
+          quotation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_messages_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotations: {
         Row: {
           assigned_to: string | null
