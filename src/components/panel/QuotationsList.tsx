@@ -35,9 +35,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download } from "lucide-react";
+import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
+import QuotationDetailDialog from "./QuotationDetailDialog";
 
 interface QuotationsListProps {
   searchTerm: string;
@@ -69,6 +70,7 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
   const [showArchived, setShowArchived] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [quotationToDelete, setQuotationToDelete] = useState<string | null>(null);
+  const [detailQuotationId, setDetailQuotationId] = useState<string | null>(null);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["all-quotations"],
@@ -197,6 +199,8 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
   const statusOptions = [
     { value: "pending", label: "Pendiente" },
     { value: "contacted", label: "Contactado" },
+    { value: "approved", label: "Aprobada" },
+    { value: "rejected", label: "Rechazada" },
     { value: "completed", label: "Completado" },
     { value: "cancelled", label: "Cancelado" },
   ];
@@ -295,8 +299,8 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
               {/* Mobile card layout */}
               <div className="block md:hidden space-y-4">
                 {filteredQuotations.map((quotation) => (
-                  <div key={quotation.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
+                  <div key={quotation.id} className="border rounded-lg p-4 space-y-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setDetailQuotationId(quotation.id)}>
+                    <div className="flex items-start justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                       <div className="min-w-0">
                         <h3 className="font-medium text-sm truncate">{quotation.client_name}</h3>
                         <p className="text-xs text-muted-foreground truncate">{quotation.client_email}</p>
@@ -313,6 +317,10 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                           <DropdownMenuItem onClick={() => setDetailQuotationId(quotation.id)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ver detalle
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
                                 archiveMutation.mutate({
@@ -392,7 +400,7 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                   </TableHeader>
                   <TableBody>
                     {filteredQuotations.map((quotation) => (
-                      <TableRow key={quotation.id}>
+                      <TableRow key={quotation.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailQuotationId(quotation.id)}>
                         <TableCell className="whitespace-nowrap">
                           {new Date(quotation.created_at).toLocaleDateString("es-AR")}
                         </TableCell>
@@ -401,7 +409,7 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                         <TableCell>{quotation.company || "-"}</TableCell>
                         <TableCell>{getTypeBadge(quotation.quotation_type)}</TableCell>
                         <TableCell>{getEmployeeName(quotation.created_by_employee_id)}</TableCell>
-                        <TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <Select
                             value={quotation.status || "pending"}
                             onValueChange={(value) =>
@@ -420,7 +428,7 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
@@ -428,6 +436,10 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setDetailQuotationId(quotation.id)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver detalle
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() =>
                                   archiveMutation.mutate({
@@ -493,6 +505,13 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <QuotationDetailDialog
+        quotationId={detailQuotationId}
+        open={!!detailQuotationId}
+        onOpenChange={(open) => !open && setDetailQuotationId(null)}
+        isStaff
+      />
     </>
   );
 };
