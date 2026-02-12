@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { LogOut, FileText, User, ArrowLeft, Clock, KeyRound } from "lucide-react";
+import { LogOut, FileText, User, ArrowLeft, Clock, KeyRound, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,33 @@ const CustomerPanel = () => {
     },
     enabled: !!user?.id,
   });
+
+  const { data: unreadMessages } = useQuery({
+    queryKey: ["customer-unread", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotation_messages")
+        .select("quotation_id, is_from_staff, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const getUnreadCount = (quotationId: string) => {
+    if (!unreadMessages) return 0;
+    const qMessages = unreadMessages.filter((m) => m.quotation_id === quotationId);
+    let count = 0;
+    for (const msg of qMessages) {
+      if (msg.is_from_staff) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count;
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -141,9 +168,15 @@ const CustomerPanel = () => {
                 {quotations.map((quotation) => (
                     <div
                       key={quotation.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => setDetailQuotationId(quotation.id)}
                     >
+                    {getUnreadCount(quotation.id) > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                        <MessageSquare className="h-3 w-3" />
+                        {getUnreadCount(quotation.id)}
+                      </span>
+                    )}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         {getTypeBadge(quotation.quotation_type)}

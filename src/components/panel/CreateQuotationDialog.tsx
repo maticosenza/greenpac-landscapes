@@ -47,6 +47,7 @@ const quotationSchema = z.object({
   product_ids: z.array(z.string()).min(1, "Seleccioná al menos un producto"),
   quotation_type: z.enum(["quote", "purchase", "deposit"]),
   message: z.string().optional(),
+  price: z.string().optional(),
 });
 
 type QuotationFormData = z.infer<typeof quotationSchema>;
@@ -91,13 +92,14 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
       product_ids: [],
       quotation_type: "quote",
       message: "",
+      price: "",
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: QuotationFormData) => {
-      // Check if customer exists
       const existingCustomer = customers?.find((c) => c.email === data.client_email);
+      const priceVal = data.price ? parseFloat(data.price) : null;
 
       const { error } = await supabase.from("quotations").insert({
         client_name: data.client_name,
@@ -111,6 +113,7 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
         created_by_employee_id: user?.id,
         status: "pending",
         attachments: attachments,
+        price: priceVal,
       });
 
       if (error) throw error;
@@ -129,6 +132,8 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
             products: selectedProducts,
             message: data.message,
             created_by_employee: profile?.full_name,
+            price: priceVal,
+            site_url: window.location.origin,
           },
         });
       } catch (emailError) {
@@ -286,6 +291,20 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
                       />
                     ))}
                   </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Precio (ARS)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="0.00" min="0" step="0.01" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

@@ -35,8 +35,11 @@ import {
   X,
   Loader2,
   Download,
+  DollarSign,
+  UserCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { generateQuotationPDF } from "@/lib/generateQuotationPDF";
 
 interface QuotationDetailDialogProps {
   quotationId: string | null;
@@ -132,6 +135,8 @@ const QuotationDetailDialog = ({
   const [chatMessage, setChatMessage] = useState("");
   const [chatAttachments, setChatAttachments] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [editingPrice, setEditingPrice] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -147,6 +152,20 @@ const QuotationDetailDialog = ({
       return data;
     },
     enabled: !!quotationId && open,
+  });
+
+  const { data: products } = useQuery({
+    queryKey: ["products-for-quotation", quotation?.product_ids],
+    queryFn: async () => {
+      if (!quotation?.product_ids || quotation.product_ids.length === 0) return [];
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, description, price")
+        .in("id", quotation.product_ids);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!quotation?.product_ids && quotation.product_ids.length > 0,
   });
 
   const { data: history, isLoading: historyLoading } = useQuery({
@@ -210,8 +229,28 @@ const QuotationDetailDialog = ({
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Set price input when quotation loads
+  useEffect(() => {
+    if (quotation?.price != null) {
+      setPriceInput(String(quotation.price));
+    } else {
+      setPriceInput("");
+    }
+  }, [quotation?.price]);
+
   const getUserName = (userId: string) =>
     profiles?.find((p) => p.id === userId)?.full_name || "Usuario";
+
+  const getCreatorName = () => {
+    if (!quotation) return null;
+    if (quotation.created_by_employee_id) {
+      return profiles?.find((p) => p.id === quotation.created_by_employee_id)?.full_name || "Empleado";
+    }
+    if (quotation.customer_id) {
+      return profiles?.find((p) => p.id === quotation.customer_id)?.full_name || quotation.client_name;
+    }
+    return quotation.client_name;
+  };
 
   const addHistoryMutation = useMutation({
     mutationFn: async (entry: { action: string; note?: string; old_status?: string; new_status?: string }) => {
@@ -246,6 +285,23 @@ const QuotationDetailDialog = ({
     onError: () => toast.error("Error al actualizar el historial"),
   });
 
+  const updatePriceMutation = useMutation({
+    mutationFn: async (price: number | null) => {
+      const { error } = await supabase
+        .from("quotations")
+        .update({ price })
+        .eq("id", quotationId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quotation-detail", quotationId] });
+      queryClient.invalidateQueries({ queryKey: ["all-quotations"] });
+      setEditingPrice(false);
+      toast.success("Precio actualizado");
+    },
+    onError: () => toast.error("Error al actualizar precio"),
+  });
+
   const sendMessageMutation = useMutation({
     mutationFn: async ({ message, attachments }: { message: string; attachments: string[] }) => {
       const { error } = await supabase.from("quotation_messages").insert({
@@ -260,7 +316,6 @@ const QuotationDetailDialog = ({
       // Send email notification (fire and forget)
       try {
         if (isStaff && quotation) {
-          // Notify client
           await supabase.functions.invoke("send-chat-notification", {
             body: {
               recipient_email: quotation.client_email,
@@ -272,7 +327,6 @@ const QuotationDetailDialog = ({
             },
           });
         } else if (quotation) {
-          // Notify admin
           await supabase.functions.invoke("send-chat-notification", {
             body: {
               recipient_email: "cosenzamati@gmail.com",
@@ -320,7 +374,8 @@ const QuotationDetailDialog = ({
 
         const { error } = await supabase.storage.from("quotation-attachments").upload(filePath, file);
         if (error) {
-          toast.error(`Error al subir ${file.name}`);
+          console.error("Upload error:", error);
+          toast.error(`Error al subir ${file.name}: ${error.message}`);
           continue;
         }
         uploaded.push(filePath);
@@ -330,7 +385,8 @@ const QuotationDetailDialog = ({
         setChatAttachments((prev) => [...prev, ...uploaded]);
         toast.success(`${uploaded.length} archivo(s) adjuntado(s)`);
       }
-    } catch {
+    } catch (err) {
+      console.error("Upload error:", err);
       toast.error("Error al subir archivos");
     } finally {
       setUploading(false);
@@ -343,9 +399,20 @@ const QuotationDetailDialog = ({
     setChatAttachments((prev) => prev.filter((f) => f !== filePath));
   };
 
-  const getFileUrl = (path: string) => {
-    const { data } = supabase.storage.from("quotation-attachments").getPublicUrl(path);
-    return data.publicUrl;
+  const getFileUrl = async (path: string) => {
+    const { data } = await supabase.storage
+      .from("quotation-attachments")
+      .createSignedUrl(path, 3600);
+    return data?.signedUrl || "#";
+  };
+
+  const handleDownloadFile = async (path: string) => {
+    const url = await getFileUrl(path);
+    if (url !== "#") {
+      window.open(url, "_blank");
+    } else {
+      toast.error("No se pudo obtener el archivo");
+    }
   };
 
   const getFileName = (path: string) => {
@@ -372,6 +439,25 @@ const QuotationDetailDialog = ({
     addHistoryMutation.mutate({ action: "rejected", old_status: quotation?.status, new_status: "rejected", note: "El cliente rechazó la cotización" });
   };
 
+  const handleSavePrice = () => {
+    const val = priceInput.trim();
+    if (!val) {
+      updatePriceMutation.mutate(null);
+    } else {
+      const num = parseFloat(val);
+      if (isNaN(num) || num < 0) {
+        toast.error("Precio inválido");
+        return;
+      }
+      updatePriceMutation.mutate(num);
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (!quotation) return;
+    generateQuotationPDF(quotation, products || []);
+  };
+
   if (!quotation) return null;
 
   const canApproveReject =
@@ -381,6 +467,8 @@ const QuotationDetailDialog = ({
     quotation.status !== "rejected" &&
     quotation.status !== "completed" &&
     quotation.status !== "cancelled";
+
+  const creatorName = getCreatorName();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -421,7 +509,64 @@ const QuotationDetailDialog = ({
               {new Date(quotation.created_at).toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "numeric" })}
             </p>
           </div>
+          {creatorName && (
+            <div>
+              <p className="text-muted-foreground text-xs flex items-center gap-1">
+                <UserCircle className="h-3 w-3" /> Creada por
+              </p>
+              <p className="font-medium">{creatorName}</p>
+            </div>
+          )}
         </div>
+
+        {/* Price section */}
+        <div className="flex items-center gap-3 text-sm">
+          <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
+          {isStaff && editingPrice ? (
+            <div className="flex items-center gap-2 flex-1">
+              <Input
+                type="number"
+                placeholder="Precio..."
+                value={priceInput}
+                onChange={(e) => setPriceInput(e.target.value)}
+                className="h-8 w-32"
+                min="0"
+                step="0.01"
+              />
+              <Button size="sm" className="h-8" onClick={handleSavePrice} disabled={updatePriceMutation.isPending}>
+                Guardar
+              </Button>
+              <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingPrice(false)}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="font-medium">
+                {quotation.price != null
+                  ? `$${Number(quotation.price).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`
+                  : "Sin precio asignado"}
+              </span>
+              {isStaff && (
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditingPrice(true)}>
+                  {quotation.price != null ? "Editar" : "Agregar precio"}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Products */}
+        {products && products.length > 0 && (
+          <div className="text-sm">
+            <p className="text-muted-foreground text-xs mb-1">Productos</p>
+            <div className="flex flex-wrap gap-1.5">
+              {products.map((p) => (
+                <Badge key={p.id} variant="secondary" className="text-xs">{p.name}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         {quotation.message && (
           <div className="text-sm">
@@ -436,16 +581,24 @@ const QuotationDetailDialog = ({
             <p className="text-muted-foreground mb-1 text-xs">Archivos adjuntos</p>
             <div className="flex flex-wrap gap-2">
               {quotation.attachments.map((att, i) => (
-                <a key={i} href={getFileUrl(att)} target="_blank" rel="noopener noreferrer"
+                <button key={i} onClick={() => handleDownloadFile(att)}
                   className="flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-md text-xs hover:bg-muted/80 transition-colors">
                   <FileText className="h-3.5 w-3.5" />
                   <span className="max-w-[120px] truncate">{getFileName(att)}</span>
                   <Download className="h-3 w-3" />
-                </a>
+                </button>
               ))}
             </div>
           </div>
         )}
+
+        {/* Export PDF */}
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleExportPDF}>
+            <Download className="h-4 w-4 mr-1.5" />
+            Exportar PDF
+          </Button>
+        </div>
 
         {/* Customer approve/reject */}
         {canApproveReject && (
@@ -514,11 +667,11 @@ const QuotationDetailDialog = ({
                           {msg.attachments && msg.attachments.length > 0 && (
                             <div className="mt-1.5 space-y-1">
                               {msg.attachments.map((att, i) => (
-                                <a key={i} href={getFileUrl(att)} target="_blank" rel="noopener noreferrer"
+                                <button key={i} onClick={() => handleDownloadFile(att)}
                                   className="flex items-center gap-1.5 text-xs underline opacity-90 hover:opacity-100">
                                   <FileText className="h-3 w-3" />
                                   {getFileName(att)}
-                                </a>
+                                </button>
                               ))}
                             </div>
                           )}
