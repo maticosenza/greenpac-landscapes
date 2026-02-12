@@ -35,7 +35,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download, Eye } from "lucide-react";
+import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download, Eye, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
 import QuotationDetailDialog from "./QuotationDetailDialog";
@@ -84,6 +84,34 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
       return data as Quotation[];
     },
   });
+
+  // Fetch latest messages per quotation to show unread indicator
+  const { data: latestMessages } = useQuery({
+    queryKey: ["quotation-unread-messages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotation_messages")
+        .select("quotation_id, is_from_staff, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const getUnreadCount = (quotationId: string) => {
+    if (!latestMessages) return 0;
+    const qMessages = latestMessages.filter((m) => m.quotation_id === quotationId);
+    // Count messages from clients (not staff) that are the latest unresponded
+    let count = 0;
+    for (const msg of qMessages) {
+      if (!msg.is_from_staff) {
+        count++;
+      } else {
+        break; // Stop at first staff message
+      }
+    }
+    return count;
+  };
 
   const { data: employees } = useQuery({
     queryKey: ["employees"],
@@ -299,7 +327,13 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
               {/* Mobile card layout */}
               <div className="block md:hidden space-y-4">
                 {filteredQuotations.map((quotation) => (
-                  <div key={quotation.id} className="border rounded-lg p-4 space-y-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setDetailQuotationId(quotation.id)}>
+                  <div key={quotation.id} className="relative border rounded-lg p-4 space-y-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setDetailQuotationId(quotation.id)}>
+                    {getUnreadCount(quotation.id) > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex items-center gap-1 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                        <MessageSquare className="h-3 w-3" />
+                        {getUnreadCount(quotation.id)}
+                      </span>
+                    )}
                     <div className="flex items-start justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                       <div className="min-w-0">
                         <h3 className="font-medium text-sm truncate">{quotation.client_name}</h3>
@@ -404,7 +438,17 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                         <TableCell className="whitespace-nowrap">
                           {new Date(quotation.created_at).toLocaleDateString("es-AR")}
                         </TableCell>
-                        <TableCell className="font-medium">{quotation.client_name}</TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-1.5">
+                            {quotation.client_name}
+                            {getUnreadCount(quotation.id) > 0 && (
+                              <span className="flex items-center gap-0.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                                <MessageSquare className="h-3 w-3" />
+                                {getUnreadCount(quotation.id)}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>{quotation.client_email}</TableCell>
                         <TableCell>{quotation.company || "-"}</TableCell>
                         <TableCell>{getTypeBadge(quotation.quotation_type)}</TableCell>

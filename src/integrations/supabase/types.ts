@@ -230,6 +230,7 @@ export type Database = {
           id: string
           is_archived: boolean | null
           message: string | null
+          price: number | null
           product_ids: string[] | null
           quotation_type: string | null
           status: string | null
@@ -248,6 +249,7 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           message?: string | null
+          price?: number | null
           product_ids?: string[] | null
           quotation_type?: string | null
           status?: string | null
@@ -266,6 +268,7 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           message?: string | null
+          price?: number | null
           product_ids?: string[] | null
           quotation_type?: string | null
           status?: string | null
