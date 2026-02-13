@@ -39,8 +39,8 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           showDarkBg
-            ? "bg-[rgba(0,0,0,0.9)] backdrop-blur-md shadow-lg py-3"
-            : "lg:bg-[rgba(0,0,0,0.85)] lg:backdrop-blur-md bg-transparent py-5 lg:py-3"
+            ? "bg-[rgba(0,0,0,0.9)] backdrop-blur-md shadow-lg py-2 lg:py-1.5"
+            : "lg:bg-[rgba(0,0,0,0.85)] lg:backdrop-blur-md bg-transparent py-5 lg:py-1.5"
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
@@ -48,12 +48,12 @@ const Header = () => {
             <img
               src={logo}
               alt="Greenpac Logo"
-              className="h-11 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
+              className="h-11 lg:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
             />
             <img
               src={textLogo}
               alt="Green Pac"
-              className="h-24 md:h-28 w-auto -ml-1"
+              className="h-24 lg:h-20 w-auto -ml-1"
             />
           </a>
 
