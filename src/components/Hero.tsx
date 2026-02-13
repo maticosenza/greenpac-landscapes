@@ -13,7 +13,7 @@ const Hero = () => {
         <img
           src={heroImage}
           alt="Campo argentino con silobolsas"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover max-[480px]:object-[50%_70%] object-center lg:object-[50%_65%]"
           loading="eager"
           fetchPriority="high"
           decoding="async"
@@ -22,12 +22,12 @@ const Hero = () => {
       </div>
 
       {/* Top Content - Title */}
-      <div className="relative z-10 greenpac-container text-center pt-28 sm:pt-36 md:pt-60">
+      <div className="relative z-10 greenpac-container text-center pt-[calc(92px+env(safe-area-inset-top,0px))] sm:pt-36 lg:pt-32 xl:pt-28">
         <div className="animate-slide-up">
           <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
             Maquinaria Agrícola de Calidad
           </p>
-          <h1 className="greenpac-title text-primary-foreground mb-6 max-w-4xl mx-auto leading-tight">
+          <h1 className="text-primary-foreground mb-6 mx-auto leading-[1.06] max-[480px]:text-[clamp(32px,7vw,40px)] max-[480px]:max-w-[18ch] max-[480px]:[text-wrap:balance] greenpac-title max-w-4xl">
             {/* Mobile: 3 líneas */}
             <span className="md:hidden">
               Construimos el<br />

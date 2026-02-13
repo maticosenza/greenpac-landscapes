@@ -218,58 +218,85 @@ export type Database = {
       }
       quotations: {
         Row: {
+          address_components: Json | null
+          address_formatted: string | null
           assigned_to: string | null
           attachments: string[] | null
+          city: string | null
           client_email: string
           client_name: string
           client_phone: string | null
           company: string | null
+          country: string | null
           created_at: string
           created_by_employee_id: string | null
           customer_id: string | null
           id: string
           is_archived: boolean | null
+          lat: number | null
+          lng: number | null
           message: string | null
+          place_id: string | null
+          postal_code: string | null
           price: number | null
           product_ids: string[] | null
+          province: string | null
           quotation_type: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
+          address_components?: Json | null
+          address_formatted?: string | null
           assigned_to?: string | null
           attachments?: string[] | null
+          city?: string | null
           client_email: string
           client_name: string
           client_phone?: string | null
           company?: string | null
+          country?: string | null
           created_at?: string
           created_by_employee_id?: string | null
           customer_id?: string | null
           id?: string
           is_archived?: boolean | null
+          lat?: number | null
+          lng?: number | null
           message?: string | null
+          place_id?: string | null
+          postal_code?: string | null
           price?: number | null
           product_ids?: string[] | null
+          province?: string | null
           quotation_type?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
+          address_components?: Json | null
+          address_formatted?: string | null
           assigned_to?: string | null
           attachments?: string[] | null
+          city?: string | null
           client_email?: string
           client_name?: string
           client_phone?: string | null
           company?: string | null
+          country?: string | null
           created_at?: string
           created_by_employee_id?: string | null
           customer_id?: string | null
           id?: string
           is_archived?: boolean | null
+          lat?: number | null
+          lng?: number | null
           message?: string | null
+          place_id?: string | null
+          postal_code?: string | null
           price?: number | null
           product_ids?: string[] | null
+          province?: string | null
           quotation_type?: string | null
           status?: string | null
           updated_at?: string
