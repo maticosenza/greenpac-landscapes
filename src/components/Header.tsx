@@ -31,6 +31,7 @@ const Header = () => {
   ];
 
   // On non-home pages, always show dark background
+  // On desktop, always show dark background
   const showDarkBg = !isHomePage || isScrolled;
 
   return (
@@ -38,8 +39,8 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           showDarkBg
-            ? "bg-greenpac-dark/95 backdrop-blur-md shadow-lg py-3"
-            : "bg-transparent py-5"
+            ? "bg-[rgba(0,0,0,0.9)] backdrop-blur-md shadow-lg py-3"
+            : "lg:bg-[rgba(0,0,0,0.85)] lg:backdrop-blur-md bg-transparent py-5 lg:py-3"
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
