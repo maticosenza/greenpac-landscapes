@@ -12,6 +12,9 @@ interface QuotationData {
   message: string | null;
   price: number | null;
   created_at: string;
+  province?: string | null;
+  city?: string | null;
+  address_formatted?: string | null;
 }
 
 interface ProductData {
@@ -97,6 +100,8 @@ export function generateQuotationPDF(quotation: QuotationData, products: Product
   ];
   if (quotation.client_phone) clientInfo.push(["Teléfono", quotation.client_phone]);
   if (quotation.company) clientInfo.push(["Empresa", quotation.company]);
+  const addressLine = [quotation.address_formatted, quotation.city, quotation.province].filter(Boolean).join(", ");
+  if (addressLine) clientInfo.push(["Dirección", addressLine]);
 
   clientInfo.forEach(([label, value]) => {
     doc.setFont("helvetica", "bold");

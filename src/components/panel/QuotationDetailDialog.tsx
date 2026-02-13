@@ -37,6 +37,8 @@ import {
   Download,
   DollarSign,
   UserCircle,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateQuotationPDF } from "@/lib/generateQuotationPDF";
@@ -518,6 +520,29 @@ const QuotationDetailDialog = ({
             </div>
           )}
         </div>
+
+        {/* Address section */}
+        {(quotation.province || quotation.city || quotation.address_formatted) && (
+          <div className="flex items-start gap-3 text-sm">
+            <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium">
+                {[quotation.address_formatted, quotation.city, quotation.province].filter(Boolean).join(", ")}
+              </p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  [quotation.address_formatted, quotation.city, quotation.province].filter(Boolean).join(", ")
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Abrir en Google Maps
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Price section */}
         <div className="flex items-center gap-3 text-sm">
