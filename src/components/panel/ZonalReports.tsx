@@ -27,7 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Download, MapPin, BarChart3, Filter, X, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
+import { Download, MapPin, BarChart3, Filter, X, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, Building2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { exportToCSV } from "@/lib/exportCsv";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
@@ -154,6 +154,30 @@ const ZonalReports = () => {
       .sort((a, b) => b.total - a.total);
   }, [filtered]);
 
+  // Buenos Aires cities chart data
+  const buenosAiresCityStats = useMemo(() => {
+    const map = new Map<string, { total: number; sales: number; totalPrice: number }>();
+    filtered
+      .filter((q) => q.province === "Buenos Aires")
+      .forEach((q) => {
+        const city = q.city || "Sin ciudad";
+        const entry = map.get(city) || { total: 0, sales: 0, totalPrice: 0 };
+        entry.total++;
+        if (q.status === "completed" || q.status === "approved") {
+          entry.sales++;
+          entry.totalPrice += Number(q.price) || 0;
+        }
+        map.set(city, entry);
+      });
+    return Array.from(map.entries())
+      .map(([city, stats]) => ({
+        city,
+        ...stats,
+        conversion: stats.total > 0 ? ((stats.sales / stats.total) * 100) : 0,
+      }))
+      .sort((a, b) => b.total - a.total);
+  }, [filtered]);
+
   const getProductNames = (ids: string[] | null) => {
     if (!ids || !products) return "";
     return products.filter((p) => ids.includes(p.id)).map((p) => p.name).join(", ");
@@ -232,6 +256,9 @@ const ZonalReports = () => {
   const totalSales = filtered.filter((q) => q.status === "completed" || q.status === "approved");
   const totalRevenue = totalSales.reduce((sum, q) => sum + (Number(q.price) || 0), 0);
 
+  const chartHeight = isMobile ? 240 : 340;
+  const pieChartHeight = isMobile ? 280 : 340;
+
   return (
     <TooltipProvider>
       <div className="space-y-4 sm:space-y-6">
@@ -258,7 +285,6 @@ const ZonalReports = () => {
                 </Button>
               </div>
             </div>
-            {/* Active filter chips (mobile) */}
             {!filtersOpen && hasActiveFilters && (
               <div className="flex flex-wrap gap-1.5 mt-2 sm:hidden">
                 {filterProvince !== "all" && (
@@ -360,24 +386,29 @@ const ZonalReports = () => {
           </Card>
         </div>
 
-        {/* Charts */}
+        {/* Charts Row 1: Province bar + pie */}
         <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 px-4 sm:px-6">
               <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" /> Cotizaciones por Provincia
+                <BarChart3 className="h-4 w-4 text-primary" /> Cotizaciones por Provincia
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-2 sm:px-6">
+            <CardContent className="px-2 sm:px-4">
               {provinceStats.length > 0 ? (
-                <ResponsiveContainer width="100%" height={isMobile ? 240 : 340}>
-                  <BarChart data={provinceStats.slice(0, 10)} layout="vertical" margin={{ left: isMobile ? 10 : 20, right: 10, top: 5, bottom: 5 }}>
-                    <XAxis type="number" tick={{ fontSize: 11 }} />
-                    <YAxis type="category" dataKey="province" width={isMobile ? 70 : 90} tick={{ fontSize: isMobile ? 10 : 12 }} />
-                    <RechartsTooltip formatter={(val: number) => [val, "Cotizaciones"]} />
-                    <Bar dataKey="total" fill="hsl(142,76%,36%)" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="w-full overflow-hidden">
+                  <ResponsiveContainer width="100%" height={chartHeight}>
+                    <BarChart data={provinceStats.slice(0, 10)} layout="vertical" margin={{ left: isMobile ? 0 : 10, right: 16, top: 5, bottom: 5 }}>
+                      <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                      <YAxis type="category" dataKey="province" width={isMobile ? 80 : 100} tick={{ fontSize: isMobile ? 10 : 12 }} />
+                      <RechartsTooltip
+                        formatter={(val: number) => [val, "Cotizaciones"]}
+                        contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                      />
+                      <Bar dataKey="total" fill="hsl(142,76%,36%)" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">Sin datos con provincia</p>
               )}
@@ -385,37 +416,44 @@ const ZonalReports = () => {
           </Card>
 
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 px-4 sm:px-6">
               <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> Distribución por Provincia
+                <MapPin className="h-4 w-4 text-primary" /> Distribución por Provincia
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-2 sm:px-6">
+            <CardContent className="px-2 sm:px-4">
               {provinceStats.length > 0 ? (
-                <ResponsiveContainer width="100%" height={isMobile ? 260 : 340}>
-                  <PieChart>
-                    <Pie
-                      data={provinceStats.slice(0, 8)}
-                      dataKey="total"
-                      nameKey="province"
-                      cx="50%"
-                      cy="45%"
-                      outerRadius={isMobile ? 70 : 100}
-                      label={isMobile ? false : ({ province, percent }) => `${province} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={!isMobile}
-                    >
-                      {provinceStats.slice(0, 8).map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip formatter={(val: number, _name: string, props: any) => [val, props.payload.province]} />
-                    <Legend
-                      verticalAlign="bottom"
-                      align="center"
-                      wrapperStyle={{ fontSize: isMobile ? 10 : 12, paddingTop: 8 }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="w-full overflow-hidden">
+                  <ResponsiveContainer width="100%" height={pieChartHeight}>
+                    <PieChart>
+                      <Pie
+                        data={provinceStats.slice(0, 8)}
+                        dataKey="total"
+                        nameKey="province"
+                        cx="50%"
+                        cy={isMobile ? "42%" : "45%"}
+                        outerRadius={isMobile ? 65 : 95}
+                        innerRadius={isMobile ? 20 : 30}
+                        label={isMobile ? false : ({ province, percent }) => `${province} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={!isMobile}
+                      >
+                        {provinceStats.slice(0, 8).map((_, i) => (
+                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip
+                        formatter={(val: number, _name: string, props: any) => [val, props.payload.province]}
+                        contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                      />
+                      <Legend
+                        verticalAlign="bottom"
+                        align="center"
+                        wrapperStyle={{ fontSize: isMobile ? 10 : 12, paddingTop: 12 }}
+                        iconSize={isMobile ? 8 : 10}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">Sin datos con provincia</p>
               )}
@@ -423,7 +461,37 @@ const ZonalReports = () => {
           </Card>
         </div>
 
-        {/* Export buttons (always visible) */}
+        {/* Chart Row 2: Buenos Aires cities */}
+        <Card>
+          <CardHeader className="pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" /> Cotizaciones por Ciudad (Buenos Aires)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-2 sm:px-4">
+            {buenosAiresCityStats.length > 0 ? (
+              <div className="w-full overflow-hidden">
+                <ResponsiveContainer width="100%" height={chartHeight}>
+                  <BarChart data={buenosAiresCityStats.slice(0, 12)} layout="vertical" margin={{ left: isMobile ? 0 : 10, right: 16, top: 5, bottom: 5 }}>
+                    <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <YAxis type="category" dataKey="city" width={isMobile ? 80 : 110} tick={{ fontSize: isMobile ? 10 : 12 }} />
+                    <RechartsTooltip
+                      formatter={(val: number) => [val, "Cotizaciones"]}
+                      contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                    />
+                    <Bar dataKey="total" fill="hsl(200,70%,50%)" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Sin datos de ciudades en Buenos Aires. Agregá provincia y ciudad a las cotizaciones.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Export buttons */}
         <div className="flex flex-wrap gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -443,7 +511,7 @@ const ZonalReports = () => {
           </Tooltip>
         </div>
 
-        {/* Province table — desktop table / mobile cards */}
+        {/* Province table */}
         <Card>
           <CardHeader className="pb-2 sm:pb-4">
             <CardTitle className="text-sm sm:text-base">Resumen por Provincia</CardTitle>
@@ -451,7 +519,6 @@ const ZonalReports = () => {
           <CardContent>
             {provinceStats.length > 0 ? (
               <>
-                {/* Desktop table */}
                 <div className="hidden sm:block overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -490,7 +557,6 @@ const ZonalReports = () => {
                     </TableBody>
                   </Table>
                 </div>
-                {/* Mobile cards */}
                 <div className="sm:hidden space-y-2">
                   {provinceStats.map((s) => (
                     <div key={s.province} className="rounded-lg border p-3 space-y-1.5">
@@ -524,7 +590,7 @@ const ZonalReports = () => {
           </CardContent>
         </Card>
 
-        {/* City table — desktop table / mobile cards */}
+        {/* City table */}
         <Card>
           <CardHeader className="pb-2 sm:pb-4">
             <CardTitle className="text-sm sm:text-base">Detalle por Ciudad</CardTitle>
@@ -564,7 +630,6 @@ const ZonalReports = () => {
                     </TableBody>
                   </Table>
                 </div>
-                {/* Mobile cards */}
                 <div className="sm:hidden space-y-2">
                   {cityStats.slice(0, 20).map((s) => (
                     <div key={s.city} className="rounded-lg border p-3 space-y-1.5">
