@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import FileUploadField from "./FileUploadField";
+import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 
 interface CreateQuotationDialogProps {
   open: boolean;
@@ -44,6 +45,9 @@ const quotationSchema = z.object({
   client_email: z.string().email("Email inválido"),
   client_phone: z.string().optional(),
   company: z.string().optional(),
+  province: z.string().min(1, "La provincia es requerida"),
+  city: z.string().min(1, "La ciudad es requerida"),
+  address_formatted: z.string().optional(),
   product_ids: z.array(z.string()).min(1, "Seleccioná al menos un producto"),
   quotation_type: z.enum(["quote", "purchase", "deposit"]),
   message: z.string().optional(),
@@ -89,6 +93,9 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
       client_email: "",
       client_phone: "",
       company: "",
+      province: "",
+      city: "",
+      address_formatted: "",
       product_ids: [],
       quotation_type: "quote",
       message: "",
@@ -101,11 +108,16 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
       const existingCustomer = customers?.find((c) => c.email === data.client_email);
       const priceVal = data.price ? parseFloat(data.price) : null;
 
+      const addressFull = [data.address_formatted, data.city, data.province].filter(Boolean).join(", ");
+
       const { error } = await supabase.from("quotations").insert({
         client_name: data.client_name,
         client_email: data.client_email,
         client_phone: data.client_phone || null,
         company: data.company || null,
+        province: data.province || null,
+        city: data.city || null,
+        address_formatted: addressFull || null,
         product_ids: data.product_ids,
         quotation_type: data.quotation_type,
         message: data.message || null,
@@ -232,6 +244,59 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
                 )}
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="province"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Provincia *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {ARGENTINA_PROVINCES.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ciudad / Localidad *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej: Rosario" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="address_formatted"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Dirección (calle y número)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: Av. San Martín 1234" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

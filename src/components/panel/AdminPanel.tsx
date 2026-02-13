@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, KeyRound } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, KeyRound, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import TeamManagement from "./TeamManagement";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
 import ProductManagement from "./ProductManagement";
+import ZonalReports from "./ZonalReports";
 import ChangePasswordDialog from "@/components/auth/ChangePasswordDialog";
 
 const AdminPanel = () => {
@@ -166,7 +167,7 @@ const AdminPanel = () => {
 
         <Tabs defaultValue="quotations" className="w-full">
           <div className="bg-card rounded-xl border shadow-sm p-2 mb-6">
-            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg grid grid-cols-5 gap-1">
+            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg grid grid-cols-6 gap-1">
               <TabsTrigger 
                 value="quotations" 
                 className="text-[10px] sm:text-sm px-1 sm:px-3 py-2.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all"
@@ -228,6 +229,19 @@ const AdminPanel = () => {
                   <span>Equipo</span>
                 </span>
               </TabsTrigger>
+              <TabsTrigger 
+                value="zones" 
+                className="text-[10px] sm:text-sm px-1 sm:px-3 py-2.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all"
+              >
+                <span className="hidden sm:inline items-center">
+                  <MapPin className="h-4 w-4 mr-2 inline" />
+                  Zonas
+                </span>
+                <span className="sm:hidden flex flex-col items-center gap-0.5">
+                  <MapPin className="h-4 w-4" />
+                  <span>Zonas</span>
+                </span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -249,6 +263,10 @@ const AdminPanel = () => {
 
           <TabsContent value="team">
             <TeamManagement searchTerm={searchTerm} />
+          </TabsContent>
+
+          <TabsContent value="zones">
+            <ZonalReports />
           </TabsContent>
         </Tabs>
 
