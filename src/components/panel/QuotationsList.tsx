@@ -559,20 +559,23 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
   return (
     <>
       <Tabs defaultValue="all" className="w-full" onValueChange={() => setActiveStatusFilter(null)}>
-        <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg grid grid-cols-2 gap-1 mb-4">
+        {/* Segmented control tabs - mobile: full-width 2-col, desktop: inline */}
+        <TabsList className="w-full h-auto p-1 bg-muted/60 rounded-xl grid grid-cols-2 gap-1 mb-4">
           <TabsTrigger
             value="all"
-            className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
+            className="text-xs sm:text-sm px-2 sm:px-4 py-2.5 min-h-[44px] sm:min-h-[40px] rounded-lg gap-2 font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
           >
             <List className="h-4 w-4 shrink-0" />
-            Todas las cotizaciones
+            <span className="hidden sm:inline">Todas las cotizaciones</span>
+            <span className="sm:hidden leading-tight text-center">Todas</span>
           </TabsTrigger>
           <TabsTrigger
             value="status"
-            className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
+            className="text-xs sm:text-sm px-2 sm:px-4 py-2.5 min-h-[44px] sm:min-h-[40px] rounded-lg gap-2 font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
           >
             <BarChart3 className="h-4 w-4 shrink-0" />
-            Estado de las cotizaciones
+            <span className="hidden sm:inline">Estado de las cotizaciones</span>
+            <span className="sm:hidden leading-tight text-center">Por estado</span>
           </TabsTrigger>
         </TabsList>
 
@@ -581,9 +584,9 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
         </TabsContent>
 
         <TabsContent value="status">
-          {/* Status chips */}
+          {/* Status chips - mobile: 2-col grid, desktop: flex row */}
           <div className="mb-4">
-            <div className="flex flex-wrap gap-2 sm:gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-1">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
               {STATUS_CONFIG.map((s) => {
                 const count = statusCounts[s.value] || 0;
                 const isActive = activeStatusFilter === s.value;
@@ -591,14 +594,14 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                   <button
                     key={s.value}
                     onClick={() => setActiveStatusFilter(isActive ? null : s.value)}
-                    className={`snap-start shrink-0 inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg border text-sm font-medium transition-all min-h-[44px] ${
+                    className={`inline-flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all min-h-[44px] ${
                       isActive
                         ? `${s.color} ring-2 ring-primary/30 shadow-sm`
                         : "bg-card border-border text-foreground hover:bg-muted/50"
                     }`}
                   >
-                    <span>{s.label}</span>
-                    <Badge variant={isActive ? "default" : "secondary"} className="text-[11px] px-1.5 py-0 min-w-[20px] text-center">
+                    <span className="truncate">{s.label}</span>
+                    <Badge variant={isActive ? "default" : "secondary"} className="text-[11px] px-1.5 py-0 min-w-[20px] text-center shrink-0">
                       {count}
                     </Badge>
                   </button>
@@ -607,7 +610,7 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
               {activeStatusFilter && (
                 <button
                   onClick={() => setActiveStatusFilter(null)}
-                  className="snap-start shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-muted-foreground/30 text-sm text-muted-foreground hover:bg-muted/50 transition-all min-h-[44px]"
+                  className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg border border-dashed border-muted-foreground/30 text-sm text-muted-foreground hover:bg-muted/50 transition-all min-h-[44px]"
                 >
                   <X className="h-3.5 w-3.5" />
                   Ver todas
