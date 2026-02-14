@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useEditMode } from "@/hooks/useEditMode";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import EditableSection from "@/components/EditableSection";
 import logo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
@@ -14,6 +16,7 @@ const Header = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { isEditMode, toggleEditMode, canEdit } = useEditMode();
+  const { getAsset } = useSiteContent();
 
   const isHomePage = location.pathname === "/";
 
@@ -44,18 +47,25 @@ const Header = () => {
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
-          <a href="/#inicio" className="flex items-center gap-1 group">
-            <img
-              src={logo}
-              alt="Greenpac Logo"
-              className="h-11 lg:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
-            />
-            <img
-              src={textLogo}
-              alt="Green Pac"
-              className="h-24 lg:h-20 w-auto -ml-1"
-            />
-          </a>
+          <EditableSection
+            sectionId="Nav Logo"
+            fields={[
+              { key: "nav-logo", label: "Logo (isotipo)", type: "image", fallback: logo, assetKey: "nav-logo" },
+            ]}
+          >
+            <a href="/#inicio" className="flex items-center gap-1 group">
+              <img
+                src={getAsset("nav-logo", logo, "Greenpac Logo").url}
+                alt={getAsset("nav-logo", logo, "Greenpac Logo").alt}
+                className="h-11 lg:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+              />
+              <img
+                src={textLogo}
+                alt="Green Pac"
+                className="h-24 lg:h-20 w-auto -ml-1"
+              />
+            </a>
+          </EditableSection>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             {navLinks.map((link) => (

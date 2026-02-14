@@ -217,34 +217,34 @@ const AdminPanel = () => {
                 Zonas
               </TabsTrigger>
             </TabsList>
-            {/* Mobile: horizontal scrollable bar with solid background */}
-            <TabsList className="sm:hidden w-full h-auto p-2 bg-muted rounded-xl border border-border/50 flex overflow-x-auto gap-1.5 snap-x snap-mandatory scrollbar-none">
-              <TabsTrigger value="quotations" className="snap-start shrink-0 text-[11px] px-3 py-2 min-h-[48px] min-w-[88px] rounded-lg flex flex-col items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+            {/* Mobile: 2-row grid (3 columns x 2 rows) */}
+            <TabsList className="sm:hidden w-full h-auto p-2 bg-muted rounded-xl border border-border/50 grid grid-cols-3 gap-1.5">
+              <TabsTrigger value="quotations" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <FileText className="h-[18px] w-[18px]" />
-                <span>Cotiz.</span>
+                <span>Cotizaciones</span>
               </TabsTrigger>
-              <TabsTrigger value="inquiries" className="relative snap-start shrink-0 text-[11px] px-3 py-2 min-h-[48px] min-w-[88px] rounded-lg flex flex-col items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="inquiries" className="relative text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <MessageSquare className="h-[18px] w-[18px]" />
-                <span>Consult.</span>
+                <span>Consultas</span>
                 {(stats?.pendingInquiries || 0) > 0 && (
                   <span className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
                     {stats?.pendingInquiries}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="products" className="snap-start shrink-0 text-[11px] px-3 py-2 min-h-[48px] min-w-[88px] rounded-lg flex flex-col items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="products" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Package className="h-[18px] w-[18px]" />
-                <span>Prod.</span>
+                <span>Productos</span>
               </TabsTrigger>
-              <TabsTrigger value="customers" className="snap-start shrink-0 text-[11px] px-3 py-2 min-h-[48px] min-w-[88px] rounded-lg flex flex-col items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="customers" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Users className="h-[18px] w-[18px]" />
-                <span>Client.</span>
+                <span>Clientes</span>
               </TabsTrigger>
-              <TabsTrigger value="team" className="snap-start shrink-0 text-[11px] px-3 py-2 min-h-[48px] min-w-[88px] rounded-lg flex flex-col items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="team" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Settings className="h-[18px] w-[18px]" />
                 <span>Equipo</span>
               </TabsTrigger>
-              <TabsTrigger value="zones" className="snap-start shrink-0 text-[11px] px-3 py-2 min-h-[48px] min-w-[88px] rounded-lg flex flex-col items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="zones" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <MapPin className="h-[18px] w-[18px]" />
                 <span>Zonas</span>
               </TabsTrigger>

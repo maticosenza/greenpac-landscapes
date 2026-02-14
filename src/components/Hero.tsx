@@ -24,7 +24,7 @@ const Hero = () => {
         <EditableSection
           sectionId="Hero Banner"
           fields={[
-            { key: "hero-banner", label: "Imagen de fondo", type: "image", fallback: heroImageDefault, assetKey: "hero-banner" },
+            { key: "hero-banner", label: "Imagen de fondo (banner)", type: "image", fallback: heroImageDefault, assetKey: "hero-banner" },
           ]}
         >
           <img

@@ -538,9 +538,9 @@ const ZonalReports = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="px-2 sm:px-4">
+            <CardContent className="px-1 sm:px-4">
               {provinceChartData.length > 0 ? (
-                <div ref={provinceBarRef} className="w-full overflow-hidden">
+                <div ref={provinceBarRef} className="w-full overflow-hidden flex justify-center">
                   <ResponsiveContainer width="100%" height={chartHeight}>
                     <BarChart data={provinceChartData} margin={{ left: 4, right: 16, top: 5, bottom: isMobile ? 60 : 40 }} barCategoryGap="30%" barGap={4}>
                       <XAxis
@@ -577,9 +577,9 @@ const ZonalReports = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="px-2 sm:px-4">
+            <CardContent className="px-1 sm:px-4">
               {provinceStats.length > 0 ? (
-                <div ref={provincePieRef} className="w-full overflow-hidden">
+                <div ref={provincePieRef} className="w-full overflow-hidden flex justify-center">
                   <ResponsiveContainer width="100%" height={pieChartHeight}>
                     <PieChart>
                       <Pie
@@ -630,9 +630,9 @@ const ZonalReports = () => {
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">Agregá provincia y ciudad para ver métricas más precisas.</p>
             </CardHeader>
-            <CardContent className="px-2 sm:px-4">
+            <CardContent className="px-1 sm:px-4">
               {cityChartData.length > 0 ? (
-                <div ref={cityBarRef} className="w-full overflow-hidden">
+                <div ref={cityBarRef} className="w-full overflow-hidden flex justify-center">
                   <ResponsiveContainer width="100%" height={chartHeight}>
                     <BarChart data={cityChartData} margin={{ left: 4, right: 16, top: 5, bottom: isMobile ? 60 : 40 }} barCategoryGap="30%" barGap={4}>
                       <XAxis
@@ -671,9 +671,9 @@ const ZonalReports = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="px-2 sm:px-4">
+            <CardContent className="px-1 sm:px-4">
               {allCityStats.length > 0 ? (
-                <div ref={cityPieRef} className="w-full overflow-hidden">
+                <div ref={cityPieRef} className="w-full overflow-hidden flex justify-center">
                   <ResponsiveContainer width="100%" height={pieChartHeight}>
                     <PieChart>
                       <Pie
