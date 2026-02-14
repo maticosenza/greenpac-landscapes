@@ -324,6 +324,60 @@ export type Database = {
         }
         Relationships: []
       }
+      site_assets: {
+        Row: {
+          alt_text: string | null
+          id: string
+          section_key: string
+          updated_at: string
+          updated_by: string | null
+          url: string
+        }
+        Insert: {
+          alt_text?: string | null
+          id?: string
+          section_key: string
+          updated_at?: string
+          updated_by?: string | null
+          url: string
+        }
+        Update: {
+          alt_text?: string | null
+          id?: string
+          section_key?: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          content_type: string
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          content_type?: string
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Update: {
+          content_type?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           client_name: string

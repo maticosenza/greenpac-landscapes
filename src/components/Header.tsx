@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, Pencil, PencilOff } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useEditMode } from "@/hooks/useEditMode";
 import logo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
@@ -12,6 +13,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { isEditMode, toggleEditMode, canEdit } = useEditMode();
 
   const isHomePage = location.pathname === "/";
 
@@ -30,8 +32,6 @@ const Header = () => {
     { href: "/#contacto", label: "Contacto" },
   ];
 
-  // On non-home pages, always show dark background
-  // On desktop, always show dark background
   const showDarkBg = !isHomePage || isScrolled;
 
   return (
@@ -70,7 +70,27 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center">
+          <div className="hidden lg:flex items-center gap-2">
+            {canEdit && (
+              <Button
+                variant={isEditMode ? "destructive" : "outline"}
+                size="sm"
+                onClick={toggleEditMode}
+                className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white border-white/50" : ""}
+              >
+                {isEditMode ? (
+                  <>
+                    <PencilOff className="h-4 w-4 mr-1.5" />
+                    Salir edición
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="h-4 w-4 mr-1.5" />
+                    Modo edición
+                  </>
+                )}
+              </Button>
+            )}
             <Button
               variant="hero"
               size="sm"
@@ -91,25 +111,23 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Menu - Outside header for proper stacking */}
+      {/* Edit mode indicator banner */}
+      {isEditMode && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground text-center text-xs py-1 font-medium pointer-events-none">
+          ✏️ Modo edición activo — hacé hover sobre las secciones para editarlas
+        </div>
+      )}
+
+      {/* Mobile Menu */}
       <div
         className={`lg:hidden fixed inset-0 bg-[#1a2e1a] z-[60] transition-all duration-300 ${
           isMobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
       >
-        {/* Mobile Menu Header */}
         <div className="greenpac-container flex items-center justify-between py-4">
           <a href="/#inicio" className="flex items-center gap-1">
-            <img
-              src={logo}
-              alt="Greenpac Logo"
-              className="h-11 w-auto"
-            />
-            <img
-              src={textLogo}
-              alt="Green Pac"
-              className="h-24 w-auto -ml-1"
-            />
+            <img src={logo} alt="Greenpac Logo" className="h-11 w-auto" />
+            <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
           </a>
           <button
             className="text-primary-foreground p-2"
@@ -130,6 +148,29 @@ const Header = () => {
               {link.label}
             </a>
           ))}
+          {canEdit && (
+            <Button
+              variant={isEditMode ? "destructive" : "outline"}
+              size="sm"
+              className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white" : ""}
+              onClick={() => {
+                toggleEditMode();
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              {isEditMode ? (
+                <>
+                  <PencilOff className="h-4 w-4 mr-1.5" />
+                  Salir edición
+                </>
+              ) : (
+                <>
+                  <Pencil className="h-4 w-4 mr-1.5" />
+                  Modo edición
+                </>
+              )}
+            </Button>
+          )}
           <Button
             variant="hero"
             size="sm"
