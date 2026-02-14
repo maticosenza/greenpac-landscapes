@@ -217,13 +217,13 @@ const AdminPanel = () => {
                 Zonas
               </TabsTrigger>
             </TabsList>
-            {/* Mobile: scrollable row */}
-            <TabsList className="sm:hidden w-full h-auto p-1 bg-muted/50 rounded-lg flex overflow-x-auto gap-1 snap-x snap-mandatory scrollbar-none">
-              <TabsTrigger value="quotations" className="snap-start shrink-0 text-xs px-3 py-2.5 min-h-[44px] rounded-md flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+            {/* Mobile: horizontal scrollable bar with visible background */}
+            <TabsList className="sm:hidden w-full h-auto p-1.5 bg-muted rounded-xl border border-border/50 flex overflow-x-auto gap-1.5 snap-x snap-mandatory scrollbar-none">
+              <TabsTrigger value="quotations" className="snap-start shrink-0 text-[11px] px-2.5 py-2 min-h-[44px] min-w-[72px] rounded-lg flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <FileText className="h-[18px] w-[18px]" />
                 <span>Cotiz.</span>
               </TabsTrigger>
-              <TabsTrigger value="inquiries" className="relative snap-start shrink-0 text-xs px-3 py-2.5 min-h-[44px] rounded-md flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="inquiries" className="relative snap-start shrink-0 text-[11px] px-2.5 py-2 min-h-[44px] min-w-[72px] rounded-lg flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <MessageSquare className="h-[18px] w-[18px]" />
                 <span>Consult.</span>
                 {(stats?.pendingInquiries || 0) > 0 && (
@@ -232,19 +232,19 @@ const AdminPanel = () => {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="products" className="snap-start shrink-0 text-xs px-3 py-2.5 min-h-[44px] rounded-md flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="products" className="snap-start shrink-0 text-[11px] px-2.5 py-2 min-h-[44px] min-w-[72px] rounded-lg flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Package className="h-[18px] w-[18px]" />
                 <span>Prod.</span>
               </TabsTrigger>
-              <TabsTrigger value="customers" className="snap-start shrink-0 text-xs px-3 py-2.5 min-h-[44px] rounded-md flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="customers" className="snap-start shrink-0 text-[11px] px-2.5 py-2 min-h-[44px] min-w-[72px] rounded-lg flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Users className="h-[18px] w-[18px]" />
                 <span>Client.</span>
               </TabsTrigger>
-              <TabsTrigger value="team" className="snap-start shrink-0 text-xs px-3 py-2.5 min-h-[44px] rounded-md flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="team" className="snap-start shrink-0 text-[11px] px-2.5 py-2 min-h-[44px] min-w-[72px] rounded-lg flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Settings className="h-[18px] w-[18px]" />
                 <span>Equipo</span>
               </TabsTrigger>
-              <TabsTrigger value="zones" className="snap-start shrink-0 text-xs px-3 py-2.5 min-h-[44px] rounded-md flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+              <TabsTrigger value="zones" className="snap-start shrink-0 text-[11px] px-2.5 py-2 min-h-[44px] min-w-[72px] rounded-lg flex flex-col items-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <MapPin className="h-[18px] w-[18px]" />
                 <span>Zonas</span>
               </TabsTrigger>
