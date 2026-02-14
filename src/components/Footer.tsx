@@ -1,26 +1,39 @@
+import { useSiteContent } from "@/hooks/useSiteContent";
+import EditableSection from "@/components/EditableSection";
 import footerLogo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { getText } = useSiteContent();
+
+  const tagline = getText("footer-tagline", "Maquinaria para la conservación de forrajes");
 
   return (
     <footer className="bg-greenpac-dark">
       <div className="greenpac-container py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-1">
-            <img src={footerLogo} alt="Greenpac Logo" className="h-11 md:h-14 w-auto" />
-            <img src={textLogo} alt="Green Pac" className="h-32 w-auto -ml-1" />
+        <EditableSection
+          sectionId="Footer"
+          fields={[
+            { key: "footer-tagline", label: "Tagline", type: "text", fallback: "Maquinaria para la conservación de forrajes" },
+            { key: "footer-logo", label: "Logo", type: "image", fallback: footerLogo, assetKey: "footer-logo" },
+          ]}
+        >
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-1">
+              <img src={footerLogo} alt="Greenpac Logo" className="h-11 md:h-14 w-auto" />
+              <img src={textLogo} alt="Green Pac" className="h-32 w-auto -ml-1" />
+            </div>
+
+            <p className="text-primary-foreground/60 text-sm text-center">
+              {tagline}
+            </p>
+
+            <p className="text-primary-foreground/40 text-sm">
+              © {currentYear} Greenpac Argentina. Todos los derechos reservados.
+            </p>
           </div>
-
-          <p className="text-primary-foreground/60 text-sm text-center">
-            Maquinaria para la conservación de forrajes
-          </p>
-
-          <p className="text-primary-foreground/40 text-sm">
-            © {currentYear} Greenpac Argentina. Todos los derechos reservados.
-          </p>
-        </div>
+        </EditableSection>
       </div>
     </footer>
   );
