@@ -1,11 +1,128 @@
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Pencil, Upload, Save, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
 import heroImageDefault from "@/assets/hero-banner-greenpac-v5.jpg";
 
+const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
+  const { updateAsset } = useSiteContent();
+  const [isOpen, setIsOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [altText, setAltText] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const handleFileChange = (f: File | null) => {
+    setFile(f);
+    if (f) {
+      const url = URL.createObjectURL(f);
+      setPreview(url);
+    } else {
+      setPreview(null);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!file) return;
+    setIsSaving(true);
+    try {
+      await updateAsset.mutateAsync({
+        sectionKey: "hero-banner",
+        file,
+        altText,
+      });
+      setIsOpen(false);
+      setFile(null);
+      setPreview(null);
+      onSaved?.();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        size="sm"
+        variant="secondary"
+        className="absolute top-20 right-4 z-[15] shadow-lg gap-1.5 h-9 text-xs"
+        onClick={() => setIsOpen(true)}
+      >
+        <Pencil className="h-3.5 w-3.5" />
+        Editar Banner
+      </Button>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar sección: Hero Banner</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Texto alternativo (alt)</Label>
+              <Input
+                value={altText}
+                onChange={(e) => setAltText(e.target.value)}
+                placeholder="Campo argentino con silobolsas"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Imagen de fondo</Label>
+              <p className="text-xs text-muted-foreground">
+                Recomendado: 1920×1080 px (JPG/WEBP). Mantener el sujeto centrado porque la imagen se recorta en distintas pantallas.
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => document.getElementById("hero-banner-upload")?.click()}
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  {file ? file.name : "Subir imagen"}
+                </Button>
+                <input
+                  id="hero-banner-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                />
+              </div>
+              {preview && (
+                <img src={preview} alt="Preview" className="w-full max-h-48 object-cover rounded-lg border border-border/50 mt-2" />
+              )}
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isSaving}>
+              <X className="h-4 w-4 mr-1" /> Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving || !file}>
+              {isSaving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+              Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
 const Hero = () => {
   const { getText, getAsset } = useSiteContent();
+  const { isEditMode } = useEditMode();
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
   const kicker = getText("hero-kicker", "Maquinaria Agrícola de Calidad");
@@ -20,32 +137,21 @@ const Hero = () => {
       id="inicio"
       className="relative min-h-screen flex flex-col overflow-hidden"
     >
-      {/* Background Image */}
+      {/* Background Image — single source of truth */}
       <div className="absolute inset-0">
-        <EditableSection
-          sectionId="Hero Banner"
-          fields={[
-            {
-              key: "hero-banner",
-              label: "Imagen de fondo (banner)",
-              type: "image",
-              fallback: heroImageDefault,
-              assetKey: "hero-banner",
-              hint: "Recomendado: 1920×1080 px (JPG/WEBP). Mantener el sujeto centrado porque la imagen se recorta en distintas pantallas.",
-            },
-          ]}
-        >
-          <img
-            src={heroAsset.url}
-            alt={heroAsset.alt}
-            className="w-full h-full object-cover max-[480px]:object-[50%_70%] object-center lg:object-[50%_65%]"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
-        </EditableSection>
+        <img
+          src={heroAsset.url}
+          alt={heroAsset.alt}
+          className="w-full h-full object-cover max-[480px]:object-[50%_70%] object-center lg:object-[50%_65%]"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/30 via-transparent to-greenpac-dark/40" />
       </div>
+
+      {/* Banner edit — floating button, always clickable */}
+      {isEditMode && <HeroBannerEditor />}
 
       {/* Top Content - Title */}
       <div className="relative z-10 greenpac-container text-center pt-[calc(108px+env(safe-area-inset-top,0px))] sm:pt-36 lg:pt-32 xl:pt-28">
