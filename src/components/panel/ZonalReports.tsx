@@ -287,19 +287,21 @@ const ZonalReports = () => {
       maxHeight: node.style.maxHeight,
       height: node.style.height,
       width: node.style.width,
+      padding: node.style.padding,
     };
     node.style.overflow = "visible";
     node.style.overflowY = "visible";
     node.style.maxHeight = "none";
-    node.style.height = node.scrollHeight + "px";
+    node.style.height = node.scrollHeight + 8 + "px";
     node.style.width = node.scrollWidth + "px";
+    node.style.padding = "6px";
     try {
       const dataUrl = await toPng(node, {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
         width: node.scrollWidth,
-        height: node.scrollHeight,
+        height: node.scrollHeight + 8,
       });
       return dataUrl;
     } finally {
@@ -308,6 +310,7 @@ const ZonalReports = () => {
       node.style.maxHeight = prev.maxHeight;
       node.style.height = prev.height;
       node.style.width = prev.width;
+      node.style.padding = prev.padding;
     }
   };
 
@@ -350,8 +353,8 @@ const ZonalReports = () => {
   const addImageToPdf = async (doc: jsPDF, imgData: string, y: number, _maxH?: number): Promise<number> => {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
-    const margin = 12;
-    const bottomMargin = 8;
+    const margin = 10;
+    const bottomMargin = 6;
     const availW = pageW - margin * 2;
     const availH = pageH - y - bottomMargin;
     const img = await new Promise<HTMLImageElement>((resolve) => {
@@ -360,14 +363,14 @@ const ZonalReports = () => {
       i.src = imgData;
     });
     const ratio = img.naturalHeight / (img.naturalWidth || 1);
-    // Shrink to 90% of available width to prevent edge clipping
-    let imgW = availW * 0.92;
+    let imgW = availW;
     let imgH = imgW * ratio;
+    // If too tall, scale down to fit height and center horizontally
     if (imgH > availH) {
       imgH = availH;
       imgW = imgH / ratio;
     }
-    const xOffset = margin + (availW - imgW) / 2; // center horizontally
+    const xOffset = margin + (availW - imgW) / 2;
     doc.addImage(imgData, "PNG", xOffset, y, imgW, imgH);
     return y + imgH + 3;
   };
