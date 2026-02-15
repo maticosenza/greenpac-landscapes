@@ -41,6 +41,7 @@ import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 
 const COLORS = ["hsl(142,76%,36%)", "hsl(142,76%,46%)", "hsl(142,60%,56%)", "hsl(142,55%,62%)", "hsl(142,45%,70%)", "hsl(0,0%,75%)", "hsl(0,0%,60%)"];
@@ -327,90 +328,7 @@ const ZonalReports = () => {
     return y + imgH + 4;
   };
 
-  const handleExportProvincePDF = useCallback(async () => {
-    if (!kpisRef.current || !provinceRowRef.current) { toast.error("No se encontró el contenido"); return; }
-    toast.info("Generando PDF…");
-    try {
-      const [kpiImg, provImg] = await Promise.all([
-        captureNode(kpisRef.current),
-        captureNode(provinceRowRef.current),
-      ]);
-      const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, "Reporte por Provincia");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, provImg, y, 120);
-      doc.save(`Reporte_B_Provincia.pdf`);
-      toast.success("PDF Provincia descargado");
-    } catch (e) {
-      console.error(e);
-      toast.error("Error generando PDF");
-    }
-  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo]);
 
-  const handleExportCityPDF = useCallback(async () => {
-    if (!kpisRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
-    toast.info("Generando PDF…");
-    try {
-      const [kpiImg, cityImg] = await Promise.all([
-        captureNode(kpisRef.current),
-        captureNode(cityRowRef.current),
-      ]);
-      const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, "Reporte por Ciudad");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, cityImg, y, 120);
-      doc.save(`Reporte_A_Ciudad.pdf`);
-      toast.success("PDF Ciudad descargado");
-    } catch (e) {
-      console.error(e);
-      toast.error("Error generando PDF");
-    }
-  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo]);
-
-  const handleExportAllPDF = useCallback(async () => {
-    if (!kpisRef.current || !provinceRowRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
-    toast.info("Generando PDF completo…");
-    try {
-      const [kpiImg, provImg, cityImg] = await Promise.all([
-        captureNode(kpisRef.current),
-        captureNode(provinceRowRef.current),
-        captureNode(cityRowRef.current),
-      ]);
-      const doc = new jsPDF({ orientation: "landscape" });
-      // Page 1: KPIs + Province
-      let y = drawSimpleHeader(doc, "Reportes Zonales Completo");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, provImg, y, 120);
-      // Page 2: KPIs + City
-      doc.addPage();
-      y = drawSimpleHeader(doc, "Reportes Zonales Completo");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, cityImg, y, 120);
-      doc.save(`reportes-zonales-${new Date().toISOString().split("T")[0]}.pdf`);
-      toast.success("PDF completo descargado");
-    } catch (e) {
-      console.error(e);
-      toast.error("Error generando PDF");
-    }
-  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo]);
-
-  const exportCardToPDF = useCallback(async (cardRef: React.RefObject<HTMLDivElement | null>, title: string) => {
-    const node = cardRef.current;
-    if (!node) { toast.error("No se encontró el contenido"); return; }
-    toast.info("Generando PDF…");
-    try {
-      const cardImg = await captureNode(node);
-      const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, title);
-      y = await addImageToPdf(doc, cardImg, y, 150);
-      const filename = `reportes-zonas-${title.toLowerCase().replace(/\s+/g, "-").replace(/[()]/g, "")}.pdf`;
-      doc.save(filename);
-      toast.success("PDF descargado");
-    } catch (e) {
-      console.error(e);
-      toast.error("Error generando PDF");
-    }
-  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo]);
 
   const toggleSort = (field: SortField) => {
     if (provinceSortField === field) {
@@ -476,6 +394,148 @@ const ZonalReports = () => {
     const minH = isMobile ? 260 : 320;
     return Math.max(minH, cityChartData.length * barH + 80);
   }, [cityChartData, isMobile]);
+
+  const addProvinceTable = (doc: jsPDF, data: typeof provinceChartData) => {
+    doc.addPage();
+    const y = drawSimpleHeader(doc, "Detalle por Provincia");
+    doc.setTextColor(30, 80, 30);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Detalle por Provincia", 14, y + 4);
+    autoTable(doc, {
+      startY: y + 8,
+      head: [["Provincia", "Cotizaciones", "Ventas", "Conversión", "Total $"]],
+      body: data.map((s) => [
+        s.province,
+        String(s.total),
+        String(s.sales),
+        `${s.conversion.toFixed(1)}%`,
+        s.totalPrice > 0 ? `$${s.totalPrice.toLocaleString("es-AR")}` : "$0",
+      ]),
+      headStyles: { fillColor: [34, 197, 94], textColor: 255, fontStyle: "bold", fontSize: 9 },
+      styles: { fontSize: 9, cellPadding: 3 },
+      theme: "grid",
+      margin: { left: 14, right: 14 },
+    });
+  };
+
+  const addCityTable = (doc: jsPDF, data: typeof cityChartData) => {
+    doc.addPage();
+    const y = drawSimpleHeader(doc, "Detalle por Ciudad");
+    doc.setTextColor(30, 80, 30);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Detalle por Ciudad", 14, y + 4);
+    autoTable(doc, {
+      startY: y + 8,
+      head: [["Ciudad", "Provincia", "Cotizaciones", "Ventas", "Conversión", "Total $"]],
+      body: data.map((s) => [
+        s.city,
+        s.province || "-",
+        String(s.total),
+        String(s.sales),
+        `${s.conversion.toFixed(1)}%`,
+        s.totalPrice > 0 ? `$${s.totalPrice.toLocaleString("es-AR")}` : "$0",
+      ]),
+      headStyles: { fillColor: [34, 197, 94], textColor: 255, fontStyle: "bold", fontSize: 9 },
+      styles: { fontSize: 9, cellPadding: 3 },
+      theme: "grid",
+      margin: { left: 14, right: 14 },
+    });
+  };
+
+  const handleExportProvincePDF = useCallback(async () => {
+    if (!kpisRef.current || !provinceRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    toast.info("Generando PDF…");
+    try {
+      const [kpiImg, provImg] = await Promise.all([
+        captureNode(kpisRef.current),
+        captureNode(provinceRowRef.current),
+      ]);
+      const doc = new jsPDF({ orientation: "landscape" });
+      let y = drawSimpleHeader(doc, "Reporte por Provincia");
+      y = await addImageToPdf(doc, kpiImg, y, 40);
+      y = await addImageToPdf(doc, provImg, y, 120);
+      addProvinceTable(doc, provinceChartData);
+      doc.save(`Reporte_B_Provincia.pdf`);
+      toast.success("PDF Provincia descargado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error generando PDF");
+    }
+  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, provinceChartData]);
+
+  const handleExportCityPDF = useCallback(async () => {
+    if (!kpisRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    toast.info("Generando PDF…");
+    try {
+      const [kpiImg, cityImg] = await Promise.all([
+        captureNode(kpisRef.current),
+        captureNode(cityRowRef.current),
+      ]);
+      const doc = new jsPDF({ orientation: "landscape" });
+      let y = drawSimpleHeader(doc, "Reporte por Ciudad");
+      y = await addImageToPdf(doc, kpiImg, y, 40);
+      y = await addImageToPdf(doc, cityImg, y, 120);
+      addCityTable(doc, cityChartData);
+      doc.save(`Reporte_A_Ciudad.pdf`);
+      toast.success("PDF Ciudad descargado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error generando PDF");
+    }
+  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, cityChartData]);
+
+  const handleExportAllPDF = useCallback(async () => {
+    if (!kpisRef.current || !provinceRowRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    toast.info("Generando PDF completo…");
+    try {
+      const [kpiImg, provImg, cityImg] = await Promise.all([
+        captureNode(kpisRef.current),
+        captureNode(provinceRowRef.current),
+        captureNode(cityRowRef.current),
+      ]);
+      const doc = new jsPDF({ orientation: "landscape" });
+      let y = drawSimpleHeader(doc, "Reportes Zonales — Provincia");
+      y = await addImageToPdf(doc, kpiImg, y, 40);
+      y = await addImageToPdf(doc, provImg, y, 120);
+      addProvinceTable(doc, provinceChartData);
+      doc.addPage();
+      y = drawSimpleHeader(doc, "Reportes Zonales — Ciudad");
+      y = await addImageToPdf(doc, kpiImg, y, 40);
+      y = await addImageToPdf(doc, cityImg, y, 120);
+      addCityTable(doc, cityChartData);
+      doc.save(`reportes-zonales-${new Date().toISOString().split("T")[0]}.pdf`);
+      toast.success("PDF completo descargado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error generando PDF");
+    }
+  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, provinceChartData, cityChartData]);
+
+  const exportCardToPDF = useCallback(async (cardRef: React.RefObject<HTMLDivElement | null>, title: string, scope: "province" | "city") => {
+    const node = cardRef.current;
+    if (!node) { toast.error("No se encontró el contenido"); return; }
+    toast.info("Generando PDF…");
+    try {
+      const cardImg = await captureNode(node);
+      const doc = new jsPDF({ orientation: "landscape" });
+      let y = drawSimpleHeader(doc, title);
+      y = await addImageToPdf(doc, cardImg, y, 150);
+      if (scope === "province") {
+        addProvinceTable(doc, provinceChartData);
+      } else {
+        addCityTable(doc, cityChartData);
+      }
+      const filename = `reportes-zonas-${title.toLowerCase().replace(/\s+/g, "-").replace(/[()]/g, "")}.pdf`;
+      doc.save(filename);
+      toast.success("PDF descargado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error generando PDF");
+    }
+  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, provinceChartData, cityChartData]);
+
 
   return (
     <TooltipProvider>
@@ -695,7 +755,7 @@ const ZonalReports = () => {
                       Todas
                     </button>
                   </div>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(provinceBarCardRef, "Cotizaciones por Provincia")}>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(provinceBarCardRef, "Cotizaciones por Provincia", "province")}>
                     <FileDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -754,7 +814,7 @@ const ZonalReports = () => {
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" /> Distribución por Provincia
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(provincePieCardRef, "Distribución por Provincia")}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(provincePieCardRef, "Distribución por Provincia", "province")}>
                   <FileDown className="h-4 w-4" />
                 </Button>
               </div>
@@ -823,7 +883,7 @@ const ZonalReports = () => {
                       Todas
                     </button>
                   </div>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(cityBarCardRef, "Cotizaciones por Ciudad")}>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(cityBarCardRef, "Cotizaciones por Ciudad", "city")}>
                     <FileDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -885,7 +945,7 @@ const ZonalReports = () => {
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" /> Distribución por Ciudad
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(cityPieCardRef, "Distribución por Ciudad")}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(cityPieCardRef, "Distribución por Ciudad", "city")}>
                   <FileDown className="h-4 w-4" />
                 </Button>
               </div>
