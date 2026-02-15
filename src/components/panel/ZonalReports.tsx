@@ -489,16 +489,12 @@ const ZonalReports = () => {
   };
 
   const handleExportProvincePDF = useCallback(async () => {
-    if (!kpisRef.current || !provinceRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    if (!provinceRowRef.current) { toast.error("No se encontró el contenido"); return; }
     toast.info("Generando PDF…");
     try {
-      const [kpiImg, provImg] = await Promise.all([
-        capturePng(kpisRef.current),
-        capturePng(provinceRowRef.current),
-      ]);
+      const provImg = await capturePng(provinceRowRef.current);
       const doc = new jsPDF({ orientation: "landscape" });
       let y = await drawPdfHeader(doc, "Reporte por Provincia");
-      y = await addImageToPdf(doc, kpiImg, y);
       y = await addImageToPdf(doc, provImg, y);
       await addProvinceTable(doc, provinceChartData);
       doc.save(`Reporte_B_Provincia.pdf`);
@@ -510,16 +506,12 @@ const ZonalReports = () => {
   }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, provinceChartData]);
 
   const handleExportCityPDF = useCallback(async () => {
-    if (!kpisRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    if (!cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
     toast.info("Generando PDF…");
     try {
-      const [kpiImg, cityImg] = await Promise.all([
-        capturePng(kpisRef.current),
-        capturePng(cityRowRef.current),
-      ]);
+      const cityImg = await capturePng(cityRowRef.current);
       const doc = new jsPDF({ orientation: "landscape" });
       let y = await drawPdfHeader(doc, "Reporte por Ciudad");
-      y = await addImageToPdf(doc, kpiImg, y);
       y = await addImageToPdf(doc, cityImg, y);
       await addCityTable(doc, cityChartData);
       doc.save(`Reporte_A_Ciudad.pdf`);
@@ -531,22 +523,19 @@ const ZonalReports = () => {
   }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, cityChartData]);
 
   const handleExportAllPDF = useCallback(async () => {
-    if (!kpisRef.current || !provinceRowRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    if (!provinceRowRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
     toast.info("Generando PDF completo…");
     try {
-      const [kpiImg, provImg, cityImg] = await Promise.all([
-        capturePng(kpisRef.current),
+      const [provImg, cityImg] = await Promise.all([
         capturePng(provinceRowRef.current),
         capturePng(cityRowRef.current),
       ]);
       const doc = new jsPDF({ orientation: "landscape" });
       let y = await drawPdfHeader(doc, "Reportes Zonales — Provincia");
-      y = await addImageToPdf(doc, kpiImg, y);
       y = await addImageToPdf(doc, provImg, y);
       await addProvinceTable(doc, provinceChartData);
       doc.addPage();
       y = await drawPdfHeader(doc, "Reportes Zonales — Ciudad");
-      y = await addImageToPdf(doc, kpiImg, y);
       y = await addImageToPdf(doc, cityImg, y);
       await addCityTable(doc, cityChartData);
       doc.save(`reportes-zonales-${new Date().toISOString().split("T")[0]}.pdf`);
