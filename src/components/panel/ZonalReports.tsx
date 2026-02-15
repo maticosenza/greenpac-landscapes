@@ -58,6 +58,20 @@ const statusLabels: Record<string, string> = {
 type SortField = "total" | "sales" | "conversion" | "totalPrice";
 type SortDir = "asc" | "desc";
 
+let cachedLogoDataUrl: string | null = null;
+async function getLogoDataUrl(): Promise<string> {
+  if (cachedLogoDataUrl) return cachedLogoDataUrl;
+  const res = await fetch("/brand/greenpac_logo_1200x270_transparent.png");
+  const blob = await res.blob();
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+  cachedLogoDataUrl = dataUrl;
+  return dataUrl;
+}
 
 const ZonalReports = () => {
   const isMobile = useIsMobile();
@@ -265,18 +279,35 @@ const ZonalReports = () => {
     toast.success("CSV resumen descargado");
   };
 
-  const captureNode = async (node: HTMLElement): Promise<string> => {
-    await document.fonts.ready;
-    const prevOverflow = node.style.overflow;
-    const prevMaxHeight = node.style.maxHeight;
+  const capturePng = async (node: HTMLElement): Promise<string> => {
+    await document.fonts?.ready;
+    const prev = {
+      overflow: node.style.overflow,
+      overflowY: node.style.overflowY,
+      maxHeight: node.style.maxHeight,
+      height: node.style.height,
+      width: node.style.width,
+    };
     node.style.overflow = "visible";
+    node.style.overflowY = "visible";
     node.style.maxHeight = "none";
+    node.style.height = node.scrollHeight + "px";
+    node.style.width = node.scrollWidth + "px";
     try {
-      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: "#ffffff", cacheBust: true });
+      const dataUrl = await toPng(node, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        width: node.scrollWidth,
+        height: node.scrollHeight,
+      });
       return dataUrl;
     } finally {
-      node.style.overflow = prevOverflow;
-      node.style.maxHeight = prevMaxHeight;
+      node.style.overflow = prev.overflow;
+      node.style.overflowY = prev.overflowY;
+      node.style.maxHeight = prev.maxHeight;
+      node.style.height = prev.height;
+      node.style.width = prev.width;
     }
   };
 
@@ -289,42 +320,52 @@ const ZonalReports = () => {
     return parts.length > 0 ? parts.join(" | ") : "Sin filtros";
   };
 
-  const drawSimpleHeader = (doc: jsPDF, subtitle: string): number => {
+  const drawPdfHeader = async (doc: jsPDF, title: string): Promise<number> => {
     const pageW = doc.internal.pageSize.getWidth();
     doc.setFillColor(30, 80, 30);
-    doc.rect(0, 0, pageW, 22, "F");
+    doc.rect(0, 0, pageW, 20, "F");
+    try {
+      const logo = await getLogoDataUrl();
+      const logoH = 10;
+      const logoW = logoH * (1200 / 270);
+      doc.addImage(logo, "PNG", 12, 5, logoW, logoH);
+    } catch {
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("GREENPAC", 14, 14);
+    }
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("GREENPAC", 14, 15);
-    doc.setFontSize(9);
+    doc.setFontSize(10);
+    doc.text(title, pageW - 12, 13, { align: "right" });
+    const y = 26;
+    doc.setTextColor(90, 90, 90);
     doc.setFont("helvetica", "normal");
-    doc.text(subtitle, pageW - 14, 15, { align: "right" });
-    // Date + filters below header
-    let y = 28;
-    doc.setTextColor(100, 100, 100);
     doc.setFontSize(8);
     doc.text(`Generado: ${new Date().toLocaleDateString("es-AR")}  |  ${buildFilterSummary()}`, 14, y);
     return y + 6;
   };
 
-  const addImageToPdf = async (doc: jsPDF, imgData: string, y: number, maxH: number): Promise<number> => {
+  const addImageToPdf = async (doc: jsPDF, imgData: string, y: number, _maxH?: number): Promise<number> => {
     const pageW = doc.internal.pageSize.getWidth();
-    const availW = pageW - 20;
-    // Load image to get natural dimensions
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 12;
+    const availW = pageW - margin * 2;
+    const availH = pageH - y - margin;
     const img = await new Promise<HTMLImageElement>((resolve) => {
       const i = new Image();
       i.onload = () => resolve(i);
       i.src = imgData;
     });
-    const aspectRatio = img.naturalHeight / (img.naturalWidth || 1);
+    const ratio = img.naturalHeight / (img.naturalWidth || 1);
     let imgW = availW;
-    let imgH = imgW * aspectRatio;
-    if (imgH > maxH) {
-      imgH = maxH;
-      imgW = imgH / aspectRatio;
+    let imgH = imgW * ratio;
+    if (imgH > availH) {
+      imgH = availH;
+      imgW = imgH / ratio;
     }
-    doc.addImage(imgData, "PNG", 10, y, imgW, imgH);
+    doc.addImage(imgData, "PNG", margin, y, imgW, imgH);
     return y + imgH + 4;
   };
 
@@ -395,9 +436,9 @@ const ZonalReports = () => {
     return Math.max(minH, cityChartData.length * barH + 80);
   }, [cityChartData, isMobile]);
 
-  const addProvinceTable = (doc: jsPDF, data: typeof provinceChartData) => {
+  const addProvinceTable = async (doc: jsPDF, data: typeof provinceChartData) => {
     doc.addPage();
-    const y = drawSimpleHeader(doc, "Detalle por Provincia");
+    const y = await drawPdfHeader(doc, "Detalle por Provincia");
     doc.setTextColor(30, 80, 30);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -419,9 +460,9 @@ const ZonalReports = () => {
     });
   };
 
-  const addCityTable = (doc: jsPDF, data: typeof cityChartData) => {
+  const addCityTable = async (doc: jsPDF, data: typeof cityChartData) => {
     doc.addPage();
-    const y = drawSimpleHeader(doc, "Detalle por Ciudad");
+    const y = await drawPdfHeader(doc, "Detalle por Ciudad");
     doc.setTextColor(30, 80, 30);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -449,14 +490,14 @@ const ZonalReports = () => {
     toast.info("Generando PDF…");
     try {
       const [kpiImg, provImg] = await Promise.all([
-        captureNode(kpisRef.current),
-        captureNode(provinceRowRef.current),
+        capturePng(kpisRef.current),
+        capturePng(provinceRowRef.current),
       ]);
       const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, "Reporte por Provincia");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, provImg, y, 120);
-      addProvinceTable(doc, provinceChartData);
+      let y = await drawPdfHeader(doc, "Reporte por Provincia");
+      y = await addImageToPdf(doc, kpiImg, y);
+      y = await addImageToPdf(doc, provImg, y);
+      await addProvinceTable(doc, provinceChartData);
       doc.save(`Reporte_B_Provincia.pdf`);
       toast.success("PDF Provincia descargado");
     } catch (e) {
@@ -470,14 +511,14 @@ const ZonalReports = () => {
     toast.info("Generando PDF…");
     try {
       const [kpiImg, cityImg] = await Promise.all([
-        captureNode(kpisRef.current),
-        captureNode(cityRowRef.current),
+        capturePng(kpisRef.current),
+        capturePng(cityRowRef.current),
       ]);
       const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, "Reporte por Ciudad");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, cityImg, y, 120);
-      addCityTable(doc, cityChartData);
+      let y = await drawPdfHeader(doc, "Reporte por Ciudad");
+      y = await addImageToPdf(doc, kpiImg, y);
+      y = await addImageToPdf(doc, cityImg, y);
+      await addCityTable(doc, cityChartData);
       doc.save(`Reporte_A_Ciudad.pdf`);
       toast.success("PDF Ciudad descargado");
     } catch (e) {
@@ -491,20 +532,20 @@ const ZonalReports = () => {
     toast.info("Generando PDF completo…");
     try {
       const [kpiImg, provImg, cityImg] = await Promise.all([
-        captureNode(kpisRef.current),
-        captureNode(provinceRowRef.current),
-        captureNode(cityRowRef.current),
+        capturePng(kpisRef.current),
+        capturePng(provinceRowRef.current),
+        capturePng(cityRowRef.current),
       ]);
       const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, "Reportes Zonales — Provincia");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, provImg, y, 120);
-      addProvinceTable(doc, provinceChartData);
+      let y = await drawPdfHeader(doc, "Reportes Zonales — Provincia");
+      y = await addImageToPdf(doc, kpiImg, y);
+      y = await addImageToPdf(doc, provImg, y);
+      await addProvinceTable(doc, provinceChartData);
       doc.addPage();
-      y = drawSimpleHeader(doc, "Reportes Zonales — Ciudad");
-      y = await addImageToPdf(doc, kpiImg, y, 40);
-      y = await addImageToPdf(doc, cityImg, y, 120);
-      addCityTable(doc, cityChartData);
+      y = await drawPdfHeader(doc, "Reportes Zonales — Ciudad");
+      y = await addImageToPdf(doc, kpiImg, y);
+      y = await addImageToPdf(doc, cityImg, y);
+      await addCityTable(doc, cityChartData);
       doc.save(`reportes-zonales-${new Date().toISOString().split("T")[0]}.pdf`);
       toast.success("PDF completo descargado");
     } catch (e) {
@@ -518,14 +559,14 @@ const ZonalReports = () => {
     if (!node) { toast.error("No se encontró el contenido"); return; }
     toast.info("Generando PDF…");
     try {
-      const cardImg = await captureNode(node);
+      const cardImg = await capturePng(node);
       const doc = new jsPDF({ orientation: "landscape" });
-      let y = drawSimpleHeader(doc, title);
-      y = await addImageToPdf(doc, cardImg, y, 150);
+      let y = await drawPdfHeader(doc, title);
+      y = await addImageToPdf(doc, cardImg, y);
       if (scope === "province") {
-        addProvinceTable(doc, provinceChartData);
+        await addProvinceTable(doc, provinceChartData);
       } else {
-        addCityTable(doc, cityChartData);
+        await addCityTable(doc, cityChartData);
       }
       const filename = `reportes-zonas-${title.toLowerCase().replace(/\s+/g, "-").replace(/[()]/g, "")}.pdf`;
       doc.save(filename);
@@ -631,7 +672,7 @@ const ZonalReports = () => {
         )}
 
         {/* KPI cards */}
-        <div ref={kpisRef} className="space-y-3 sm:space-y-4">
+        <div ref={kpisRef} className="space-y-3 sm:space-y-4 bg-white p-3 rounded-lg">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
             <CardContent className="pt-4 sm:pt-6 pb-4">
@@ -732,8 +773,8 @@ const ZonalReports = () => {
         </div>
 
         {/* Charts Row 1: Province bar + pie */}
-        <div ref={provinceRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6">
-          <div ref={provinceBarCardRef}>
+        <div ref={provinceRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6 bg-white p-3 rounded-lg">
+          <div ref={provinceBarCardRef} className="bg-white p-1 rounded-lg">
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -807,7 +848,7 @@ const ZonalReports = () => {
            </Card>
           </div>
 
-          <div ref={provincePieCardRef}>
+          <div ref={provincePieCardRef} className="bg-white p-1 rounded-lg">
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between">
@@ -860,8 +901,8 @@ const ZonalReports = () => {
         </div>
 
         {/* Charts Row 2: City bar + pie (ALL Argentina) */}
-        <div ref={cityRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6">
-          <div ref={cityBarCardRef}>
+        <div ref={cityRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6 bg-white p-3 rounded-lg">
+          <div ref={cityBarCardRef} className="bg-white p-1 rounded-lg">
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -938,7 +979,7 @@ const ZonalReports = () => {
           </Card>
           </div>
 
-          <div ref={cityPieCardRef}>
+          <div ref={cityPieCardRef} className="bg-white p-1 rounded-lg">
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between">
