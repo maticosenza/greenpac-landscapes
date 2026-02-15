@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { loadPdfLogo, drawPdfHeader } from "./pdfLogo";
 
 interface QuotationData {
   id: string;
@@ -39,32 +40,20 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
-export function generateQuotationPDF(quotation: QuotationData, products: ProductData[]) {
+export async function generateQuotationPDF(quotation: QuotationData, products: ProductData[]) {
+  const logoBase64 = await loadPdfLogo();
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Header background
-  doc.setFillColor(30, 80, 30);
-  doc.rect(0, 0, pageWidth, 40, "F");
-
-  // Logo text
-  doc.setTextColor(34, 197, 94);
-  doc.setFontSize(28);
-  doc.setFont("helvetica", "bold");
-  doc.text("GREENPAC", 20, 27);
-
-  // Subtitle
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Soluciones para el campo", 20, 35);
+  // Header with logo
+  const startY = drawPdfHeader(doc, logoBase64, "Soluciones para el campo");
 
   // Quotation title
   doc.setTextColor(30, 80, 30);
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   const typeLabel = typeLabels[quotation.quotation_type || "quote"] || "Cotización";
-  doc.text(typeLabel, 20, 55);
+  doc.text(typeLabel, 20, startY + 10);
 
   // Date and ID
   doc.setFontSize(9);
@@ -75,12 +64,12 @@ export function generateQuotationPDF(quotation: QuotationData, products: Product
     month: "long",
     day: "numeric",
   });
-  doc.text(`Fecha: ${dateStr}`, pageWidth - 20, 50, { align: "right" });
-  doc.text(`Estado: ${statusLabels[quotation.status || "pending"] || "Pendiente"}`, pageWidth - 20, 56, { align: "right" });
-  doc.text(`ID: ${quotation.id.slice(0, 8).toUpperCase()}`, pageWidth - 20, 62, { align: "right" });
+  doc.text(`Fecha: ${dateStr}`, pageWidth - 20, startY + 5, { align: "right" });
+  doc.text(`Estado: ${statusLabels[quotation.status || "pending"] || "Pendiente"}`, pageWidth - 20, startY + 11, { align: "right" });
+  doc.text(`ID: ${quotation.id.slice(0, 8).toUpperCase()}`, pageWidth - 20, startY + 17, { align: "right" });
 
   // Client info section
-  let y = 70;
+  let y = startY + 25;
   doc.setDrawColor(34, 197, 94);
   doc.setLineWidth(0.5);
   doc.line(20, y, pageWidth - 20, y);

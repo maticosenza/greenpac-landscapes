@@ -455,9 +455,9 @@ const QuotationDetailDialog = ({
     }
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!quotation) return;
-    generateQuotationPDF(quotation, products || []);
+    await generateQuotationPDF(quotation, products || []);
   };
 
   if (!quotation) return null;
