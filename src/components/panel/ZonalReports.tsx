@@ -592,8 +592,13 @@ const ZonalReports = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="px-1 sm:px-3 pt-4">
-              {provinceChartData.length > 0 ? (
+            <CardContent className="px-2 sm:px-3 pt-4">
+              {provinceChartData.length > 0 ? (() => {
+                const rawMax = Math.max(...provinceChartData.map(d => d.total), 1);
+                const xMax = Math.ceil(rawMax / 2) * 2;
+                const xTicks: number[] = [];
+                for (let i = 0; i <= xMax; i += 2) xTicks.push(i);
+                return (
                 <div
                   ref={provinceBarRef}
                   className="w-full"
@@ -603,15 +608,15 @@ const ZonalReports = () => {
                     <BarChart
                       data={provinceChartData}
                       layout="vertical"
-                      margin={{ top: 10, right: 15, bottom: 30, left: 5 }}
+                      margin={{ top: 10, right: 20, bottom: 30, left: 0 }}
                       barCategoryGap="25%"
                     >
-                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, "dataMax"]} />
+                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, xMax]} ticks={xTicks} />
                       <YAxis
                         type="category"
                         dataKey="province"
                         tick={{ fontSize: isMobile ? 10 : 12 }}
-                        width={isMobile ? 90 : 120}
+                        width={isMobile ? 100 : 130}
                         interval={0}
                         tickLine={{ stroke: "hsl(var(--border))" }}
                         axisLine={{ stroke: "hsl(var(--border))" }}
@@ -624,7 +629,8 @@ const ZonalReports = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-              ) : (
+                );
+              }) () : (
                 <p className="text-sm text-muted-foreground text-center py-8">Sin datos con provincia</p>
               )}
             </CardContent>
@@ -710,8 +716,13 @@ const ZonalReports = () => {
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">Agregá provincia y ciudad para ver métricas más precisas.</p>
             </CardHeader>
-            <CardContent className="px-1 sm:px-3 pt-4">
-              {cityChartData.length > 0 ? (
+            <CardContent className="px-2 sm:px-3 pt-4">
+              {cityChartData.length > 0 ? (() => {
+                const rawMax = Math.max(...cityChartData.map(d => d.total), 1);
+                const xMax = Math.ceil(rawMax / 2) * 2;
+                const xTicks: number[] = [];
+                for (let i = 0; i <= xMax; i += 2) xTicks.push(i);
+                return (
                 <div
                   ref={cityBarRef}
                   className="w-full"
@@ -721,15 +732,15 @@ const ZonalReports = () => {
                     <BarChart
                       data={cityChartData}
                       layout="vertical"
-                      margin={{ top: 10, right: 15, bottom: 30, left: 5 }}
+                      margin={{ top: 10, right: 20, bottom: 30, left: 0 }}
                       barCategoryGap="25%"
                     >
-                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, "dataMax"]} />
+                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, xMax]} ticks={xTicks} />
                       <YAxis
                         type="category"
                         dataKey="city"
                         tick={{ fontSize: isMobile ? 10 : 12 }}
-                        width={isMobile ? 90 : 120}
+                        width={isMobile ? 100 : 130}
                         interval={0}
                         tickLine={{ stroke: "hsl(var(--border))" }}
                         axisLine={{ stroke: "hsl(var(--border))" }}
@@ -742,7 +753,8 @@ const ZonalReports = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-              ) : (
+                );
+              }) () : (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Sin datos de ciudades. Agregá provincia y ciudad a las cotizaciones.
                 </p>
