@@ -349,17 +349,37 @@ const ZonalReports = () => {
   const chartHeight = isMobile ? 240 : 340;
   const pieChartHeight = isMobile ? 280 : 340;
 
-  // Province chart data limited for display
+  const [provinceViewAll, setProvinceViewAll] = useState(false);
+
+  // Province chart data: Top 10 + "Otras" or all
   const provinceChartData = useMemo(() => {
-    const limit = isMobile ? 8 : 12;
-    const top = provinceStats.slice(0, limit);
-    const rest = provinceStats.slice(limit);
-    if (rest.length > 0) {
-      const otrasTotal = rest.reduce((s, p) => s + p.total, 0);
-      top.push({ province: "Otras", total: otrasTotal, sales: 0, totalPrice: 0, conversion: 0 });
+    // Sort descending by total
+    const sorted = [...provinceStats].sort((a, b) => b.total - a.total);
+    // "Sin provincia" always first if exists
+    const sinProv = sorted.find((p) => p.province === "Sin provincia");
+    const rest = sorted.filter((p) => p.province !== "Sin provincia");
+
+    if (provinceViewAll) {
+      return sinProv ? [sinProv, ...rest] : rest;
     }
-    return top;
-  }, [provinceStats, isMobile]);
+
+    const top = rest.slice(0, 10);
+    const remaining = rest.slice(10);
+    const result: typeof top = [];
+    if (sinProv) result.push(sinProv);
+    result.push(...top);
+    if (remaining.length > 0) {
+      const otrasTotal = remaining.reduce((s, p) => s + p.total, 0);
+      result.push({ province: "Otras", total: otrasTotal, sales: 0, totalPrice: 0, conversion: 0 });
+    }
+    return result;
+  }, [provinceStats, provinceViewAll]);
+
+  const provinceBarHeight = useMemo(() => {
+    const barH = isMobile ? 28 : 32;
+    const minH = isMobile ? 240 : 300;
+    return Math.max(minH, provinceChartData.length * barH + 60);
+  }, [provinceChartData, isMobile]);
 
   return (
     <TooltipProvider>
@@ -529,34 +549,58 @@ const ZonalReports = () => {
         <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-primary" /> Cotizaciones por Provincia
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(provinceBarRef, "Cotizaciones por Provincia")}>
-                  <FileDown className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <div className="flex rounded-md border border-border overflow-hidden text-xs">
+                    <button
+                      onClick={() => setProvinceViewAll(false)}
+                      className={`px-2.5 py-1 transition-colors ${!provinceViewAll ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}
+                    >
+                      Top 10
+                    </button>
+                    <button
+                      onClick={() => setProvinceViewAll(true)}
+                      className={`px-2.5 py-1 transition-colors ${provinceViewAll ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}
+                    >
+                      Todas
+                    </button>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(provinceBarRef, "Cotizaciones por Provincia")}>
+                    <FileDown className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="px-1 sm:px-4">
+            <CardContent className="px-2 sm:px-4 pt-2">
               {provinceChartData.length > 0 ? (
-                <div ref={provinceBarRef} className="w-full overflow-hidden flex justify-center">
-                  <ResponsiveContainer width={provinceChartData.length <= 3 ? (isMobile ? "85%" : "60%") : "100%"} height={chartHeight}>
-                    <BarChart data={provinceChartData} margin={{ left: 4, right: 16, top: 5, bottom: isMobile ? 60 : 40 }} barCategoryGap="30%" barGap={4}>
-                      <XAxis
+                <div
+                  ref={provinceBarRef}
+                  className="w-full"
+                  style={{ overflowY: provinceViewAll && provinceChartData.length > 12 ? "auto" : "hidden", maxHeight: provinceViewAll && provinceChartData.length > 12 ? (isMobile ? 400 : 500) : undefined }}
+                >
+                  <ResponsiveContainer width="100%" height={provinceBarHeight}>
+                    <BarChart
+                      data={provinceChartData}
+                      layout="vertical"
+                      margin={{ top: 10, right: 20, bottom: 10, left: isMobile ? 70 : 90 }}
+                      barCategoryGap="25%"
+                    >
+                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} />
+                      <YAxis
+                        type="category"
                         dataKey="province"
-                        tick={{ fontSize: isMobile ? 9 : 11 }}
-                        angle={isMobile ? -45 : -25}
-                        textAnchor="end"
+                        tick={{ fontSize: isMobile ? 10 : 12 }}
+                        width={isMobile ? 65 : 85}
                         interval={0}
-                        height={isMobile ? 70 : 50}
                       />
-                      <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={30} />
                       <RechartsTooltip
                         formatter={(val: number) => [val, "Cotizaciones"]}
                         contentStyle={{ fontSize: 12, borderRadius: 8 }}
                       />
-                      <Bar dataKey="total" fill="hsl(142,76%,36%)" radius={[4, 4, 0, 0]} maxBarSize={isMobile ? 28 : 40} />
+                      <Bar dataKey="total" fill="hsl(142,76%,36%)" radius={[0, 4, 4, 0]} maxBarSize={isMobile ? 22 : 28} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
