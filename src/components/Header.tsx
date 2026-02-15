@@ -45,9 +45,9 @@ const Header = () => {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          showDarkBg
-            ? "bg-[rgba(0,0,0,0.65)] backdrop-blur-md shadow-lg py-2 lg:py-1.5"
-            : "bg-white/[0.55] backdrop-blur-[10px] border-b border-white/[0.35] py-5 lg:py-1.5"
+        showDarkBg
+            ? "bg-[rgba(0,0,0,0.65)] backdrop-blur-[10px] shadow-lg py-2 lg:py-1.5"
+            : "bg-transparent py-5 lg:py-1.5"
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
@@ -60,7 +60,7 @@ const Header = () => {
                 type: "image",
                 fallback: defaultLogo,
                 assetKey: "nav-logo",
-                hint: "Recomendado: 320×72 px (PNG/SVG transparente). Se muestra aprox.: Desktop 40px alto, Tablet 28px, Mobile 24px.",
+                hint: "Recomendado: 320×72 px (PNG/SVG transparente). Se muestra aprox.: Desktop 40px, Tablet 32px, Mobile 30px.",
               },
             ]}
           >
@@ -68,7 +68,7 @@ const Header = () => {
               <img
                 src={navLogo.url}
                 alt={navLogo.alt}
-                className={`${hasCustomLogo ? "h-6 md:h-7 lg:h-10 max-h-10" : "h-11 lg:h-10"} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
+                className={`${hasCustomLogo ? "h-[30px] md:h-8 lg:h-10 max-h-10" : "h-11 lg:h-10"} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
               />
               {!hasCustomLogo && (
                 <img
@@ -85,7 +85,7 @@ const Header = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className={`${showDarkBg ? "text-white/90" : "text-gray-900/80"} hover:text-primary font-medium transition-colors duration-300 relative group`}
+                className="text-white/90 hover:text-primary font-medium transition-colors duration-300 relative group"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
@@ -99,7 +99,7 @@ const Header = () => {
                 variant={isEditMode ? "destructive" : "outline"}
                 size="sm"
                 onClick={toggleEditMode}
-                className={!isEditMode ? (showDarkBg ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111] border-white/50" : "bg-black/10 text-gray-900 hover:bg-white hover:text-[#111] border-gray-900/30") : ""}
+                className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111] border-white/50" : ""}
               >
                 {isEditMode ? (
                   <>
@@ -125,7 +125,7 @@ const Header = () => {
           </div>
 
           <button
-            className={`lg:hidden ${showDarkBg ? "text-white" : "text-gray-900"} p-2 relative z-[70]`}
+            className="lg:hidden text-white p-2 relative z-[70]"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -149,7 +149,7 @@ const Header = () => {
       >
         <div className="greenpac-container flex items-center justify-between py-4">
           <a href="/#inicio" className="flex items-center gap-1">
-            <img src={navLogo.url} alt={navLogo.alt} className={`${hasCustomLogo ? "h-6 max-h-6" : "h-11"} w-auto object-contain`} />
+            <img src={navLogo.url} alt={navLogo.alt} className={`${hasCustomLogo ? "h-[30px] max-h-[30px]" : "h-11"} w-auto object-contain`} />
             {!hasCustomLogo && (
               <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
             )}
