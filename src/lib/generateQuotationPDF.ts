@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { loadPdfLogo, drawPdfHeader } from "./pdfLogo";
 
 interface QuotationData {
   id: string;
@@ -40,13 +39,38 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
+async function fetchAsDataURL(url: string): Promise<string> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function generateQuotationPDF(quotation: QuotationData, products: ProductData[]) {
-  const logoBase64 = await loadPdfLogo();
+  const logoDataUrl = await fetchAsDataURL("/brand/greenpac_logo_horizontal.png");
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Header with logo
-  const startY = drawPdfHeader(doc, logoBase64, "Soluciones para el campo");
+  // Header bar
+  doc.setFillColor(30, 80, 30);
+  doc.rect(0, 0, pageWidth, 30, "F");
+
+  // Logo image (ratio 320/72 ≈ 4.44)
+  const logoH = 14;
+  const logoW = logoH * (320 / 72);
+  doc.addImage(logoDataUrl, "PNG", 14, 8, logoW, logoH);
+
+  // Subtitle
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text("Soluciones para el campo", pageWidth - 14, 19, { align: "right" });
+
+  const startY = 38;
 
   // Quotation title
   doc.setTextColor(30, 80, 30);
@@ -161,10 +185,9 @@ export async function generateQuotationPDF(quotation: QuotationData, products: P
   doc.setDrawColor(34, 197, 94);
   doc.setLineWidth(0.5);
   doc.line(20, footerY - 5, pageWidth - 20, footerY - 5);
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(100, 100, 100);
-  doc.text("Greenpac — Soluciones para el campo", pageWidth / 2, footerY, { align: "center" });
-  doc.text("Este documento es una cotización estimativa y no constituye un compromiso de venta.", pageWidth / 2, footerY + 5, { align: "center" });
+  doc.text("Para confirmar la cotización, responda a este documento.", pageWidth / 2, footerY + 2, { align: "center" });
 
   doc.save(`cotizacion-${quotation.id.slice(0, 8)}.pdf`);
 }
