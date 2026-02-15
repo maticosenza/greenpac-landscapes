@@ -75,6 +75,10 @@ const ZonalReports = () => {
   const kpisRef = useRef<HTMLDivElement>(null);
   const provinceRowRef = useRef<HTMLDivElement>(null);
   const cityRowRef = useRef<HTMLDivElement>(null);
+  const provinceBarCardRef = useRef<HTMLDivElement>(null);
+  const provincePieCardRef = useRef<HTMLDivElement>(null);
+  const cityBarCardRef = useRef<HTMLDivElement>(null);
+  const cityPieCardRef = useRef<HTMLDivElement>(null);
 
   const hasActiveFilters = filterProvince !== "all" || filterStatus !== "all" || filterDateFrom || filterDateTo;
 
@@ -390,6 +394,24 @@ const ZonalReports = () => {
     }
   }, [filterProvince, filterStatus, filterDateFrom, filterDateTo]);
 
+  const exportCardToPDF = useCallback(async (cardRef: React.RefObject<HTMLDivElement | null>, title: string) => {
+    const node = cardRef.current;
+    if (!node) { toast.error("No se encontró el contenido"); return; }
+    toast.info("Generando PDF…");
+    try {
+      const cardImg = await captureNode(node);
+      const doc = new jsPDF({ orientation: "landscape" });
+      let y = drawSimpleHeader(doc, title);
+      y = await addImageToPdf(doc, cardImg, y, 150);
+      const filename = `reportes-zonas-${title.toLowerCase().replace(/\s+/g, "-").replace(/[()]/g, "")}.pdf`;
+      doc.save(filename);
+      toast.success("PDF descargado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error generando PDF");
+    }
+  }, [filterProvince, filterStatus, filterDateFrom, filterDateTo]);
+
   const toggleSort = (field: SortField) => {
     if (provinceSortField === field) {
       setProvinceSortDir((d) => (d === "desc" ? "asc" : "desc"));
@@ -651,6 +673,7 @@ const ZonalReports = () => {
 
         {/* Charts Row 1: Province bar + pie */}
         <div ref={provinceRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+          <div ref={provinceBarCardRef}>
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -672,7 +695,7 @@ const ZonalReports = () => {
                       Todas
                     </button>
                   </div>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleExportProvincePDF}>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(provinceBarCardRef, "Cotizaciones por Provincia")}>
                     <FileDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -721,15 +744,17 @@ const ZonalReports = () => {
                 <p className="text-sm text-muted-foreground text-center py-8">Sin datos con provincia</p>
               )}
             </CardContent>
-          </Card>
+           </Card>
+          </div>
 
+          <div ref={provincePieCardRef}>
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" /> Distribución por Provincia
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleExportProvincePDF}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(provincePieCardRef, "Distribución por Provincia")}>
                   <FileDown className="h-4 w-4" />
                 </Button>
               </div>
@@ -771,10 +796,12 @@ const ZonalReports = () => {
               )}
             </CardContent>
           </Card>
+          </div>
         </div>
 
         {/* Charts Row 2: City bar + pie (ALL Argentina) */}
         <div ref={cityRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+          <div ref={cityBarCardRef}>
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -796,7 +823,7 @@ const ZonalReports = () => {
                       Todas
                     </button>
                   </div>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleExportCityPDF}>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(cityBarCardRef, "Cotizaciones por Ciudad")}>
                     <FileDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -849,14 +876,16 @@ const ZonalReports = () => {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div ref={cityPieCardRef}>
           <Card>
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" /> Distribución por Ciudad
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleExportCityPDF}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportCardToPDF(cityPieCardRef, "Distribución por Ciudad")}>
                   <FileDown className="h-4 w-4" />
                 </Button>
               </div>
@@ -898,6 +927,7 @@ const ZonalReports = () => {
               )}
             </CardContent>
           </Card>
+          </div>
         </div>
 
         {/* Province table */}
