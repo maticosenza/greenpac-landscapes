@@ -541,7 +541,7 @@ const ZonalReports = () => {
             <CardContent className="px-1 sm:px-4">
               {provinceChartData.length > 0 ? (
                 <div ref={provinceBarRef} className="w-full overflow-hidden flex justify-center">
-                  <ResponsiveContainer width="100%" height={chartHeight}>
+                  <ResponsiveContainer width={provinceChartData.length <= 3 ? (isMobile ? "85%" : "60%") : "100%"} height={chartHeight}>
                     <BarChart data={provinceChartData} margin={{ left: 4, right: 16, top: 5, bottom: isMobile ? 60 : 40 }} barCategoryGap="30%" barGap={4}>
                       <XAxis
                         dataKey="province"
@@ -633,7 +633,7 @@ const ZonalReports = () => {
             <CardContent className="px-1 sm:px-4">
               {cityChartData.length > 0 ? (
                 <div ref={cityBarRef} className="w-full overflow-hidden flex justify-center">
-                  <ResponsiveContainer width="100%" height={chartHeight}>
+                  <ResponsiveContainer width={cityChartData.length <= 3 ? (isMobile ? "85%" : "60%") : "100%"} height={chartHeight}>
                     <BarChart data={cityChartData} margin={{ left: 4, right: 16, top: 5, bottom: isMobile ? 60 : 40 }} barCategoryGap="30%" barGap={4}>
                       <XAxis
                         dataKey="city"
