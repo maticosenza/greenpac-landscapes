@@ -20,6 +20,7 @@ interface EditableField {
   type: "text" | "textarea" | "link" | "image";
   fallback: string;
   assetKey?: string; // for image type
+  hint?: string; // helper text shown below image fields
 }
 
 interface EditableSectionProps {
@@ -140,6 +141,9 @@ const EditableSection = ({ sectionId, fields, children }: EditableSectionProps) 
                         }}
                       />
                     </div>
+                    {field.hint && (
+                      <p className="text-xs text-muted-foreground mt-1">{field.hint}</p>
+                    )}
                   </div>
                 ) : field.type === "textarea" ? (
                   <Textarea

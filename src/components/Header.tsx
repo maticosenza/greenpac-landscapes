@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEditMode } from "@/hooks/useEditMode";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import EditableSection from "@/components/EditableSection";
-import logo from "@/assets/greenpac-logo-new.png";
+import defaultLogo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
 const Header = () => {
@@ -19,6 +19,9 @@ const Header = () => {
   const { getAsset } = useSiteContent();
 
   const isHomePage = location.pathname === "/";
+
+  // Single source of truth for nav logo
+  const navLogo = getAsset("nav-logo", defaultLogo, "Greenpac Logo");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,13 +53,20 @@ const Header = () => {
           <EditableSection
             sectionId="Nav Logo"
             fields={[
-              { key: "nav-logo", label: "Logo (isotipo)", type: "image", fallback: logo, assetKey: "nav-logo" },
+              {
+                key: "nav-logo",
+                label: "Logo (isotipo)",
+                type: "image",
+                fallback: defaultLogo,
+                assetKey: "nav-logo",
+                hint: "Recomendado: 320×80 px (PNG/SVG, fondo transparente). Se muestra aprox. 160×40 px.",
+              },
             ]}
           >
             <a href="/#inicio" className="flex items-center gap-1 group">
               <img
-                src={getAsset("nav-logo", logo, "Greenpac Logo").url}
-                alt={getAsset("nav-logo", logo, "Greenpac Logo").alt}
+                src={navLogo.url}
+                alt={navLogo.alt}
                 className="h-11 lg:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
               />
               <img
@@ -136,7 +146,7 @@ const Header = () => {
       >
         <div className="greenpac-container flex items-center justify-between py-4">
           <a href="/#inicio" className="flex items-center gap-1">
-            <img src={logo} alt="Greenpac Logo" className="h-11 w-auto" />
+            <img src={navLogo.url} alt={navLogo.alt} className="h-11 w-auto" />
             <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
           </a>
           <button

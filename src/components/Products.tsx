@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import EditableSection from "@/components/EditableSection";
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product3 from "@/assets/product-3.jpg";
@@ -16,7 +18,6 @@ interface Product {
   category: string | null;
 }
 
-// Fallback images for products without custom images
 const fallbackImages: Record<string, string> = {
   embolsadoras: product1,
   extractores: product2,
@@ -27,6 +28,12 @@ const fallbackImages: Record<string, string> = {
 };
 
 const Products = () => {
+  const { getText } = useSiteContent();
+
+  const kicker = getText("products-kicker", "Catálogo");
+  const title = getText("products-title", "Nuestros Productos");
+  const subtitle = getText("products-subtitle", "Maquinaria de primera línea para la conservación y manejo de forrajes. Importamos las mejores marcas del mercado internacional.");
+
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -51,18 +58,26 @@ const Products = () => {
   return (
     <section id="productos" className="greenpac-section bg-muted">
       <div className="greenpac-container">
-        <div className="text-center mb-16">
-          <p className="text-primary font-display font-semibold mb-3 tracking-widest uppercase">
-            Catálogo
-          </p>
-          <h2 className="greenpac-title text-foreground mb-4">
-            Nuestros Productos
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Maquinaria de primera línea para la conservación y manejo de forrajes.
-            Importamos las mejores marcas del mercado internacional.
-          </p>
-        </div>
+        <EditableSection
+          sectionId="Productos Encabezado"
+          fields={[
+            { key: "products-kicker", label: "Kicker", type: "text", fallback: "Catálogo" },
+            { key: "products-title", label: "Título", type: "text", fallback: "Nuestros Productos" },
+            { key: "products-subtitle", label: "Subtítulo", type: "textarea", fallback: subtitle },
+          ]}
+        >
+          <div className="text-center mb-16">
+            <p className="text-primary font-display font-semibold mb-3 tracking-widest uppercase">
+              {kicker}
+            </p>
+            <h2 className="greenpac-title text-foreground mb-4">
+              {title}
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              {subtitle}
+            </p>
+          </div>
+        </EditableSection>
 
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
