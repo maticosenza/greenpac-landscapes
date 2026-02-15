@@ -6,8 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEditMode } from "@/hooks/useEditMode";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import EditableSection from "@/components/EditableSection";
-import defaultLogo from "@/assets/greenpac-logo-new.png";
-import textLogo from "@/assets/greenpac-text.png";
+import defaultIcon from "@/assets/greenpac-logo-new.png";
+import defaultTextLogo from "@/assets/greenpac-text.png";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,14 +20,11 @@ const Header = () => {
 
   const isHomePage = location.pathname === "/";
 
-  // Single source of truth for nav logo
-  const navLogo = getAsset("nav-logo", defaultLogo, "Greenpac Logo");
-  const hasCustomLogo = navLogo.url !== defaultLogo;
+  const navIcon = getAsset("nav-icon", defaultIcon, "Greenpac Isotipo");
+  const navText = getAsset("nav-text-logo", defaultTextLogo, "Greenpac");
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -41,11 +38,18 @@ const Header = () => {
 
   const showDarkBg = !isHomePage || isScrolled;
 
+  const LogoBlock = ({ iconClass, textClass }: { iconClass: string; textClass: string }) => (
+    <a href="/#inicio" className="flex items-center gap-1 group">
+      <img src={navIcon.url} alt={navIcon.alt} className={`${iconClass} w-auto object-contain transition-transform duration-300 group-hover:scale-105`} />
+      <img src={navText.url} alt={navText.alt} className={`${textClass} w-auto`} />
+    </a>
+  );
+
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        showDarkBg
+          showDarkBg
             ? "bg-[rgba(0,0,0,0.65)] backdrop-blur-[10px] shadow-lg py-2 lg:py-1.5"
             : "bg-transparent py-5 lg:py-1.5"
         }`}
@@ -55,29 +59,24 @@ const Header = () => {
             sectionId="Nav Logo"
             fields={[
               {
-                key: "nav-logo",
-                label: "Logo (isotipo)",
+                key: "nav-icon",
+                label: "Isotipo (icono verde)",
                 type: "image",
-                fallback: defaultLogo,
-                assetKey: "nav-logo",
-                hint: "Recomendado: 320×72 px (PNG/SVG transparente). Se muestra aprox.: Desktop 40px, Tablet 32px, Mobile 30px.",
+                fallback: defaultIcon,
+                assetKey: "nav-icon",
+                hint: "Recomendado: 120×120 px (PNG/SVG transparente). Solo el icono verde.",
+              },
+              {
+                key: "nav-text-logo",
+                label: "Logotipo (texto GREENPAC)",
+                type: "image",
+                fallback: defaultTextLogo,
+                assetKey: "nav-text-logo",
+                hint: "Recomendado: 300×72 px (PNG/SVG transparente). Solo el texto.",
               },
             ]}
           >
-            <a href="/#inicio" className="flex items-center gap-1 group">
-              <img
-                src={navLogo.url}
-                alt={navLogo.alt}
-                className={`${hasCustomLogo ? "h-[30px] md:h-8 lg:h-10 max-h-10" : "h-11 lg:h-10"} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
-              />
-              {!hasCustomLogo && (
-                <img
-                  src={textLogo}
-                  alt="Green Pac"
-                  className="h-24 lg:h-20 w-auto -ml-1"
-                />
-              )}
-            </a>
+            <LogoBlock iconClass="h-11 lg:h-10" textClass="h-24 lg:h-20 -ml-1" />
           </EditableSection>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -102,23 +101,13 @@ const Header = () => {
                 className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111] border-white/50" : ""}
               >
                 {isEditMode ? (
-                  <>
-                    <PencilOff className="h-4 w-4 mr-1.5" />
-                    Salir edición
-                  </>
+                  <><PencilOff className="h-4 w-4 mr-1.5" />Salir edición</>
                 ) : (
-                  <>
-                    <Pencil className="h-4 w-4 mr-1.5" />
-                    Modo edición
-                  </>
+                  <><Pencil className="h-4 w-4 mr-1.5" />Modo edición</>
                 )}
               </Button>
             )}
-            <Button
-              variant="hero"
-              size="sm"
-              onClick={() => navigate(user ? "/panel" : "/auth")}
-            >
+            <Button variant="hero" size="sm" onClick={() => navigate(user ? "/panel" : "/auth")}>
               <User className="h-4 w-4 mr-2" />
               {user ? "Mi Panel" : "Ingresar"}
             </Button>
@@ -134,7 +123,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Edit mode indicator banner */}
       {isEditMode && (
         <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground text-center text-xs py-1 font-medium pointer-events-none">
           ✏️ Modo edición activo — hacé hover sobre las secciones para editarlas
@@ -148,28 +136,14 @@ const Header = () => {
         }`}
       >
         <div className="greenpac-container flex items-center justify-between py-4">
-          <a href="/#inicio" className="flex items-center gap-1">
-            <img src={navLogo.url} alt={navLogo.alt} className={`${hasCustomLogo ? "h-[30px] max-h-[30px]" : "h-11"} w-auto object-contain`} />
-            {!hasCustomLogo && (
-              <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
-            )}
-          </a>
-          <button
-            className="text-primary-foreground p-2"
-            onClick={() => setIsMobileMenuOpen(false)}
-            aria-label="Close menu"
-          >
+          <LogoBlock iconClass="h-11" textClass="h-24 -ml-1" />
+          <button className="text-primary-foreground p-2" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
             <X className="h-6 w-6" />
           </button>
         </div>
         <nav className="greenpac-container py-6 flex flex-col gap-4">
           {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-primary-foreground/90 hover:text-primary font-medium py-2 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
+            <a key={link.href} href={link.href} className="text-primary-foreground/90 hover:text-primary font-medium py-2 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
               {link.label}
             </a>
           ))}
@@ -178,33 +152,12 @@ const Header = () => {
               variant={isEditMode ? "destructive" : "outline"}
               size="sm"
               className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111]" : ""}
-              onClick={() => {
-                toggleEditMode();
-                setIsMobileMenuOpen(false);
-              }}
+              onClick={() => { toggleEditMode(); setIsMobileMenuOpen(false); }}
             >
-              {isEditMode ? (
-                <>
-                  <PencilOff className="h-4 w-4 mr-1.5" />
-                  Salir edición
-                </>
-              ) : (
-                <>
-                  <Pencil className="h-4 w-4 mr-1.5" />
-                  Modo edición
-                </>
-              )}
+              {isEditMode ? <><PencilOff className="h-4 w-4 mr-1.5" />Salir edición</> : <><Pencil className="h-4 w-4 mr-1.5" />Modo edición</>}
             </Button>
           )}
-          <Button
-            variant="hero"
-            size="sm"
-            className="mt-2"
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              navigate(user ? "/panel" : "/auth");
-            }}
-          >
+          <Button variant="hero" size="sm" className="mt-2" onClick={() => { setIsMobileMenuOpen(false); navigate(user ? "/panel" : "/auth"); }}>
             <User className="h-4 w-4 mr-2" />
             {user ? "Mi Panel" : "Ingresar"}
           </Button>
