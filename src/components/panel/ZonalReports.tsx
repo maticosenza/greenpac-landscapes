@@ -351,22 +351,25 @@ const ZonalReports = () => {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const margin = 12;
+    const bottomMargin = 8;
     const availW = pageW - margin * 2;
-    const availH = pageH - y - margin;
+    const availH = pageH - y - bottomMargin;
     const img = await new Promise<HTMLImageElement>((resolve) => {
       const i = new Image();
       i.onload = () => resolve(i);
       i.src = imgData;
     });
     const ratio = img.naturalHeight / (img.naturalWidth || 1);
-    let imgW = availW;
+    // Shrink to 90% of available width to prevent edge clipping
+    let imgW = availW * 0.92;
     let imgH = imgW * ratio;
     if (imgH > availH) {
       imgH = availH;
       imgW = imgH / ratio;
     }
-    doc.addImage(imgData, "PNG", margin, y, imgW, imgH);
-    return y + imgH + 4;
+    const xOffset = margin + (availW - imgW) / 2; // center horizontally
+    doc.addImage(imgData, "PNG", xOffset, y, imgW, imgH);
+    return y + imgH + 3;
   };
 
 
