@@ -3,12 +3,15 @@ import EditableSection from "@/components/EditableSection";
 import defaultFooterLogo from "@/assets/greenpac-logo-new.png";
 import textLogo from "@/assets/greenpac-text.png";
 
+const DEFAULT_FOOTER_LOGO = defaultFooterLogo;
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { getText, getAsset } = useSiteContent();
 
   const tagline = getText("footer-tagline", "Maquinaria para la conservación de forrajes");
-  const footerLogo = getAsset("footer-logo", defaultFooterLogo, "Greenpac Logo");
+  const footerLogo = getAsset("footer-logo", DEFAULT_FOOTER_LOGO, "Greenpac Logo");
+  const hasCustomFooterLogo = footerLogo.url !== DEFAULT_FOOTER_LOGO;
 
   return (
     <footer className="bg-greenpac-dark">
@@ -21,16 +24,18 @@ const Footer = () => {
               key: "footer-logo",
               label: "Logo",
               type: "image",
-              fallback: defaultFooterLogo,
+              fallback: DEFAULT_FOOTER_LOGO,
               assetKey: "footer-logo",
-              hint: "Recomendado: 320×80 px (PNG/SVG, fondo transparente).",
+              hint: "Recomendado: 320×80 px (PNG/SVG, fondo transparente). Si subís un logo completo (isotipo + texto), se oculta el texto por defecto.",
             },
           ]}
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-1">
-              <img src={footerLogo.url} alt={footerLogo.alt} className="h-11 md:h-14 w-auto" />
-              <img src={textLogo} alt="Green Pac" className="h-32 w-auto -ml-1" />
+              <img src={footerLogo.url} alt={footerLogo.alt} className={`${hasCustomFooterLogo ? "h-14 md:h-16" : "h-11 md:h-14"} w-auto`} />
+              {!hasCustomFooterLogo && (
+                <img src={textLogo} alt="Green Pac" className="h-32 w-auto -ml-1" />
+              )}
             </div>
 
             <p className="text-primary-foreground/60 text-sm text-center">

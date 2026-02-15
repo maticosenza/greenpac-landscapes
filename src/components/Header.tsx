@@ -22,6 +22,7 @@ const Header = () => {
 
   // Single source of truth for nav logo
   const navLogo = getAsset("nav-logo", defaultLogo, "Greenpac Logo");
+  const hasCustomLogo = navLogo.url !== defaultLogo;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,13 +68,15 @@ const Header = () => {
               <img
                 src={navLogo.url}
                 alt={navLogo.alt}
-                className="h-11 lg:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+                className={`${hasCustomLogo ? "h-14 lg:h-12" : "h-11 lg:h-10"} w-auto transition-transform duration-300 group-hover:scale-105`}
               />
-              <img
-                src={textLogo}
-                alt="Green Pac"
-                className="h-24 lg:h-20 w-auto -ml-1"
-              />
+              {!hasCustomLogo && (
+                <img
+                  src={textLogo}
+                  alt="Green Pac"
+                  className="h-24 lg:h-20 w-auto -ml-1"
+                />
+              )}
             </a>
           </EditableSection>
 
@@ -146,8 +149,10 @@ const Header = () => {
       >
         <div className="greenpac-container flex items-center justify-between py-4">
           <a href="/#inicio" className="flex items-center gap-1">
-            <img src={navLogo.url} alt={navLogo.alt} className="h-11 w-auto" />
-            <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
+            <img src={navLogo.url} alt={navLogo.alt} className={`${hasCustomLogo ? "h-14" : "h-11"} w-auto`} />
+            {!hasCustomLogo && (
+              <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
+            )}
           </a>
           <button
             className="text-primary-foreground p-2"
