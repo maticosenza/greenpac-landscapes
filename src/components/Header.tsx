@@ -60,7 +60,7 @@ const Header = () => {
                 type: "image",
                 fallback: defaultLogo,
                 assetKey: "nav-logo",
-                hint: "Recomendado: 320×80 px (PNG/SVG, fondo transparente). Se muestra aprox. 160×40 px.",
+                hint: "Recomendado: 240×56 px (PNG/SVG, transparente). Se muestra aprox.: Desktop 32px alto, Tablet 28px, Mobile 24px.",
               },
             ]}
           >
@@ -68,7 +68,7 @@ const Header = () => {
               <img
                 src={navLogo.url}
                 alt={navLogo.alt}
-                className={`${hasCustomLogo ? "h-14 lg:h-12" : "h-11 lg:h-10"} w-auto transition-transform duration-300 group-hover:scale-105`}
+                className={`${hasCustomLogo ? "h-6 md:h-7 lg:h-8 max-h-8" : "h-11 lg:h-10"} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
               />
               {!hasCustomLogo && (
                 <img
@@ -99,7 +99,7 @@ const Header = () => {
                 variant={isEditMode ? "destructive" : "outline"}
                 size="sm"
                 onClick={toggleEditMode}
-                className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white border-white/50" : ""}
+                className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111] border-white/50" : ""}
               >
                 {isEditMode ? (
                   <>
@@ -149,7 +149,7 @@ const Header = () => {
       >
         <div className="greenpac-container flex items-center justify-between py-4">
           <a href="/#inicio" className="flex items-center gap-1">
-            <img src={navLogo.url} alt={navLogo.alt} className={`${hasCustomLogo ? "h-14" : "h-11"} w-auto`} />
+            <img src={navLogo.url} alt={navLogo.alt} className={`${hasCustomLogo ? "h-6 max-h-6" : "h-11"} w-auto object-contain`} />
             {!hasCustomLogo && (
               <img src={textLogo} alt="Green Pac" className="h-24 w-auto -ml-1" />
             )}
@@ -177,7 +177,7 @@ const Header = () => {
             <Button
               variant={isEditMode ? "destructive" : "outline"}
               size="sm"
-              className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white" : ""}
+              className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111]" : ""}
               onClick={() => {
                 toggleEditMode();
                 setIsMobileMenuOpen(false);
