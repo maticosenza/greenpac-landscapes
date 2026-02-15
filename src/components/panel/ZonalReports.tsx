@@ -40,6 +40,7 @@ import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
+import { loadPdfLogo, drawPdfHeader } from "@/lib/pdfLogo";
 
 const COLORS = ["hsl(142,76%,36%)", "hsl(142,76%,46%)", "hsl(142,60%,56%)", "hsl(200,70%,50%)", "hsl(40,90%,50%)", "hsl(0,70%,50%)", "hsl(270,60%,50%)", "hsl(180,60%,40%)", "hsl(320,60%,50%)", "hsl(60,70%,45%)"];
 
@@ -55,49 +56,91 @@ const statusLabels: Record<string, string> = {
 type SortField = "total" | "sales" | "conversion" | "totalPrice";
 type SortDir = "asc" | "desc";
 
-const exportChartToPDF = (chartRef: React.RefObject<HTMLDivElement | null>, title: string) => {
+const exportChartToPDF = async (
+  chartRef: React.RefObject<HTMLDivElement | null>,
+  title: string,
+  summaryData?: Array<{ label: string; total: number; sales: number; conversion: number }>
+) => {
   const el = chartRef.current;
   if (!el) return;
   const svg = el.querySelector("svg");
   if (!svg) { toast.error("No se encontró el gráfico"); return; }
 
+  const logoBase64 = await loadPdfLogo();
   const doc = new jsPDF({ orientation: "landscape" });
   const pageW = doc.internal.pageSize.getWidth();
 
-  // Header
-  doc.setFillColor(30, 80, 30);
-  doc.rect(0, 0, pageW, 25, "F");
-  doc.setTextColor(34, 197, 94);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("GREENPAC — Reportes Zonales", 14, 17);
+  // Header with logo
+  let y = drawPdfHeader(doc, logoBase64, "Reportes Zonales");
 
   doc.setTextColor(30, 30, 30);
   doc.setFontSize(14);
-  doc.text(title, 14, 38);
+  doc.setFont("helvetica", "bold");
+  doc.text(title, 14, y);
 
   doc.setFontSize(9);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, pageW - 14, 38, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, pageW - 14, y, { align: "right" });
+  y += 6;
 
-  // Convert SVG to canvas
+  // Convert SVG to canvas and add chart image
   const svgData = new XMLSerializer().serializeToString(svg);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   const img = new Image();
-  img.onload = () => {
-    canvas.width = img.width * 2;
-    canvas.height = img.height * 2;
-    ctx!.fillStyle = "white";
-    ctx!.fillRect(0, 0, canvas.width, canvas.height);
-    ctx!.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const imgData = canvas.toDataURL("image/png");
-    const ratio = Math.min((pageW - 28) / canvas.width, 120 / canvas.height);
-    doc.addImage(imgData, "PNG", 14, 45, canvas.width * ratio, canvas.height * ratio);
-    doc.save(`${title.replace(/\s/g, "-").toLowerCase()}.pdf`);
-    toast.success("PDF descargado");
-  };
-  img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+
+  await new Promise<void>((resolve) => {
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+      ctx!.fillStyle = "white";
+      ctx!.fillRect(0, 0, canvas.width, canvas.height);
+      ctx!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const imgData = canvas.toDataURL("image/png");
+      const maxChartH = summaryData ? 90 : 120;
+      const ratio = Math.min((pageW - 28) / canvas.width, maxChartH / canvas.height);
+      doc.addImage(imgData, "PNG", 14, y, canvas.width * ratio, canvas.height * ratio);
+      y += canvas.height * ratio + 8;
+      resolve();
+    };
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+  });
+
+  // Add summary data table below the chart
+  if (summaryData && summaryData.length > 0) {
+    if (y > 170) { doc.addPage(); y = 20; }
+    doc.setFontSize(11);
+    doc.setTextColor(30, 30, 30);
+    doc.setFont("helvetica", "bold");
+    doc.text("Resumen de datos", 14, y);
+    y += 5;
+
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.text("Nombre", 14, y);
+    doc.text("Cotizaciones", 120, y);
+    doc.text("Ventas", 160, y);
+    doc.text("Conversión", 195, y);
+    y += 4;
+    doc.setDrawColor(34, 197, 94);
+    doc.setLineWidth(0.3);
+    doc.line(14, y, pageW - 14, y);
+    y += 3;
+
+    doc.setFont("helvetica", "normal");
+    summaryData.forEach((row) => {
+      if (y > 190) { doc.addPage(); y = 20; }
+      doc.text(row.label.length > 30 ? row.label.slice(0, 30) + "…" : row.label, 14, y);
+      doc.text(String(row.total), 120, y);
+      doc.text(String(row.sales), 160, y);
+      doc.text(row.conversion.toFixed(1) + "%", 195, y);
+      y += 4;
+    });
+  }
+
+  doc.save(`${title.replace(/\s/g, "-").toLowerCase()}.pdf`);
+  toast.success("PDF descargado");
 };
 
 const ZonalReports = () => {
@@ -299,43 +342,88 @@ const ZonalReports = () => {
     toast.success("CSV resumen descargado");
   };
 
-  const handleExportAllPDF = useCallback(() => {
+  const handleExportAllPDF = useCallback(async () => {
+    const logoBase64 = await loadPdfLogo();
     const doc = new jsPDF({ orientation: "landscape" });
     const pageW = doc.internal.pageSize.getWidth();
 
-    doc.setFillColor(30, 80, 30);
-    doc.rect(0, 0, pageW, 25, "F");
-    doc.setTextColor(34, 197, 94);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("GREENPAC — Reportes Zonales Completo", 14, 17);
+    let y = drawPdfHeader(doc, logoBase64, "Reportes Zonales Completo");
+
     doc.setTextColor(100);
     doc.setFontSize(9);
-    doc.text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, pageW - 14, 17, { align: "right" });
+    doc.text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, pageW - 14, y - 2, { align: "right" });
 
-    let y = 35;
+    // --- Province chart ---
+    const addChartImage = async (ref: React.RefObject<HTMLDivElement | null>, title: string, yPos: number): Promise<number> => {
+      const el = ref.current;
+      if (!el) return yPos;
+      const svg = el.querySelector("svg");
+      if (!svg) return yPos;
+
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(title, 14, yPos);
+      yPos += 4;
+
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          canvas.width = img.width * 2;
+          canvas.height = img.height * 2;
+          ctx!.fillStyle = "white";
+          ctx!.fillRect(0, 0, canvas.width, canvas.height);
+          ctx!.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const imgData = canvas.toDataURL("image/png");
+          const ratio = Math.min((pageW - 28) / canvas.width, 80 / canvas.height);
+          doc.addImage(imgData, "PNG", 14, yPos, canvas.width * ratio, canvas.height * ratio);
+          yPos += canvas.height * ratio + 6;
+          resolve();
+        };
+        img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+      });
+      return yPos;
+    };
+
+    y = await addChartImage(provinceBarRef, "Cotizaciones por Provincia", y);
 
     // Province summary table
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(30, 30, 30);
-    doc.setFontSize(12);
+    if (y > 160) { doc.addPage(); y = 20; }
     doc.text("Resumen por Provincia", 14, y);
-    y += 6;
+    y += 5;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
     provinceStats.forEach((s) => {
-      doc.setFontSize(9);
-      doc.text(`${s.province}: ${s.total} cotiz. | ${s.sales} ventas | ${s.conversion.toFixed(1)}%`, 14, y);
-      y += 5;
-      if (y > 180) { doc.addPage(); y = 20; }
+      if (y > 190) { doc.addPage(); y = 20; }
+      doc.text(`${s.province}: ${s.total} cotiz. | ${s.sales} ventas | ${s.conversion.toFixed(1)}% | $${s.totalPrice.toLocaleString("es-AR")}`, 14, y);
+      y += 4;
     });
 
-    y += 8;
-    doc.setFontSize(12);
+    // New page for city charts
+    doc.addPage();
+    y = drawPdfHeader(doc, logoBase64, "Reportes Zonales Completo");
+
+    y = await addChartImage(cityBarRef, "Cotizaciones por Ciudad", y);
+
+    // City summary table
+    if (y > 160) { doc.addPage(); y = 20; }
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 30, 30);
     doc.text("Resumen por Ciudad (Top 15)", 14, y);
-    y += 6;
+    y += 5;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
     allCityStats.slice(0, 15).forEach((s) => {
-      doc.setFontSize(9);
-      doc.text(`${s.city} (${s.province}): ${s.total} cotiz. | ${s.sales} ventas`, 14, y);
-      y += 5;
-      if (y > 180) { doc.addPage(); y = 20; }
+      if (y > 190) { doc.addPage(); y = 20; }
+      doc.text(`${s.city} (${s.province}): ${s.total} cotiz. | ${s.sales} ventas | ${s.conversion.toFixed(1)}%`, 14, y);
+      y += 4;
     });
 
     doc.save(`reportes-zonales-${new Date().toISOString().split("T")[0]}.pdf`);
@@ -586,7 +674,7 @@ const ZonalReports = () => {
                       Todas
                     </button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(provinceBarRef, "Cotizaciones por Provincia")}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(provinceBarRef, "Cotizaciones por Provincia", provinceStats.map(s => ({ label: s.province, total: s.total, sales: s.sales, conversion: s.conversion })))}>
                     <FileDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -642,7 +730,7 @@ const ZonalReports = () => {
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" /> Distribución por Provincia
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(provincePieRef, "Distribución por Provincia")}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(provincePieRef, "Distribución por Provincia", provinceStats.map(s => ({ label: s.province, total: s.total, sales: s.sales, conversion: s.conversion })))}>
                   <FileDown className="h-4 w-4" />
                 </Button>
               </div>
@@ -709,7 +797,7 @@ const ZonalReports = () => {
                       Todas
                     </button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(cityBarRef, "Cotizaciones por Ciudad")}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(cityBarRef, "Cotizaciones por Ciudad", allCityStats.map(s => ({ label: `${s.city} (${s.province})`, total: s.total, sales: s.sales, conversion: s.conversion })))}>
                     <FileDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -768,7 +856,7 @@ const ZonalReports = () => {
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" /> Distribución por Ciudad
                 </CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(cityPieRef, "Distribución por Ciudad")}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => exportChartToPDF(cityPieRef, "Distribución por Ciudad", allCityStats.map(s => ({ label: `${s.city} (${s.province})`, total: s.total, sales: s.sales, conversion: s.conversion })))}>
                   <FileDown className="h-4 w-4" />
                 </Button>
               </div>
