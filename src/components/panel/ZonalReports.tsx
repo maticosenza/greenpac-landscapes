@@ -483,6 +483,14 @@ const ZonalReports = () => {
   const coveragePercent = filtered.length > 0 ? ((withProvince.length / filtered.length) * 100) : 0;
   const hasDataQualityIssue = filtered.length > 0 && coveragePercent < 50;
 
+  const withCity = filtered.filter((q) => q.city);
+  const cityCoveragePercent = filtered.length > 0 ? ((withCity.length / filtered.length) * 100) : 0;
+
+  const missingProvince = filtered.length - withProvince.length;
+  const missingCity = filtered.length - withCity.length;
+  const missingProvincePct = filtered.length > 0 ? ((missingProvince / filtered.length) * 100) : 0;
+  const missingCityPct = filtered.length > 0 ? ((missingCity / filtered.length) * 100) : 0;
+
   const totalSales = filtered.filter((q) => q.status === "completed" || q.status === "approved");
   const totalRevenue = totalSales.reduce((sum, q) => sum + (Number(q.price) || 0), 0);
 
@@ -650,6 +658,34 @@ const ZonalReports = () => {
                 <Progress value={coveragePercent} className="h-1.5" />
                 <p className="text-[10px] sm:text-xs text-muted-foreground">{withProvince.length}/{filtered.length} con provincia</p>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Data quality & city coverage */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <Card>
+            <CardContent className="pt-4 sm:pt-6 pb-4">
+              <p className="text-[11px] sm:text-xs text-muted-foreground leading-tight">Cobertura ciudad</p>
+              <div className="mt-1 space-y-1.5">
+                <p className="text-xl sm:text-2xl font-bold">{cityCoveragePercent.toFixed(0)}%</p>
+                <Progress value={cityCoveragePercent} className="h-1.5" />
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{withCity.length}/{filtered.length} con ciudad</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 sm:pt-6 pb-4">
+              <p className="text-[11px] sm:text-xs text-muted-foreground leading-tight">Sin provincia</p>
+              <p className="text-xl sm:text-2xl font-bold mt-1">{missingProvince}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{missingProvincePct.toFixed(1)}% del total</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 sm:pt-6 pb-4">
+              <p className="text-[11px] sm:text-xs text-muted-foreground leading-tight">Sin ciudad</p>
+              <p className="text-xl sm:text-2xl font-bold mt-1">{missingCity}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{missingCityPct.toFixed(1)}% del total</p>
             </CardContent>
           </Card>
         </div>
