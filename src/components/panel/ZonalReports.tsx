@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Download, MapPin, BarChart3, Filter, X, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, Building2, FileDown } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from "recharts";
 import { exportToCSV } from "@/lib/exportCsv";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { toast } from "sonner";
@@ -405,7 +405,27 @@ const ZonalReports = () => {
       y += 4;
     });
 
-    // New page for city charts
+    // --- Province Pie/Donut chart page ---
+    doc.addPage();
+    y = drawPdfHeader(doc, logoBase64, "Reportes Zonales Completo");
+    y = await addChartImage(provincePieRef, "Distribución por Provincia (Dona)", y);
+
+    // Province pie summary
+    if (y > 160) { doc.addPage(); y = 20; }
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 30, 30);
+    doc.text("Detalle por Provincia", 14, y);
+    y += 5;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    provinceStats.forEach((s) => {
+      if (y > 190) { doc.addPage(); y = 20; }
+      doc.text(`${s.province}: ${s.total} cotiz. | ${s.sales} ventas | ${s.conversion.toFixed(1)}% | $${s.totalPrice.toLocaleString("es-AR")}`, 14, y);
+      y += 4;
+    });
+
+    // New page for city bar chart
     doc.addPage();
     y = drawPdfHeader(doc, logoBase64, "Reportes Zonales Completo");
 
@@ -417,6 +437,26 @@ const ZonalReports = () => {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(30, 30, 30);
     doc.text("Resumen por Ciudad (Top 15)", 14, y);
+    y += 5;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    allCityStats.slice(0, 15).forEach((s) => {
+      if (y > 190) { doc.addPage(); y = 20; }
+      doc.text(`${s.city} (${s.province}): ${s.total} cotiz. | ${s.sales} ventas | ${s.conversion.toFixed(1)}%`, 14, y);
+      y += 4;
+    });
+
+    // --- City Pie/Donut chart page ---
+    doc.addPage();
+    y = drawPdfHeader(doc, logoBase64, "Reportes Zonales Completo");
+    y = await addChartImage(cityPieRef, "Distribución por Ciudad (Dona)", y);
+
+    // City pie summary
+    if (y > 160) { doc.addPage(); y = 20; }
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 30, 30);
+    doc.text("Detalle por Ciudad (Top 15)", 14, y);
     y += 5;
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
@@ -699,6 +739,7 @@ const ZonalReports = () => {
                       margin={{ top: 10, right: 20, bottom: 30, left: 0 }}
                       barCategoryGap="25%"
                     >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                       <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, xMax]} ticks={xTicks} />
                       <YAxis
                         type="category"
@@ -823,6 +864,7 @@ const ZonalReports = () => {
                       margin={{ top: 10, right: 20, bottom: 30, left: 0 }}
                       barCategoryGap="25%"
                     >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                       <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, xMax]} ticks={xTicks} />
                       <YAxis
                         type="category"
