@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Star, Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import EditableSection from "@/components/EditableSection";
 
 interface Testimonial {
   id: string;
@@ -13,6 +15,12 @@ interface Testimonial {
 }
 
 const Testimonials = () => {
+  const { getText } = useSiteContent();
+
+  const kicker = getText("testimonials-kicker", "Testimonios");
+  const title = getText("testimonials-title", "Lo Que Dicen Nuestros Clientes");
+  const subtitle = getText("testimonials-subtitle", "La satisfacción de nuestros clientes es nuestra mayor recompensa. Conocé sus experiencias trabajando con GreenPac.");
+
   const { data: testimonials, isLoading } = useQuery({
     queryKey: ["testimonials"],
     queryFn: async () => {
@@ -20,7 +28,6 @@ const Testimonials = () => {
         .from("testimonials")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       return data as Testimonial[];
     },
@@ -41,38 +48,43 @@ const Testimonials = () => {
     );
   }
 
-  if (!testimonials?.length) {
-    return null;
-  }
+  if (!testimonials?.length) return null;
 
   return (
     <section id="testimonios" className="greenpac-section bg-background">
       <div className="greenpac-container">
-        <div className="text-center mb-16">
-          <p className="text-primary font-display font-semibold mb-3 tracking-widest uppercase">
-            Testimonios
-          </p>
-          <h2 className="greenpac-title text-foreground mb-4">
-            Lo Que Dicen Nuestros Clientes
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            La satisfacción de nuestros clientes es nuestra mayor recompensa.
-            Conocé sus experiencias trabajando con GreenPac.
-          </p>
-        </div>
+        <EditableSection
+          sectionId="Testimonios Encabezado"
+          fields={[
+            { key: "testimonials-kicker", label: "Kicker", type: "text", fallback: "Testimonios" },
+            { key: "testimonials-title", label: "Título", type: "text", fallback: "Lo Que Dicen Nuestros Clientes" },
+            { key: "testimonials-subtitle", label: "Subtítulo", type: "textarea", fallback: subtitle },
+          ]}
+        >
+          <div className="text-center mb-16">
+            <p className="text-primary font-display font-semibold mb-3 tracking-widest uppercase">
+              {kicker}
+            </p>
+            <h2 className="greenpac-title text-foreground mb-4">
+              {title}
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              {subtitle}
+            </p>
+          </div>
+        </EditableSection>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.id}
               className="bg-card rounded-xl p-8 relative animate-slide-up"
-              style={{ 
+              style={{
                 animationDelay: `${index * 0.15}s`,
-                boxShadow: "var(--shadow-card)"
+                boxShadow: "var(--shadow-card)",
               }}
             >
               <Quote className="absolute top-6 right-6 h-10 w-10 text-primary/10" />
-              
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
@@ -85,11 +97,9 @@ const Testimonials = () => {
                   />
                 ))}
               </div>
-
               <p className="text-muted-foreground leading-relaxed mb-6 italic">
                 "{testimonial.content}"
               </p>
-
               <div className="flex items-center gap-4">
                 {testimonial.image_url ? (
                   <img

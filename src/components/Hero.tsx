@@ -8,6 +8,7 @@ const Hero = () => {
   const { getText, getAsset } = useSiteContent();
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
+  const kicker = getText("hero-kicker", "Maquinaria Agrícola de Calidad");
   const h1Line1 = getText("hero-h1-line1", "Construimos el");
   const h1Highlight = getText("hero-h1-highlight", "Futuro del");
   const h1Line3 = getText("hero-h1-line3", "Campo Argentino");
@@ -24,7 +25,14 @@ const Hero = () => {
         <EditableSection
           sectionId="Hero Banner"
           fields={[
-            { key: "hero-banner", label: "Imagen de fondo (banner)", type: "image", fallback: heroImageDefault, assetKey: "hero-banner" },
+            {
+              key: "hero-banner",
+              label: "Imagen de fondo (banner)",
+              type: "image",
+              fallback: heroImageDefault,
+              assetKey: "hero-banner",
+              hint: "Recomendado: 1920×1080 px (JPG/WEBP). Mantener el sujeto centrado porque la imagen se recorta en distintas pantallas.",
+            },
           ]}
         >
           <img
@@ -44,6 +52,7 @@ const Hero = () => {
         <EditableSection
           sectionId="Hero Textos"
           fields={[
+            { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria Agrícola de Calidad" },
             { key: "hero-h1-line1", label: "H1 línea 1", type: "text", fallback: "Construimos el" },
             { key: "hero-h1-highlight", label: "H1 destacado", type: "text", fallback: "Futuro del" },
             { key: "hero-h1-line3", label: "H1 línea 3", type: "text", fallback: "Campo Argentino" },
@@ -53,7 +62,7 @@ const Hero = () => {
         >
           <div className="animate-slide-up">
             <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
-              Maquinaria Agrícola de Calidad
+              {kicker}
             </p>
             <h1 className="text-primary-foreground mb-6 mx-auto leading-[1.06] max-[480px]:text-[clamp(32px,7vw,40px)] max-[480px]:max-w-[18ch] max-[480px]:[text-wrap:balance] greenpac-title max-w-4xl">
               <span className="md:hidden">
