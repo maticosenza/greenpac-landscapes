@@ -24,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, GripVertical, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, GripVertical, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -138,6 +138,102 @@ const SortableFeatureItem = ({ id, feature, onRemove }: SortableFeatureItemProps
         <X className="h-4 w-4" />
       </Button>
     </div>
+  );
+};
+
+interface SortableProductRowProps {
+  product: Product;
+  index: number;
+  total: number;
+  onEdit: (product: Product) => void;
+  onDelete: (id: string) => void;
+  onToggleActive: (product: Product) => void;
+  onMoveUp: (index: number) => void;
+  onMoveDown: (index: number) => void;
+}
+
+const SortableProductRow = ({ product, index, total, onEdit, onDelete, onToggleActive, onMoveUp, onMoveDown }: SortableProductRowProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: product.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell>
+        <button
+          type="button"
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </TableCell>
+      <TableCell>
+        <button
+          type="button"
+          className="cursor-pointer group/img relative"
+          onClick={() => onEdit(product)}
+          title="Editar producto"
+        >
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.name} className="w-12 h-12 object-cover rounded transition-opacity group-hover/img:opacity-70" />
+          ) : (
+            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center transition-colors group-hover/img:bg-primary/10">
+              <ImageIcon className="h-5 w-5 text-muted-foreground" />
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+            <Pencil className="h-4 w-4 text-primary" />
+          </div>
+        </button>
+      </TableCell>
+      <TableCell className="font-medium">{product.name}</TableCell>
+      <TableCell>
+        {product.category && <Badge variant="outline" className="capitalize">{product.category}</Badge>}
+      </TableCell>
+      <TableCell>{product.price ? `$${product.price.toLocaleString("es-AR")}` : "-"}</TableCell>
+      <TableCell>
+        <Badge variant={product.is_active ? "default" : "secondary"}>{product.is_active ? "Activo" : "Inactivo"}</Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <span className="text-sm w-6 text-center">{product.sort_order}</span>
+          <div className="flex flex-col">
+            <Button size="icon" variant="ghost" className="h-5 w-5" disabled={index === 0} onClick={() => onMoveUp(index)}>
+              <ArrowUp className="h-3 w-3" />
+            </Button>
+            <Button size="icon" variant="ghost" className="h-5 w-5" disabled={index === total - 1} onClick={() => onMoveDown(index)}>
+              <ArrowDown className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button size="icon" variant="ghost" title={product.is_active ? "Ocultar en la página" : "Mostrar en la página"} onClick={() => onToggleActive(product)}>
+            {product.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+          </Button>
+          <Button size="icon" variant="ghost" onClick={() => onEdit(product)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { if (confirm("¿Eliminar este producto?")) onDelete(product.id); }}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 };
 
@@ -432,6 +528,46 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleToggleActive = async (product: Product) => {
+    const newActive = !product.is_active;
+    const { error } = await supabase.from("products").update({ is_active: newActive }).eq("id", product.id);
+    if (error) {
+      toast({ title: "Error al cambiar visibilidad", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({ title: newActive ? "Producto visible" : "Producto oculto" });
+    }
+  };
+
+  const reorderProducts = async (items: Product[]) => {
+    const updates = items.map((p, i) => supabase.from("products").update({ sort_order: i }).eq("id", p.id));
+    await Promise.all(updates);
+    queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  };
+
+  const handleProductDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !filteredProducts) return;
+    const oldIndex = filteredProducts.findIndex(p => p.id === active.id);
+    const newIndex = filteredProducts.findIndex(p => p.id === over.id);
+    const reordered = arrayMove(filteredProducts, oldIndex, newIndex);
+    reorderProducts(reordered);
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (!filteredProducts || index === 0) return;
+    const reordered = arrayMove(filteredProducts, index, index - 1);
+    reorderProducts(reordered);
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (!filteredProducts || index >= filteredProducts.length - 1) return;
+    const reordered = arrayMove(filteredProducts, index, index + 1);
+    reorderProducts(reordered);
+  };
 
   return (
     <Card>
@@ -733,92 +869,40 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         ) : (
           <>
             {/* Mobile card layout */}
-            <div className="block md:hidden space-y-4">
-              {filteredProducts?.map((product) => (
-                <div key={product.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <button
-                      type="button"
-                      className="flex-shrink-0 cursor-pointer relative group/img"
-                      onClick={() => handleEdit(product)}
-                    >
+            <div className="block md:hidden space-y-2">
+              {filteredProducts?.map((product, index) => (
+                <div key={product.id} className="border rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-0.5 shrink-0">
+                      <Button size="icon" variant="ghost" className="h-6 w-6" disabled={index === 0} onClick={() => handleMoveUp(index)}>
+                        <ArrowUp className="h-3 w-3" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-6 w-6" disabled={index === (filteredProducts?.length || 0) - 1} onClick={() => handleMoveDown(index)}>
+                        <ArrowDown className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <button type="button" className="flex-shrink-0 cursor-pointer relative group/img" onClick={() => handleEdit(product)}>
                       {product.image_url ? (
-                        <img
-                          src={product.image_url}
-                          alt={product.name}
-                          className="w-16 h-16 object-cover rounded transition-opacity group-hover/img:opacity-70"
-                        />
+                        <img src={product.image_url} alt={product.name} className="w-14 h-14 object-cover rounded transition-opacity group-hover/img:opacity-70" />
                       ) : (
-                        <div className="w-16 h-16 bg-muted rounded flex items-center justify-center transition-colors group-hover/img:bg-primary/10">
-                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                        </div>
+                        <div className="w-14 h-14 bg-muted rounded flex items-center justify-center"><ImageIcon className="h-5 w-5 text-muted-foreground" /></div>
                       )}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                        <Pencil className="h-4 w-4 text-primary" />
-                      </div>
                     </button>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{product.name}</h3>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {product.category && (
-                          <Badge variant="outline" className="capitalize text-xs">
-                            {product.category}
-                          </Badge>
-                        )}
-                        <Badge
-                          variant={product.is_active ? "default" : "secondary"}
-                          className="text-xs"
-                        >
-                          {product.is_active ? "Activo" : "Inactivo"}
-                        </Badge>
+                        {product.category && <Badge variant="outline" className="capitalize text-xs">{product.category}</Badge>}
+                        <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs">{product.is_active ? "Activo" : "Inactivo"}</Badge>
                       </div>
-                      {product.price && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          ${product.price.toLocaleString("es-AR")}
-                        </p>
-                      )}
                     </div>
                     <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        title={product.is_active ? "Ocultar" : "Mostrar"}
-                        onClick={async () => {
-                          const newActive = !product.is_active;
-                          const { error } = await supabase
-                            .from("products")
-                            .update({ is_active: newActive })
-                            .eq("id", product.id);
-                          if (error) {
-                            toast({ title: "Error al cambiar visibilidad", description: error.message, variant: "destructive" });
-                          } else {
-                            queryClient.invalidateQueries({ queryKey: ["admin-products"] });
-                            queryClient.invalidateQueries({ queryKey: ["products"] });
-                            toast({ title: newActive ? "Producto visible" : "Producto oculto" });
-                          }
-                        }}
-                      >
+                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleToggleActive(product)}>
                         {product.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        onClick={() => handleEdit(product)}
-                      >
+                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(product)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => {
-                          if (confirm("¿Eliminar este producto?")) {
-                            deleteMutation.mutate(product.id);
-                          }
-                        }}
-                      >
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => { if (confirm("¿Eliminar este producto?")) deleteMutation.mutate(product.id); }}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -829,113 +913,39 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
 
             {/* Desktop table layout */}
             <div className="hidden md:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-20">Imagen</TableHead>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Orden</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProducts?.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <button
-                          type="button"
-                          className="cursor-pointer group/img relative"
-                          onClick={() => handleEdit(product)}
-                          title="Editar producto"
-                        >
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="w-12 h-12 object-cover rounded transition-opacity group-hover/img:opacity-70"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center transition-colors group-hover/img:bg-primary/10">
-                              <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                            <Pencil className="h-4 w-4 text-primary" />
-                          </div>
-                        </button>
-                      </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>
-                        {product.category && (
-                          <Badge variant="outline" className="capitalize">
-                            {product.category}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {product.price
-                          ? `$${product.price.toLocaleString("es-AR")}`
-                          : "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={product.is_active ? "default" : "secondary"}
-                        >
-                          {product.is_active ? "Activo" : "Inactivo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{product.sort_order}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title={product.is_active ? "Ocultar en la página" : "Mostrar en la página"}
-                            onClick={async () => {
-                              const newActive = !product.is_active;
-                              const { error } = await supabase
-                                .from("products")
-                                .update({ is_active: newActive })
-                                .eq("id", product.id);
-                              if (error) {
-                                toast({ title: "Error al cambiar visibilidad", description: error.message, variant: "destructive" });
-                              } else {
-                                queryClient.invalidateQueries({ queryKey: ["admin-products"] });
-                                queryClient.invalidateQueries({ queryKey: ["products"] });
-                                toast({ title: newActive ? "Producto visible en la página" : "Producto oculto de la página" });
-                              }
-                            }}
-                          >
-                            {product.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => handleEdit(product)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => {
-                              if (confirm("¿Eliminar este producto?")) {
-                                deleteMutation.mutate(product.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleProductDragEnd}>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10"></TableHead>
+                      <TableHead className="w-20">Imagen</TableHead>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Categoría</TableHead>
+                      <TableHead>Precio</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Orden</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <SortableContext items={filteredProducts?.map(p => p.id) || []} strategy={verticalListSortingStrategy}>
+                    <TableBody>
+                      {filteredProducts?.map((product, index) => (
+                        <SortableProductRow
+                          key={product.id}
+                          product={product}
+                          index={index}
+                          total={filteredProducts.length}
+                          onEdit={handleEdit}
+                          onDelete={(id) => deleteMutation.mutate(id)}
+                          onToggleActive={handleToggleActive}
+                          onMoveUp={handleMoveUp}
+                          onMoveDown={handleMoveDown}
+                        />
+                      ))}
+                    </TableBody>
+                  </SortableContext>
+                </Table>
+              </DndContext>
             </div>
           </>
         )}
