@@ -42,7 +42,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 import { loadPdfLogo, drawPdfHeader } from "@/lib/pdfLogo";
 
-const COLORS = ["hsl(142,76%,36%)", "hsl(142,76%,46%)", "hsl(142,60%,56%)", "hsl(200,70%,50%)", "hsl(40,90%,50%)", "hsl(0,70%,50%)", "hsl(270,60%,50%)", "hsl(180,60%,40%)", "hsl(320,60%,50%)", "hsl(60,70%,45%)"];
+const COLORS = ["hsl(142,76%,36%)", "hsl(142,76%,46%)", "hsl(142,60%,56%)", "hsl(142,55%,62%)", "hsl(142,45%,70%)", "hsl(0,0%,75%)", "hsl(0,0%,60%)"];
 
 const statusLabels: Record<string, string> = {
   pending: "Pendiente",
@@ -791,8 +791,8 @@ const ZonalReports = () => {
                         innerRadius={isMobile ? 25 : 35}
                         label={false}
                       >
-                        {provinceStats.slice(0, 10).map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        {provinceStats.slice(0, 10).map((s, i) => (
+                          <Cell key={i} fill={s.province === "Sin provincia" ? "hsl(0,0%,75%)" : COLORS[i % COLORS.length]} />
                         ))}
                       </Pie>
                       <RechartsTooltip
@@ -879,7 +879,7 @@ const ZonalReports = () => {
                         formatter={(val: number) => [val, "Cotizaciones"]}
                         contentStyle={{ fontSize: 12, borderRadius: 8 }}
                       />
-                      <Bar dataKey="total" fill="hsl(200,70%,50%)" radius={[0, 4, 4, 0]} maxBarSize={isMobile ? 22 : 28} />
+                      <Bar dataKey="total" fill="hsl(142,76%,36%)" radius={[0, 4, 4, 0]} maxBarSize={isMobile ? 22 : 28} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -918,8 +918,8 @@ const ZonalReports = () => {
                         innerRadius={isMobile ? 25 : 35}
                         label={false}
                       >
-                        {allCityStats.slice(0, 10).map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        {allCityStats.slice(0, 10).map((s, i) => (
+                          <Cell key={i} fill={s.city === "Sin ciudad" ? "hsl(0,0%,75%)" : COLORS[i % COLORS.length]} />
                         ))}
                       </Pie>
                       <RechartsTooltip
