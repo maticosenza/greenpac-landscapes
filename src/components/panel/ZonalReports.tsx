@@ -592,7 +592,7 @@ const ZonalReports = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="px-2 sm:px-4 pt-2">
+            <CardContent className="px-1 sm:px-3 pt-4">
               {provinceChartData.length > 0 ? (
                 <div
                   ref={provinceBarRef}
@@ -603,15 +603,15 @@ const ZonalReports = () => {
                     <BarChart
                       data={provinceChartData}
                       layout="vertical"
-                      margin={{ top: 15, right: 25, bottom: 20, left: isMobile ? 80 : 100 }}
+                      margin={{ top: 10, right: 15, bottom: 30, left: 5 }}
                       barCategoryGap="25%"
                     >
-                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} />
+                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, "dataMax"]} />
                       <YAxis
                         type="category"
                         dataKey="province"
                         tick={{ fontSize: isMobile ? 10 : 12 }}
-                        width={isMobile ? 75 : 95}
+                        width={isMobile ? 90 : 120}
                         interval={0}
                         tickLine={{ stroke: "hsl(var(--border))" }}
                         axisLine={{ stroke: "hsl(var(--border))" }}
@@ -710,7 +710,7 @@ const ZonalReports = () => {
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">Agregá provincia y ciudad para ver métricas más precisas.</p>
             </CardHeader>
-            <CardContent className="px-2 sm:px-4 pt-2">
+            <CardContent className="px-1 sm:px-3 pt-4">
               {cityChartData.length > 0 ? (
                 <div
                   ref={cityBarRef}
@@ -721,15 +721,15 @@ const ZonalReports = () => {
                     <BarChart
                       data={cityChartData}
                       layout="vertical"
-                      margin={{ top: 15, right: 25, bottom: 20, left: isMobile ? 80 : 100 }}
+                      margin={{ top: 10, right: 15, bottom: 30, left: 5 }}
                       barCategoryGap="25%"
                     >
-                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} />
+                      <XAxis type="number" tick={{ fontSize: isMobile ? 10 : 11 }} allowDecimals={false} tickLine={{ stroke: "hsl(var(--border))" }} axisLine={{ stroke: "hsl(var(--border))" }} domain={[0, "dataMax"]} />
                       <YAxis
                         type="category"
                         dataKey="city"
                         tick={{ fontSize: isMobile ? 10 : 12 }}
-                        width={isMobile ? 75 : 95}
+                        width={isMobile ? 90 : 120}
                         interval={0}
                         tickLine={{ stroke: "hsl(var(--border))" }}
                         axisLine={{ stroke: "hsl(var(--border))" }}
