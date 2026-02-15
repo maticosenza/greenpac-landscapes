@@ -46,8 +46,8 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           showDarkBg
-            ? "bg-[rgba(0,0,0,0.9)] backdrop-blur-md shadow-lg py-2 lg:py-1.5"
-            : "lg:bg-[rgba(0,0,0,0.85)] lg:backdrop-blur-md bg-transparent py-5 lg:py-1.5"
+            ? "bg-[rgba(0,0,0,0.65)] backdrop-blur-md shadow-lg py-2 lg:py-1.5"
+            : "bg-white/[0.55] backdrop-blur-[10px] border-b border-white/[0.35] py-5 lg:py-1.5"
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
@@ -60,7 +60,7 @@ const Header = () => {
                 type: "image",
                 fallback: defaultLogo,
                 assetKey: "nav-logo",
-                hint: "Recomendado: 240×56 px (PNG/SVG, transparente). Se muestra aprox.: Desktop 32px alto, Tablet 28px, Mobile 24px.",
+                hint: "Recomendado: 320×72 px (PNG/SVG transparente). Se muestra aprox.: Desktop 40px alto, Tablet 28px, Mobile 24px.",
               },
             ]}
           >
@@ -68,7 +68,7 @@ const Header = () => {
               <img
                 src={navLogo.url}
                 alt={navLogo.alt}
-                className={`${hasCustomLogo ? "h-6 md:h-7 lg:h-8 max-h-8" : "h-11 lg:h-10"} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
+                className={`${hasCustomLogo ? "h-6 md:h-7 lg:h-10 max-h-10" : "h-11 lg:h-10"} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
               />
               {!hasCustomLogo && (
                 <img
@@ -85,7 +85,7 @@ const Header = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-primary-foreground/90 hover:text-primary font-medium transition-colors duration-300 relative group"
+                className={`${showDarkBg ? "text-white/90" : "text-gray-900/80"} hover:text-primary font-medium transition-colors duration-300 relative group`}
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
@@ -99,7 +99,7 @@ const Header = () => {
                 variant={isEditMode ? "destructive" : "outline"}
                 size="sm"
                 onClick={toggleEditMode}
-                className={!isEditMode ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111] border-white/50" : ""}
+                className={!isEditMode ? (showDarkBg ? "bg-white/90 text-foreground hover:bg-white hover:text-[#111] border-white/50" : "bg-black/10 text-gray-900 hover:bg-white hover:text-[#111] border-gray-900/30") : ""}
               >
                 {isEditMode ? (
                   <>
@@ -125,7 +125,7 @@ const Header = () => {
           </div>
 
           <button
-            className="lg:hidden text-primary-foreground p-2 relative z-[70]"
+            className={`lg:hidden ${showDarkBg ? "text-white" : "text-gray-900"} p-2 relative z-[70]`}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >

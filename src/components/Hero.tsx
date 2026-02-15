@@ -14,6 +14,7 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
 import heroImageDefault from "@/assets/hero-banner-greenpac-v5.jpg";
+import DraggableHeroBlock from "@/components/DraggableHeroBlock";
 
 const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
   const { updateAsset } = useSiteContent();
@@ -135,7 +136,7 @@ const Hero = () => {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex flex-col overflow-hidden"
+      className="relative min-h-screen overflow-hidden"
     >
       {/* Background Image — single source of truth */}
       <div className="absolute inset-0">
@@ -154,7 +155,7 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Top Content - Title */}
-      <div className="relative z-10 greenpac-container text-center pt-[calc(108px+env(safe-area-inset-top,0px))] sm:pt-36 lg:pt-32 xl:pt-28">
+      <DraggableHeroBlock posKey="hero-h1-pos" defaultPos={{ xPct: 50, yPct: 30 }} className="w-[90vw] max-w-4xl text-center">
         <EditableSection
           sectionId="Hero Textos"
           fields={[
@@ -185,21 +186,19 @@ const Hero = () => {
             </h1>
           </div>
         </EditableSection>
-      </div>
+      </DraggableHeroBlock>
 
       {/* Bottom Content - Buttons */}
-      <div className="relative z-10 mt-auto mb-32 md:mb-40">
-        <div className="greenpac-container">
-          <div className="flex flex-col-reverse sm:flex-row gap-4 justify-center animate-slide-up">
-            <Button variant="hero" size="lg" asChild>
-              <a href="#productos">{ctaProducts}</a>
-            </Button>
-            <Button variant="heroOutline" size="lg" asChild>
-              <a href="#cotizacion">{ctaQuote}</a>
-            </Button>
-          </div>
+      <DraggableHeroBlock posKey="hero-cta-pos" defaultPos={{ xPct: 50, yPct: 78 }}>
+        <div className="flex flex-col-reverse sm:flex-row gap-4 justify-center animate-slide-up">
+          <Button variant="hero" size="lg" asChild>
+            <a href="#productos">{ctaProducts}</a>
+          </Button>
+          <Button variant="heroOutline" size="lg" asChild>
+            <a href="#cotizacion">{ctaQuote}</a>
+          </Button>
         </div>
-      </div>
+      </DraggableHeroBlock>
 
       {/* Scroll indicator */}
       <a
