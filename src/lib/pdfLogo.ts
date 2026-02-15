@@ -29,10 +29,16 @@ export function drawPdfHeader(doc: jsPDF, logoBase64: string, subtitle?: string)
   doc.setFillColor(30, 80, 30);
   doc.rect(0, 0, pageW, 30, "F");
 
-  // Logo image (height ~14px, positioned vertically centered in header)
-  const logoH = 14;
-  const logoW = logoH * (320 / 72); // maintain aspect ratio
-  doc.addImage(logoBase64, "PNG", 14, 8, logoW, logoH);
+  // Round green logo (square aspect, height ~18px, vertically centered)
+  const logoH = 18;
+  const logoW = logoH; // square logo
+  doc.addImage(logoBase64, "PNG", 10, 6, logoW, logoH);
+
+  // White "GREENPAC" text next to the logo
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("GREENPAC", 10 + logoW + 4, 19);
 
   // Subtitle on the right if provided
   if (subtitle) {
