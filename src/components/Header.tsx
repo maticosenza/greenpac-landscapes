@@ -76,7 +76,7 @@ const Header = () => {
               },
             ]}
           >
-            <LogoBlock iconClass="h-11 lg:h-10" textClass="h-24 lg:h-20 -ml-1" />
+            <LogoBlock iconClass="h-20 lg:h-16" textClass="h-44 lg:h-36 -ml-2" />
           </EditableSection>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -136,7 +136,7 @@ const Header = () => {
         }`}
       >
         <div className="greenpac-container flex items-center justify-between py-4">
-          <LogoBlock iconClass="h-11" textClass="h-24 -ml-1" />
+          <LogoBlock iconClass="h-20" textClass="h-44 -ml-2" />
           <button className="text-primary-foreground p-2" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
             <X className="h-6 w-6" />
           </button>
