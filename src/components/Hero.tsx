@@ -56,7 +56,7 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
       <Button
         size="sm"
         variant="secondary"
-        className="absolute top-20 right-4 z-[15] shadow-lg gap-1.5 h-9 text-xs"
+        className="absolute top-32 right-4 z-[15] shadow-lg gap-1.5 h-9 text-xs"
         onClick={() => setIsOpen(true)}
       >
         <Pencil className="h-3.5 w-3.5" />
