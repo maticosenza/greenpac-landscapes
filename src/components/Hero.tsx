@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Pencil, Upload, Save, X, Loader2 } from "lucide-react";
+import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,12 +125,11 @@ const Hero = () => {
   const { isEditMode } = useEditMode();
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
-  const kicker = getText("hero-kicker", "Maquinaria Agrícola de Calidad");
-  const h1Line1 = getText("hero-h1-line1", "Construimos el");
-  const h1Highlight = getText("hero-h1-highlight", "Futuro del");
-  const h1Line3 = getText("hero-h1-line3", "Campo Argentino");
-  const ctaProducts = getText("hero-cta-products", "Ver Productos");
-  const ctaQuote = getText("hero-cta-quote", "Solicitar Cotización");
+  const kicker = getText("hero-kicker", "Maquinaria de alto rendimiento");
+  const h1Text = getText("hero-title", "Tecnología y potencia para el campo argentino");
+  const subtitle = getText("hero-subtitle", "Equipos listos para trabajar, con asesoramiento experto. Cotizá en minutos y coordinamos entrega a todo el país.");
+  const ctaQuote = getText("hero-cta-primary", "Solicitar Cotización");
+  const ctaProducts = getText("hero-cta-secondary", "Ver Productos");
 
   return (
     <section
@@ -149,49 +148,52 @@ const Hero = () => {
           decoding="async"
         />
         {/* Stronger gradient at top for header readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/50 via-greenpac-dark/15 to-greenpac-dark/45" />
+        <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/60 via-greenpac-dark/25 to-greenpac-dark/50" />
       </div>
 
       {/* Banner edit — floating button, always clickable */}
       {isEditMode && <HeroBannerEditor />}
 
-      {/* Content container — flex layout, no absolute positioning */}
+      {/* Content container — flex layout */}
       <div className="relative z-10 flex flex-col justify-center pt-24 sm:pt-28 pb-24 sm:pb-16 px-4 sm:px-6" style={{ minHeight: "100svh" }}>
         <div className="max-w-6xl mx-auto w-full">
           <div className="max-w-3xl">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
-                { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria Agrícola de Calidad" },
-                { key: "hero-h1-line1", label: "H1 línea 1", type: "text", fallback: "Construimos el" },
-                { key: "hero-h1-highlight", label: "H1 destacado", type: "text", fallback: "Futuro del" },
-                { key: "hero-h1-line3", label: "H1 línea 3", type: "text", fallback: "Campo Argentino" },
-                { key: "hero-cta-products", label: "Botón productos", type: "text", fallback: "Ver Productos" },
-                { key: "hero-cta-quote", label: "Botón cotización", type: "text", fallback: "Solicitar Cotización" },
+                { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria de alto rendimiento" },
+                { key: "hero-title", label: "Título H1", type: "text", fallback: "Tecnología y potencia para el campo argentino" },
+                { key: "hero-subtitle", label: "Subtítulo", type: "text", fallback: "Equipos listos para trabajar, con asesoramiento experto. Cotizá en minutos y coordinamos entrega a todo el país." },
+                { key: "hero-cta-primary", label: "Botón primario", type: "text", fallback: "Solicitar Cotización" },
+                { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
               ]}
             >
-              <div className="animate-slide-up">
-                <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
-                  {kicker}
-                </p>
-                <h1 className="text-primary-foreground mb-8 leading-[1.06] text-[clamp(32px,7vw,40px)] sm:text-5xl md:text-6xl lg:text-7xl [text-wrap:balance] greenpac-title">
-                  <span className="md:hidden">
-                    {h1Line1}<br />
-                    <span className="greenpac-gradient-text">{h1Highlight}</span><br />
-                    {h1Line3}
-                  </span>
-                  <span className="hidden md:inline">
-                    {h1Line1}{" "}
-                    <span className="greenpac-gradient-text">{h1Highlight.replace("del", "el Futuro").includes("Futuro") ? "el Futuro" : h1Highlight}</span>
-                    <br />
-                    del {h1Line3}
-                  </span>
+              <div className="animate-slide-up space-y-6">
+                {/* Kicker with leaf icon */}
+                <div className="flex items-center gap-2">
+                  <Leaf className="h-4 w-4 text-primary shrink-0" />
+                  <p className="text-primary font-semibold text-xs sm:text-sm tracking-[0.2em] uppercase">
+                    {kicker}
+                  </p>
+                </div>
+
+                {/* H1 — editorial serif */}
+                <h1
+                  className="text-primary-foreground leading-[1.1] text-[clamp(36px,8vw,72px)] [text-wrap:balance]"
+                  style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+                >
+                  {h1Text}
                 </h1>
+
+                {/* Subtitle */}
+                <p className="text-primary-foreground/80 text-base sm:text-lg max-w-xl leading-relaxed">
+                  {subtitle}
+                </p>
               </div>
             </EditableSection>
 
             {/* CTAs — full width on mobile, inline on desktop */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-slide-up">
+            <div className="flex flex-col sm:flex-row gap-4 mt-8 animate-slide-up">
               <Button variant="heroOutline" size="lg" className="w-full sm:w-auto" asChild>
                 <a href="#cotizacion">{ctaQuote}</a>
               </Button>
