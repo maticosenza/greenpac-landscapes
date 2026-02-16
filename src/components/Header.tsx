@@ -76,7 +76,7 @@ const Header = () => {
               },
             ]}
           >
-            <LogoBlock iconClass="h-10 md:h-12 lg:h-14" textClass="h-20 md:h-24 lg:h-28 -ml-1" />
+            <LogoBlock iconClass="h-12 md:h-14 lg:h-16 scale-y-105" textClass="h-24 md:h-[6.5rem] lg:h-[7.5rem] -ml-1" />
           </EditableSection>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -118,7 +118,7 @@ const Header = () => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
           </button>
         </div>
       </header>
