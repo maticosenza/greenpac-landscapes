@@ -178,7 +178,7 @@ const Hero = () => {
 
                 {/* H1 */}
                 <h1 className="text-primary-foreground font-extrabold leading-[1.12] tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem]">
-                  {h1Text}
+                  Tecnología y<br />potencia para el<br />campo argentino
                 </h1>
 
                 {/* Subtitle */}
