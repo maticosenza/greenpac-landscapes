@@ -175,13 +175,13 @@ const Hero = () => {
                 {/* Kicker with leaf icon */}
                 <div className="flex items-center gap-2.5">
                   <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] lg:text-[0.85rem] tracking-[0.2em] uppercase">
+                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] md:text-[0.85rem] lg:text-[0.85rem] tracking-[0.2em] uppercase">
                     {kicker}
                   </p>
                 </div>
 
                 {/* H1 */}
-                <h1 className="text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.35rem,4.6vw,5.1rem)]">
+                <h1 className="text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.35rem,4.6vw,5.1rem)] md:text-[3rem] lg:text-[clamp(2.35rem,4.6vw,5.1rem)]">
                   Tecnología y<br />potencia para el<br />campo argentino
                 </h1>
 
