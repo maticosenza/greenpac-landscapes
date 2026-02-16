@@ -125,11 +125,11 @@
   }
 
   .greenpac-title {
-    @apply font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+    @apply font-display text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight;
   }
 
   .greenpac-subtitle {
-    @apply font-display text-2xl md:text-3xl font-semibold tracking-tight;
+    @apply font-display text-2xl md:text-3xl font-bold tracking-tight;
   }
 
   .greenpac-gradient-text {
