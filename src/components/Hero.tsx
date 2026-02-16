@@ -156,7 +156,7 @@ const Hero = () => {
 
       {/* Content container — uses same container as header for alignment */}
       <div className="relative z-10 flex flex-col justify-end sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] pt-24 sm:pt-32 pb-32 sm:pb-20">
+        <div className="max-w-[560px] md:max-w-[620px] lg:max-w-[680px] xl:max-w-[740px] pt-24 sm:pt-32 pb-32 sm:pb-20 lg:pb-24">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
@@ -167,33 +167,33 @@ const Hero = () => {
                 { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
               ]}
             >
-              <div className="animate-slide-up space-y-4 sm:space-y-5">
+              <div className="animate-slide-up space-y-4 sm:space-y-5 lg:space-y-6 xl:space-y-7">
                 {/* Kicker with leaf icon */}
                 <div className="flex items-center gap-2">
-                  <Leaf className="h-4 w-4 text-primary shrink-0" />
-                  <p className="text-primary font-semibold text-xs sm:text-sm tracking-[0.2em] uppercase">
+                  <Leaf className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
+                  <p className="text-primary font-semibold text-xs sm:text-sm md:text-[0.9rem] tracking-[0.2em] uppercase">
                     {kicker}
                   </p>
                 </div>
 
                 {/* H1 */}
-                <h1 className="text-primary-foreground font-extrabold leading-[1.08] sm:leading-[1.12] tracking-tight text-[1.75rem] sm:text-4xl md:text-5xl lg:text-[3.25rem]">
+                <h1 className="text-primary-foreground font-extrabold leading-[1.08] sm:leading-[1.1] lg:leading-[1.08] tracking-tight text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-[3.5rem] xl:text-[4rem]">
                   Tecnología y<br />potencia para el<br />campo argentino
                 </h1>
 
                 {/* Subtitle */}
-                <p className="text-primary-foreground/85 text-[0.9rem] sm:text-base md:text-lg max-w-[44ch] leading-relaxed">
+                <p className="text-primary-foreground/85 text-[0.9rem] sm:text-base md:text-lg lg:text-xl max-w-[44ch] leading-relaxed">
                   {subtitle}
                 </p>
               </div>
             </EditableSection>
 
             {/* CTAs — stack vertical full-width on mobile, inline on sm+ */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-7 animate-slide-up">
-              <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-12 sm:h-auto" asChild>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 mt-6 sm:mt-7 lg:mt-9 animate-slide-up">
+              <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-12 sm:h-11 lg:h-12 sm:px-8 lg:px-10 lg:text-base" asChild>
                 <a href="#cotizacion">{ctaQuote}</a>
               </Button>
-              <Button variant="hero" size="lg" className="w-full sm:w-auto h-12 sm:h-auto" asChild>
+              <Button variant="hero" size="lg" className="w-full sm:w-auto h-12 sm:h-11 lg:h-12 sm:px-8 lg:px-10 lg:text-base" asChild>
                 <a href="#productos">{ctaProducts}</a>
               </Button>
             </div>
