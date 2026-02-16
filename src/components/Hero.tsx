@@ -127,13 +127,10 @@ const Hero = () => {
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
   const kicker = getText("hero-kicker", "Maquinaria de alto rendimiento");
   const h1Text = getText("hero-title", "Tecnología y potencia para el campo argentino");
-  const subtitle = getText("hero-subtitle", "Equipos listos para trabajar, con asesoramiento experto. Cotizá en minutos y coordinamos entrega a todo el país.");
+  const subtitleLine1 = getText("hero-subtitle-line1", "Equipos listos para trabajar, con asesoramiento experto.");
+  const subtitleLine2 = getText("hero-subtitle-line2", "Cotizá en minutos y coordinamos entrega a todo el país.");
   const ctaQuote = getText("hero-cta-primary", "Solicitar Cotización");
   const ctaProducts = getText("hero-cta-secondary", "Ver Productos");
-
-  const subtitleParts = subtitle.split(". ");
-  const subtitleLine1 = subtitleParts[0] ? subtitleParts[0] + "." : subtitle;
-  const subtitleLine2 = subtitleParts.slice(1).join(". ");
 
   return (
     <section
@@ -166,7 +163,8 @@ const Hero = () => {
               fields={[
                 { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria de alto rendimiento" },
                 { key: "hero-title", label: "Título H1", type: "text", fallback: "Tecnología y potencia para el campo argentino" },
-                { key: "hero-subtitle", label: "Subtítulo", type: "text", fallback: "Equipos listos para trabajar, con asesoramiento experto. Cotizá en minutos y coordinamos entrega a todo el país." },
+                { key: "hero-subtitle-line1", label: "Subtítulo — Línea 1", type: "text", fallback: "Equipos listos para trabajar, con asesoramiento experto." },
+                { key: "hero-subtitle-line2", label: "Subtítulo — Línea 2", type: "text", fallback: "Cotizá en minutos y coordinamos entrega a todo el país." },
                 { key: "hero-cta-primary", label: "Botón primario", type: "text", fallback: "Solicitar Cotización" },
                 { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
               ]}
@@ -185,7 +183,6 @@ const Hero = () => {
                   Tecnología y<br />potencia para el<br />campo argentino
                 </h1>
 
-                {/* Subtitle */}
                 <p className="text-primary-foreground/85 text-[clamp(1.02rem,1.5vw,1.55rem)] max-w-[52ch] leading-relaxed">
                   {subtitleLine1}
                   {subtitleLine2 ? (
