@@ -154,10 +154,9 @@ const Hero = () => {
       {/* Banner edit — floating button, always clickable */}
       {isEditMode && <HeroBannerEditor />}
 
-      {/* Content container — flex layout */}
-      <div className="relative z-10 flex flex-col justify-center pt-24 sm:pt-28 pb-24 sm:pb-16 px-4 sm:px-6" style={{ minHeight: "100svh" }}>
-        <div className="max-w-6xl mx-auto w-full">
-          <div className="max-w-3xl">
+      {/* Content container — uses same container as header for alignment */}
+      <div className="relative z-10 flex flex-col justify-center greenpac-container" style={{ minHeight: "100svh" }}>
+        <div className="max-w-2xl pt-28 sm:pt-32 pb-24 sm:pb-16">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
@@ -168,7 +167,7 @@ const Hero = () => {
                 { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
               ]}
             >
-              <div className="animate-slide-up space-y-6">
+              <div className="animate-slide-up space-y-5">
                 {/* Kicker with leaf icon */}
                 <div className="flex items-center gap-2">
                   <Leaf className="h-4 w-4 text-primary shrink-0" />
@@ -177,22 +176,20 @@ const Hero = () => {
                   </p>
                 </div>
 
-                {/* H1 — editorial serif */}
-                <h1
-                  className="text-primary-foreground font-extrabold leading-[1.1] tracking-tight text-[clamp(36px,8vw,72px)] [text-wrap:balance]"
-                >
+                {/* H1 */}
+                <h1 className="text-primary-foreground font-extrabold leading-[1.12] tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem]">
                   {h1Text}
                 </h1>
 
                 {/* Subtitle */}
-                <p className="text-primary-foreground/80 text-base sm:text-lg max-w-xl leading-relaxed">
+                <p className="text-primary-foreground/80 text-sm sm:text-base md:text-lg max-w-lg leading-relaxed">
                   {subtitle}
                 </p>
               </div>
             </EditableSection>
 
             {/* CTAs — full width on mobile, inline on desktop */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8 animate-slide-up">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-7 animate-slide-up">
               <Button variant="heroOutline" size="lg" className="w-full sm:w-auto" asChild>
                 <a href="#cotizacion">{ctaQuote}</a>
               </Button>
@@ -200,7 +197,6 @@ const Hero = () => {
                 <a href="#productos">{ctaProducts}</a>
               </Button>
             </div>
-          </div>
         </div>
       </div>
 
