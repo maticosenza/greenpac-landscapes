@@ -131,6 +131,10 @@ const Hero = () => {
   const ctaQuote = getText("hero-cta-primary", "Solicitar Cotización");
   const ctaProducts = getText("hero-cta-secondary", "Ver Productos");
 
+  const subtitleParts = subtitle.split(". ");
+  const subtitleLine1 = subtitleParts[0] ? subtitleParts[0] + "." : subtitle;
+  const subtitleLine2 = subtitleParts.slice(1).join(". ");
+
   return (
     <section
       id="inicio"
@@ -171,7 +175,7 @@ const Hero = () => {
                 {/* Kicker with leaf icon */}
                 <div className="flex items-center gap-2.5">
                   <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] tracking-[0.2em] uppercase">
+                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] lg:text-[0.85rem] tracking-[0.2em] uppercase">
                     {kicker}
                   </p>
                 </div>
@@ -183,7 +187,14 @@ const Hero = () => {
 
                 {/* Subtitle */}
                 <p className="text-primary-foreground/85 text-[clamp(1.02rem,1.5vw,1.55rem)] max-w-[52ch] leading-relaxed">
-                  {subtitle}
+                  {subtitleLine1}
+                  {subtitleLine2 ? (
+                    <>
+                      <span className="inline lg:hidden"> </span>
+                      <br className="hidden lg:block" />
+                      {subtitleLine2}
+                    </>
+                  ) : null}
                 </p>
               </div>
             </EditableSection>
