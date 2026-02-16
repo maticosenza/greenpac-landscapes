@@ -50,8 +50,8 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           showDarkBg
-            ? "bg-[rgba(0,0,0,0.65)] backdrop-blur-[10px] shadow-lg py-2 lg:py-1.5"
-            : "bg-transparent py-5 lg:py-1.5"
+            ? "bg-[rgba(0,0,0,0.65)] backdrop-blur-[10px] shadow-lg py-1 lg:py-0.5"
+            : "bg-transparent py-3 lg:py-0.5"
         }`}
       >
         <div className="greenpac-container flex items-center justify-between">
@@ -76,7 +76,7 @@ const Header = () => {
               },
             ]}
           >
-            <LogoBlock iconClass="h-8 md:h-10 lg:h-12" textClass="h-16 md:h-20 lg:h-24 -ml-1" />
+            <LogoBlock iconClass="h-10 md:h-12 lg:h-14" textClass="h-20 md:h-24 lg:h-28 -ml-1" />
           </EditableSection>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
