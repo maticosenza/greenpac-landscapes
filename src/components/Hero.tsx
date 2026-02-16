@@ -179,8 +179,7 @@ const Hero = () => {
 
                 {/* H1 — editorial serif */}
                 <h1
-                  className="text-primary-foreground leading-[1.1] text-[clamp(36px,8vw,72px)] [text-wrap:balance]"
-                  style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+                  className="text-primary-foreground font-extrabold leading-[1.1] tracking-tight text-[clamp(36px,8vw,72px)] [text-wrap:balance]"
                 >
                   {h1Text}
                 </h1>
