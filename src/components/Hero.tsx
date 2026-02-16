@@ -14,7 +14,6 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
 import heroImageDefault from "@/assets/hero-banner-greenpac-v5.jpg";
-import DraggableHeroBlock from "@/components/DraggableHeroBlock";
 
 const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
   const { updateAsset } = useSiteContent();
@@ -136,9 +135,10 @@ const Hero = () => {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen overflow-hidden"
+      className="relative overflow-hidden"
+      style={{ minHeight: "100svh" }}
     >
-      {/* Background Image — single source of truth */}
+      {/* Background Image — full bleed cover */}
       <div className="absolute inset-0">
         <img
           src={heroAsset.url}
@@ -148,67 +148,70 @@ const Hero = () => {
           fetchPriority="high"
           decoding="async"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/30 via-transparent to-greenpac-dark/40" />
+        {/* Stronger gradient at top for header readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/50 via-greenpac-dark/15 to-greenpac-dark/45" />
       </div>
 
       {/* Banner edit — floating button, always clickable */}
       {isEditMode && <HeroBannerEditor />}
 
-      {/* Top Content - Title */}
-      <DraggableHeroBlock posKey="hero-h1-pos" defaultPos={{ xPct: 50, yPct: 30 }} className="w-[90vw] max-w-4xl text-center">
-        <EditableSection
-          sectionId="Hero Textos"
-          fields={[
-            { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria Agrícola de Calidad" },
-            { key: "hero-h1-line1", label: "H1 línea 1", type: "text", fallback: "Construimos el" },
-            { key: "hero-h1-highlight", label: "H1 destacado", type: "text", fallback: "Futuro del" },
-            { key: "hero-h1-line3", label: "H1 línea 3", type: "text", fallback: "Campo Argentino" },
-            { key: "hero-cta-products", label: "Botón productos", type: "text", fallback: "Ver Productos" },
-            { key: "hero-cta-quote", label: "Botón cotización", type: "text", fallback: "Solicitar Cotización" },
-          ]}
-        >
-          <div className="animate-slide-up">
-            <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
-              {kicker}
-            </p>
-            <h1 className="text-primary-foreground mb-6 mx-auto leading-[1.06] max-[480px]:text-[clamp(32px,7vw,40px)] max-[480px]:max-w-[18ch] max-[480px]:[text-wrap:balance] greenpac-title max-w-4xl">
-              <span className="md:hidden">
-                {h1Line1}<br />
-                <span className="greenpac-gradient-text">{h1Highlight}</span><br />
-                {h1Line3}
-              </span>
-              <span className="hidden md:inline">
-                {h1Line1}{" "}
-                <span className="greenpac-gradient-text">{h1Highlight.replace("del", "el Futuro").includes("Futuro") ? "el Futuro" : h1Highlight}</span>
-                <br />
-                del {h1Line3}
-              </span>
-            </h1>
-          </div>
-        </EditableSection>
-      </DraggableHeroBlock>
+      {/* Content container — flex layout, no absolute positioning */}
+      <div className="relative z-10 flex flex-col justify-center pt-24 sm:pt-28 pb-24 sm:pb-16 px-4 sm:px-6" style={{ minHeight: "100svh" }}>
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="max-w-3xl">
+            <EditableSection
+              sectionId="Hero Textos"
+              fields={[
+                { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria Agrícola de Calidad" },
+                { key: "hero-h1-line1", label: "H1 línea 1", type: "text", fallback: "Construimos el" },
+                { key: "hero-h1-highlight", label: "H1 destacado", type: "text", fallback: "Futuro del" },
+                { key: "hero-h1-line3", label: "H1 línea 3", type: "text", fallback: "Campo Argentino" },
+                { key: "hero-cta-products", label: "Botón productos", type: "text", fallback: "Ver Productos" },
+                { key: "hero-cta-quote", label: "Botón cotización", type: "text", fallback: "Solicitar Cotización" },
+              ]}
+            >
+              <div className="animate-slide-up">
+                <p className="hidden md:block text-primary font-display font-semibold text-lg md:text-xl mb-2 tracking-widest uppercase">
+                  {kicker}
+                </p>
+                <h1 className="text-primary-foreground mb-8 leading-[1.06] text-[clamp(32px,7vw,40px)] sm:text-5xl md:text-6xl lg:text-7xl [text-wrap:balance] greenpac-title">
+                  <span className="md:hidden">
+                    {h1Line1}<br />
+                    <span className="greenpac-gradient-text">{h1Highlight}</span><br />
+                    {h1Line3}
+                  </span>
+                  <span className="hidden md:inline">
+                    {h1Line1}{" "}
+                    <span className="greenpac-gradient-text">{h1Highlight.replace("del", "el Futuro").includes("Futuro") ? "el Futuro" : h1Highlight}</span>
+                    <br />
+                    del {h1Line3}
+                  </span>
+                </h1>
+              </div>
+            </EditableSection>
 
-      {/* Bottom Content - Buttons */}
-      <DraggableHeroBlock posKey="hero-cta-pos" defaultPos={{ xPct: 50, yPct: 78 }}>
-        <div className="flex flex-col-reverse sm:flex-row gap-4 justify-center animate-slide-up">
-          <Button variant="hero" size="lg" asChild>
-            <a href="#productos">{ctaProducts}</a>
-          </Button>
-          <Button variant="heroOutline" size="lg" asChild>
-            <a href="#cotizacion">{ctaQuote}</a>
-          </Button>
+            {/* CTAs — full width on mobile, inline on desktop */}
+            <div className="flex flex-col sm:flex-row gap-4 animate-slide-up">
+              <Button variant="heroOutline" size="lg" className="w-full sm:w-auto" asChild>
+                <a href="#cotizacion">{ctaQuote}</a>
+              </Button>
+              <Button variant="hero" size="lg" className="w-full sm:w-auto" asChild>
+                <a href="#productos">{ctaProducts}</a>
+              </Button>
+            </div>
+          </div>
         </div>
-      </DraggableHeroBlock>
+      </div>
 
       {/* Scroll indicator */}
       <a
         href="#productos"
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-primary-foreground/60 hover:text-primary transition-colors animate-float"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-primary-foreground/60 hover:text-primary transition-colors animate-float z-10"
       >
         <ChevronDown className="h-10 w-10" />
       </a>
 
-      {/* Decorative elements */}
+      {/* Bottom fade into next section */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
