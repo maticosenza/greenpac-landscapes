@@ -897,8 +897,8 @@ const ZonalReports = () => {
 
         {/* Charts Row 2: City bar + pie (ALL Argentina) */}
         <div ref={cityRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6 bg-white p-3 rounded-lg">
-          <div ref={cityBarCardRef} className="bg-white p-1 rounded-lg">
-          <Card>
+          <div ref={cityBarCardRef} className="bg-white p-1 rounded-lg h-full">
+          <Card className="h-full">
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -974,8 +974,8 @@ const ZonalReports = () => {
           </Card>
           </div>
 
-          <div ref={cityPieCardRef} className="bg-white p-1 rounded-lg">
-          <Card>
+          <div ref={cityPieCardRef} className="bg-white p-1 rounded-lg h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader className="pb-2 px-4 sm:px-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -986,7 +986,7 @@ const ZonalReports = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="px-1 sm:px-4">
+            <CardContent className="px-1 sm:px-4 flex-1 flex flex-col justify-center">
               {allCityStats.length > 0 ? (
                 <div ref={cityPieRef} className="w-full overflow-hidden flex justify-center">
                   <ResponsiveContainer width="100%" height={pieChartHeight}>
