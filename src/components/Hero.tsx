@@ -155,8 +155,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content container — uses same container as header for alignment */}
-      <div className="relative z-10 flex flex-col justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-2xl pt-28 sm:pt-32 pb-24 sm:pb-16">
+      <div className="relative z-10 flex flex-col justify-end sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
+        <div className="max-w-[560px] pt-24 sm:pt-32 pb-32 sm:pb-20">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
@@ -167,7 +167,7 @@ const Hero = () => {
                 { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
               ]}
             >
-              <div className="animate-slide-up space-y-5">
+              <div className="animate-slide-up space-y-4 sm:space-y-5">
                 {/* Kicker with leaf icon */}
                 <div className="flex items-center gap-2">
                   <Leaf className="h-4 w-4 text-primary shrink-0" />
@@ -177,23 +177,23 @@ const Hero = () => {
                 </div>
 
                 {/* H1 */}
-                <h1 className="text-primary-foreground font-extrabold leading-[1.12] tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem]">
+                <h1 className="text-primary-foreground font-extrabold leading-[1.08] sm:leading-[1.12] tracking-tight text-[1.75rem] sm:text-4xl md:text-5xl lg:text-[3.25rem]">
                   Tecnología y<br />potencia para el<br />campo argentino
                 </h1>
 
                 {/* Subtitle */}
-                <p className="text-primary-foreground/80 text-sm sm:text-base md:text-lg max-w-lg leading-relaxed">
+                <p className="text-primary-foreground/85 text-[0.9rem] sm:text-base md:text-lg max-w-[44ch] leading-relaxed">
                   {subtitle}
                 </p>
               </div>
             </EditableSection>
 
-            {/* CTAs — full width on mobile, inline on desktop */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-7 animate-slide-up">
-              <Button variant="heroOutline" size="lg" className="w-full sm:w-auto" asChild>
+            {/* CTAs — stack vertical full-width on mobile, inline on sm+ */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-7 animate-slide-up">
+              <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-12 sm:h-auto" asChild>
                 <a href="#cotizacion">{ctaQuote}</a>
               </Button>
-              <Button variant="hero" size="lg" className="w-full sm:w-auto" asChild>
+              <Button variant="hero" size="lg" className="w-full sm:w-auto h-12 sm:h-auto" asChild>
                 <a href="#productos">{ctaProducts}</a>
               </Button>
             </div>
