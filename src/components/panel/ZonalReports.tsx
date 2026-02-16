@@ -508,14 +508,56 @@ const ZonalReports = () => {
     }
   }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, provinceChartData]);
 
+  const addTwoCardsToPdf = async (doc: jsPDF, leftImg: string, rightImg: string, y: number): Promise<number> => {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    const gap = 6;
+    const bottomMargin = 6;
+    const cardW = (pageW - margin * 2 - gap) / 2;
+    const availH = pageH - y - bottomMargin;
+
+    const loadImg = (src: string) => new Promise<HTMLImageElement>((resolve) => {
+      const i = new Image(); i.onload = () => resolve(i); i.src = src;
+    });
+    const [imgL, imgR] = await Promise.all([loadImg(leftImg), loadImg(rightImg)]);
+    const ratioL = imgL.naturalHeight / (imgL.naturalWidth || 1);
+    const ratioR = imgR.naturalHeight / (imgR.naturalWidth || 1);
+
+    // Use the taller card's ratio to determine uniform height
+    let cardH = Math.max(cardW * ratioL, cardW * ratioR);
+    if (cardH > availH) cardH = availH;
+
+    // Scale each image to fit within cardW x cardH maintaining aspect ratio
+    const fitImg = (ratio: number) => {
+      let w = cardW, h = w * ratio;
+      if (h > cardH) { h = cardH; w = h / ratio; }
+      return { w, h };
+    };
+    const left = fitImg(ratioL);
+    const right = fitImg(ratioR);
+
+    const leftX = margin + (cardW - left.w) / 2;
+    const rightX = margin + cardW + gap + (cardW - right.w) / 2;
+    const leftY = y + (cardH - left.h) / 2;
+    const rightY = y + (cardH - right.h) / 2;
+
+    doc.addImage(leftImg, "PNG", leftX, leftY, left.w, left.h);
+    doc.addImage(rightImg, "PNG", rightX, rightY, right.w, right.h);
+    return y + cardH + 3;
+  };
+
   const handleExportCityPDF = useCallback(async () => {
-    if (!cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    if (!cityBarCardRef.current || !cityPieCardRef.current) { toast.error("No se encontró el contenido"); return; }
     toast.info("Generando PDF…");
     try {
-      const cityImg = await capturePng(cityRowRef.current);
+      const [barImg, pieImg] = await Promise.all([
+        capturePng(cityBarCardRef.current),
+        capturePng(cityPieCardRef.current),
+      ]);
       const doc = new jsPDF({ orientation: "landscape" });
       let y = await drawPdfHeader(doc, "Reporte por Ciudad");
-      y = await addImageToPdf(doc, cityImg, y);
+      y = await addTwoCardsToPdf(doc, barImg, pieImg, y);
       await addCityTable(doc, cityChartData);
       doc.save(`Reporte_A_Ciudad.pdf`);
       toast.success("PDF Ciudad descargado");
@@ -526,12 +568,13 @@ const ZonalReports = () => {
   }, [filterProvince, filterStatus, filterDateFrom, filterDateTo, cityChartData]);
 
   const handleExportAllPDF = useCallback(async () => {
-    if (!provinceRowRef.current || !cityRowRef.current) { toast.error("No se encontró el contenido"); return; }
+    if (!provinceRowRef.current || !cityBarCardRef.current || !cityPieCardRef.current) { toast.error("No se encontró el contenido"); return; }
     toast.info("Generando PDF completo…");
     try {
-      const [provImg, cityImg] = await Promise.all([
+      const [provImg, cityBarImg, cityPieImg] = await Promise.all([
         capturePng(provinceRowRef.current),
-        capturePng(cityRowRef.current),
+        capturePng(cityBarCardRef.current),
+        capturePng(cityPieCardRef.current),
       ]);
       const doc = new jsPDF({ orientation: "landscape" });
       let y = await drawPdfHeader(doc, "Reportes Zonales — Provincia");
@@ -539,7 +582,7 @@ const ZonalReports = () => {
       await addProvinceTable(doc, provinceChartData);
       doc.addPage();
       y = await drawPdfHeader(doc, "Reportes Zonales — Ciudad");
-      y = await addImageToPdf(doc, cityImg, y);
+      y = await addTwoCardsToPdf(doc, cityBarImg, cityPieImg, y);
       await addCityTable(doc, cityChartData);
       doc.save(`reportes-zonales-${new Date().toISOString().split("T")[0]}.pdf`);
       toast.success("PDF completo descargado");
