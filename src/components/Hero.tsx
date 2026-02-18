@@ -170,19 +170,7 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-end sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        {/* Kicker — draggable independently */}
-        <DraggableHeroBlock posKey="hero-kicker-pos" defaultPos={{ xPct: 30, yPct: 38 }}>
-          <div className="flex items-center gap-2.5">
-            <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-            <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] md:text-[0.85rem] lg:text-[0.85rem] tracking-[0.2em] uppercase whitespace-nowrap">
-              {kicker}
-            </p>
-          </div>
-        </DraggableHeroBlock>
-
-        {/* Main content block — draggable */}
-        <DraggableHeroBlock posKey="hero-content-pos" defaultPos={{ xPct: 32, yPct: 55 }}>
-          <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-32 sm:pb-20 lg:pb-24">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
@@ -195,6 +183,14 @@ const Hero = () => {
               ]}
             >
               <div className={`animate-slide-up space-y-4 sm:space-y-5 lg:space-y-7 xl:space-y-8 flex flex-col ${itemsClass(h1Align)}`}>
+                {/* Kicker with leaf icon */}
+                <div className="flex items-center gap-2.5">
+                  <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
+                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] md:text-[0.85rem] lg:text-[0.85rem] tracking-[0.2em] uppercase">
+                    {kicker}
+                  </p>
+                </div>
+
                 {/* H1 with alignment toggle */}
                 <div className="w-full relative">
                   {isEditMode && (
@@ -237,8 +233,7 @@ const Hero = () => {
                 <a href="#productos">{ctaProducts}</a>
               </Button>
             </div>
-          </div>
-        </DraggableHeroBlock>
+        </div>
       </div>
 
       {/* Scroll indicator */}
