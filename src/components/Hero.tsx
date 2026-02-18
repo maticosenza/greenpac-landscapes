@@ -13,6 +13,8 @@ import {
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
+import DraggableHeroBlock from "@/components/DraggableHeroBlock";
+import HeroAlignmentToggle from "@/components/HeroAlignmentToggle";
 import heroImageDefault from "@/assets/hero-banner-greenpac-v5.jpg";
 
 const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
@@ -132,13 +134,25 @@ const Hero = () => {
   const ctaQuote = getText("hero-cta-primary", "Solicitar Cotización");
   const ctaProducts = getText("hero-cta-secondary", "Ver Productos");
 
+  const h1Align = getText("hero-h1-align", "left");
+  const subAlign = getText("hero-sub-align", "left");
+
+  const alignClass = (align: string) =>
+    align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
+
+  const itemsClass = (align: string) =>
+    align === "center" ? "items-center" : align === "right" ? "items-end" : "items-start";
+
+  const justifyClass = (align: string) =>
+    align === "center" ? "sm:justify-center" : align === "right" ? "sm:justify-end" : "sm:justify-start";
+
   return (
     <section
       id="inicio"
       className="relative overflow-hidden"
       style={{ minHeight: "100svh" }}
     >
-      {/* Background Image — full bleed cover */}
+      {/* Background Image */}
       <div className="absolute inset-0">
         <img
           src={heroAsset.url}
@@ -148,16 +162,27 @@ const Hero = () => {
           fetchPriority="high"
           decoding="async"
         />
-        {/* Stronger gradient at top for header readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-greenpac-dark/60 via-greenpac-dark/25 to-greenpac-dark/50" />
       </div>
 
-      {/* Banner edit — floating button, always clickable */}
+      {/* Banner edit */}
       {isEditMode && <HeroBannerEditor />}
 
-      {/* Content container — uses same container as header for alignment */}
+      {/* Content */}
       <div className="relative z-10 flex flex-col justify-end sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-32 sm:pb-20 lg:pb-24">
+        {/* Kicker — draggable independently */}
+        <DraggableHeroBlock posKey="hero-kicker-pos" defaultPos={{ xPct: 30, yPct: 38 }}>
+          <div className="flex items-center gap-2.5">
+            <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
+            <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] md:text-[0.85rem] lg:text-[0.85rem] tracking-[0.2em] uppercase whitespace-nowrap">
+              {kicker}
+            </p>
+          </div>
+        </DraggableHeroBlock>
+
+        {/* Main content block — draggable */}
+        <DraggableHeroBlock posKey="hero-content-pos" defaultPos={{ xPct: 32, yPct: 55 }}>
+          <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
@@ -169,35 +194,42 @@ const Hero = () => {
                 { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
               ]}
             >
-              <div className="animate-slide-up space-y-4 sm:space-y-5 lg:space-y-7 xl:space-y-8">
-                {/* Kicker with leaf icon */}
-                <div className="flex items-center gap-2.5">
-                  <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] md:text-[0.85rem] lg:text-[0.85rem] tracking-[0.2em] uppercase">
-                    {kicker}
-                  </p>
+              <div className={`animate-slide-up space-y-4 sm:space-y-5 lg:space-y-7 xl:space-y-8 flex flex-col ${itemsClass(h1Align)}`}>
+                {/* H1 with alignment toggle */}
+                <div className="w-full relative">
+                  {isEditMode && (
+                    <div className="absolute -top-8 left-0 z-20">
+                      <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
+                    </div>
+                  )}
+                  <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.35rem,4.6vw,5.1rem)] md:text-[3rem] lg:text-[clamp(2.35rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
+                    Tecnología y<br />potencia para el<br />campo argentino
+                  </h1>
                 </div>
 
-                {/* H1 */}
-                <h1 className="text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.35rem,4.6vw,5.1rem)] md:text-[3rem] lg:text-[clamp(2.35rem,4.6vw,5.1rem)]">
-                  Tecnología y<br />potencia para el<br />campo argentino
-                </h1>
-
-                <p className="text-primary-foreground/85 text-[clamp(1.02rem,1.5vw,1.55rem)] max-w-[52ch] leading-relaxed">
-                  {subtitleLine1}
-                  {subtitleLine2 ? (
-                    <>
-                      <span className="inline lg:hidden"> </span>
-                      <br className="hidden lg:block" />
-                      {subtitleLine2}
-                    </>
-                  ) : null}
-                </p>
+                {/* Subtitle with alignment toggle */}
+                <div className="w-full relative">
+                  {isEditMode && (
+                    <div className="absolute -top-8 left-0 z-20">
+                      <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
+                    </div>
+                  )}
+                  <p className={`text-primary-foreground/85 text-[clamp(1.02rem,1.5vw,1.55rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
+                    {subtitleLine1}
+                    {subtitleLine2 ? (
+                      <>
+                        <span className="inline lg:hidden"> </span>
+                        <br className="hidden lg:block" />
+                        {subtitleLine2}
+                      </>
+                    ) : null}
+                  </p>
+                </div>
               </div>
             </EditableSection>
 
-            {/* CTAs — stack vertical full-width on mobile, inline on sm+ */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 mt-7 sm:mt-8 lg:mt-10 animate-slide-up">
+            {/* CTAs */}
+            <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 mt-7 sm:mt-8 lg:mt-10 animate-slide-up ${justifyClass(h1Align)}`}>
               <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
                 <a href="#cotizacion">{ctaQuote}</a>
               </Button>
@@ -205,7 +237,8 @@ const Hero = () => {
                 <a href="#productos">{ctaProducts}</a>
               </Button>
             </div>
-        </div>
+          </div>
+        </DraggableHeroBlock>
       </div>
 
       {/* Scroll indicator */}
@@ -216,7 +249,7 @@ const Hero = () => {
         <ChevronDown className="h-10 w-10" />
       </a>
 
-      {/* Bottom fade into next section */}
+      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
