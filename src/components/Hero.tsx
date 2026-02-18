@@ -21,32 +21,37 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
   const { updateAsset } = useSiteContent();
   const [isOpen, setIsOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [mobileFile, setMobileFile] = useState<File | null>(null);
   const [altText, setAltText] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [mobilePreview, setMobilePreview] = useState<string | null>(null);
 
-  const handleFileChange = (f: File | null) => {
-    setFile(f);
-    if (f) {
-      const url = URL.createObjectURL(f);
-      setPreview(url);
+  const handleFileChange = (f: File | null, mobile = false) => {
+    if (mobile) {
+      setMobileFile(f);
+      setMobilePreview(f ? URL.createObjectURL(f) : null);
     } else {
-      setPreview(null);
+      setFile(f);
+      setPreview(f ? URL.createObjectURL(f) : null);
     }
   };
 
   const handleSave = async () => {
-    if (!file) return;
+    if (!file && !mobileFile) return;
     setIsSaving(true);
     try {
-      await updateAsset.mutateAsync({
-        sectionKey: "hero-banner",
-        file,
-        altText,
-      });
+      if (file) {
+        await updateAsset.mutateAsync({ sectionKey: "hero-banner", file, altText });
+      }
+      if (mobileFile) {
+        await updateAsset.mutateAsync({ sectionKey: "hero-banner-mobile", file: mobileFile, altText: altText || "Hero móvil" });
+      }
       setIsOpen(false);
       setFile(null);
+      setMobileFile(null);
       setPreview(null);
+      setMobilePreview(null);
       onSaved?.();
     } finally {
       setIsSaving(false);
@@ -65,11 +70,11 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
         Editar Banner
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar sección: Hero Banner</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-5 py-2">
             <div className="space-y-1.5">
               <Label>Texto alternativo (alt)</Label>
               <Input
@@ -78,10 +83,12 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
                 placeholder="Campo argentino con silobolsas"
               />
             </div>
+
+            {/* Desktop banner */}
             <div className="space-y-2">
-              <Label>Imagen de fondo</Label>
+              <Label>🖥️ Banner Desktop</Label>
               <p className="text-xs text-muted-foreground">
-                Recomendado: 1920×1080 px (JPG/WEBP). Mantener el sujeto centrado porque la imagen se recorta en distintas pantallas.
+                Recomendado: 1920×1080 px (JPG/WEBP).
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -103,7 +110,37 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
                 />
               </div>
               {preview && (
-                <img src={preview} alt="Preview" className="w-full max-h-48 object-cover rounded-lg border border-border/50 mt-2" />
+                <img src={preview} alt="Preview desktop" className="w-full max-h-36 object-cover rounded-lg border border-border/50 mt-2" />
+              )}
+            </div>
+
+            {/* Mobile banner */}
+            <div className="space-y-2">
+              <Label>📱 Banner Móvil</Label>
+              <p className="text-xs text-muted-foreground">
+                Recomendado: 1080×1920 px (JPG/WEBP). Formato vertical para celulares.
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => document.getElementById("hero-banner-mobile-upload")?.click()}
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  {mobileFile ? mobileFile.name : "Subir imagen"}
+                </Button>
+                <input
+                  id="hero-banner-mobile-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => handleFileChange(e.target.files?.[0] || null, true)}
+                />
+              </div>
+              {mobilePreview && (
+                <img src={mobilePreview} alt="Preview móvil" className="w-32 max-h-48 object-cover rounded-lg border border-border/50 mt-2" />
               )}
             </div>
           </div>
@@ -111,7 +148,7 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
             <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isSaving}>
               <X className="h-4 w-4 mr-1" /> Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={isSaving || !file}>
+            <Button onClick={handleSave} disabled={isSaving || (!file && !mobileFile)}>
               {isSaving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
               Guardar
             </Button>
@@ -127,6 +164,7 @@ const Hero = () => {
   const { isEditMode } = useEditMode();
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
+  const heroMobileAsset = getAsset("hero-banner-mobile", "", "Hero móvil");
   const kicker = getText("hero-kicker", "Maquinaria de alto rendimiento");
   const h1Text = getText("hero-title", "Tecnología y potencia para el campo argentino");
   const subtitleLine1 = getText("hero-subtitle-line1", "Equipos listos para trabajar, con asesoramiento experto.");
@@ -154,10 +192,22 @@ const Hero = () => {
     >
       {/* Background Image */}
       <div className="absolute inset-0">
+        {/* Mobile image */}
+        {heroMobileAsset.url && (
+          <img
+            src={heroMobileAsset.url}
+            alt={heroMobileAsset.alt}
+            className="w-full h-full object-cover sm:hidden"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
+        )}
+        {/* Desktop image (or fallback on mobile if no mobile banner) */}
         <img
           src={heroAsset.url}
           alt={heroAsset.alt}
-          className="w-full h-full object-cover max-[480px]:object-[50%_70%] object-center lg:object-[50%_65%]"
+          className={`w-full h-full object-cover object-center lg:object-[50%_65%] ${heroMobileAsset.url ? 'hidden sm:block' : 'max-[480px]:object-[50%_70%]'}`}
           loading="eager"
           fetchPriority="high"
           decoding="async"

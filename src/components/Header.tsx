@@ -124,8 +124,16 @@ const Header = () => {
       </header>
 
       {isEditMode && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground text-center text-xs py-1 font-medium pointer-events-none">
-          ✏️ Modo edición activo — hacé hover sobre las secciones para editarlas
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground text-center text-xs py-1 font-medium flex items-center justify-center gap-3">
+          <span className="pointer-events-none">✏️ Modo edición activo — hacé hover sobre las secciones para editarlas</span>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-6 text-xs px-3 pointer-events-auto"
+            onClick={toggleEditMode}
+          >
+            Confirmar cambios
+          </Button>
         </div>
       )}
 
