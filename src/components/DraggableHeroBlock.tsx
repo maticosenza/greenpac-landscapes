@@ -4,56 +4,61 @@ import { Button } from "@/components/ui/button";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useEditMode } from "@/hooks/useEditMode";
 
-interface Position {
-  xPct: number;
-  yPct: number;
+interface Offset {
+  x: number;
+  y: number;
 }
 
 interface Props {
   posKey: string;
-  defaultPos: Position;
   children: React.ReactNode;
   className?: string;
 }
 
-const DraggableHeroBlock = ({ posKey, defaultPos, children, className = "" }: Props) => {
+/**
+ * Wraps a hero block so it stays in normal document flow by default.
+ * In edit mode the user can click "Mover" to drag it; the offset (px)
+ * is persisted via site_content and applied as a CSS translate so
+ * elements never overlap in production.
+ */
+const DraggableHeroBlock = ({ posKey, children, className = "" }: Props) => {
   const { getText, updateText } = useSiteContent();
   const { isEditMode } = useEditMode();
 
+  // Persisted offset in pixels
   const raw = getText(posKey, "");
-  let basePos = defaultPos;
+  let savedOffset: Offset = { x: 0, y: 0 };
   try {
-    if (raw) basePos = JSON.parse(raw);
+    if (raw) savedOffset = JSON.parse(raw);
   } catch {}
 
-  const [localPos, setLocalPos] = useState<Position | null>(null);
+  const [localOffset, setLocalOffset] = useState<Offset | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
-  const dragStartRef = useRef({ x: 0, y: 0, startPos: defaultPos });
+  const dragStartRef = useRef({ clientX: 0, clientY: 0, startOffset: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
 
-  const pos = localPos ?? basePos;
+  const offset = localOffset ?? savedOffset;
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!isMoving || !ref.current) return;
       e.preventDefault();
-      dragStartRef.current = { x: e.clientX, y: e.clientY, startPos: { ...pos } };
+      dragStartRef.current = { clientX: e.clientX, clientY: e.clientY, startOffset: { ...offset } };
       setIsDragging(true);
       ref.current.setPointerCapture(e.pointerId);
     },
-    [isMoving, pos],
+    [isMoving, offset],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (!isDragging || !ref.current) return;
-      const parent = ref.current.parentElement!.getBoundingClientRect();
-      const dx = e.clientX - dragStartRef.current.x;
-      const dy = e.clientY - dragStartRef.current.y;
-      setLocalPos({
-        xPct: Math.max(10, Math.min(90, dragStartRef.current.startPos.xPct + (dx / parent.width) * 100)),
-        yPct: Math.max(5, Math.min(95, dragStartRef.current.startPos.yPct + (dy / parent.height) * 100)),
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartRef.current.clientX;
+      const dy = e.clientY - dragStartRef.current.clientY;
+      setLocalOffset({
+        x: dragStartRef.current.startOffset.x + dx,
+        y: dragStartRef.current.startOffset.y + dy,
       });
     },
     [isDragging],
@@ -65,29 +70,29 @@ const DraggableHeroBlock = ({ posKey, defaultPos, children, className = "" }: Pr
   }, [isDragging]);
 
   const handleConfirm = useCallback(() => {
-    if (localPos) {
-      updateText.mutate({ key: posKey, value: JSON.stringify(localPos), contentType: "json" });
+    if (localOffset) {
+      updateText.mutate({ key: posKey, value: JSON.stringify(localOffset), contentType: "json" });
     }
     setIsMoving(false);
-  }, [localPos, posKey, updateText]);
+  }, [localOffset, posKey, updateText]);
 
   const handleReset = useCallback(() => {
-    setLocalPos(null);
+    const zero = { x: 0, y: 0 };
+    setLocalOffset(zero);
     setIsMoving(false);
-    updateText.mutate({ key: posKey, value: JSON.stringify(defaultPos), contentType: "json" });
-  }, [defaultPos, posKey, updateText]);
+    updateText.mutate({ key: posKey, value: JSON.stringify(zero), contentType: "json" });
+  }, [posKey, updateText]);
 
   return (
     <div
       ref={ref}
       style={{
-        position: "absolute",
-        left: `${pos.xPct}%`,
-        top: `${pos.yPct}%`,
-        transform: "translate(-50%, -50%)",
+        position: "relative",
+        transform: `translate(${offset.x}px, ${offset.y}px)`,
         touchAction: isMoving ? "none" : "auto",
+        transition: isDragging ? "none" : "transform 0.2s ease",
       }}
-      className={`z-10 ${
+      className={`${
         isMoving
           ? `cursor-move select-none rounded-lg p-2 ${
               isDragging ? "ring-2 ring-primary scale-[1.02]" : "ring-1 ring-dashed ring-primary/40 hover:ring-2 hover:ring-primary/60"
@@ -101,7 +106,7 @@ const DraggableHeroBlock = ({ posKey, defaultPos, children, className = "" }: Pr
     >
       {children}
       {isEditMode && !isDragging && (
-        <div className="absolute -top-9 right-0 flex items-center gap-1">
+        <div className="absolute -top-9 right-0 flex items-center gap-1 z-20">
           {!isMoving ? (
             <>
               <Button

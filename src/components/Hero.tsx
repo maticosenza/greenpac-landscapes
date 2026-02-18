@@ -170,10 +170,9 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-end sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="pt-24 sm:pt-32 pb-32 sm:pb-20 lg:pb-24 w-full" style={{ position: "relative", minHeight: "60vh" }}>
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-32 sm:pb-20 lg:pb-24">
           {/* Text block: kicker + h1 + subtitle — draggable */}
-          <DraggableHeroBlock posKey="hero-text-block-pos" defaultPos={{ xPct: 30, yPct: 40 }}>
-            <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
+          <DraggableHeroBlock posKey="hero-text-block-pos">
             <EditableSection
               sectionId="Hero Textos"
               fields={[
@@ -226,12 +225,11 @@ const Hero = () => {
                 </div>
               </div>
             </EditableSection>
-            </div>
           </DraggableHeroBlock>
 
           {/* CTA buttons — draggable */}
-          <DraggableHeroBlock posKey="hero-cta-block-pos" defaultPos={{ xPct: 30, yPct: 75 }}>
-            <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 animate-slide-up ${justifyClass(h1Align)}`}>
+          <DraggableHeroBlock posKey="hero-cta-block-pos">
+            <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 mt-7 sm:mt-8 lg:mt-10 animate-slide-up ${justifyClass(h1Align)}`}>
               <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
                 <a href="#cotizacion">{ctaQuote}</a>
               </Button>
