@@ -218,14 +218,28 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
 
       {/* Team Members Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Shield className="h-5 w-5" />
-            Miembros del Equipo
-          </CardTitle>
-          <CardDescription>
-            Empleados y administradores con acceso al panel interno
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-2">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Shield className="h-5 w-5" />
+              Miembros del Equipo
+            </CardTitle>
+            <CardDescription>
+              Empleados y administradores con acceso al panel interno
+            </CardDescription>
+          </div>
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
+            onClick={() => {
+              setSelectedUser(null);
+              setSelectedRole("employee");
+              setIsAddRoleDialogOpen(true);
+            }}
+          >
+            <UserPlus className="h-4 w-4 mr-1.5" />
+            Agregar miembro
+          </Button>
         </CardHeader>
         <CardContent>
           {teamMembers && teamMembers.length > 0 ? (
@@ -360,11 +374,25 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
 
       {/* All Users Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">Todos los Usuarios</CardTitle>
-          <CardDescription>
-            Lista completa de usuarios registrados. Podés asignar roles de empleado o admin.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-2">
+          <div>
+            <CardTitle className="text-lg sm:text-xl">Todos los Usuarios</CardTitle>
+            <CardDescription>
+              Lista completa de usuarios registrados. Podés asignar roles de empleado o admin.
+            </CardDescription>
+          </div>
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
+            onClick={() => {
+              setSelectedUser(null);
+              setSelectedRole("customer");
+              setIsAddRoleDialogOpen(true);
+            }}
+          >
+            <UserPlus className="h-4 w-4 mr-1.5" />
+            Agregar usuario
+          </Button>
         </CardHeader>
         <CardContent>
           {filteredUsers && filteredUsers.length > 0 ? (
