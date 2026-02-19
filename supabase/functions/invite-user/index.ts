@@ -94,18 +94,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Use Supabase's built-in invite to create the user and generate the magic link
-    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-      data: {
+    // Create user WITHOUT sending the default Supabase/Lovable invitation email
+    const { data: userData, error: createError } = await adminClient.auth.admin.createUser({
+      email,
+      email_confirm: false,
+      user_metadata: {
         invited_role: role || "customer",
         full_name: email.split("@")[0],
       },
-      redirectTo: `https://greenpac-landscapes.lovable.app/panel`,
     });
 
-    if (inviteError) {
-      console.error("Invite error:", inviteError);
-      return new Response(JSON.stringify({ error: inviteError.message }), {
+    if (createError) {
+      console.error("Create user error:", createError);
+      return new Response(JSON.stringify({ error: createError.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -114,13 +115,13 @@ Deno.serve(async (req) => {
     console.log("User created successfully:", email);
 
     // Assign role if specified
-    if (role && (role === "employee" || role === "admin" || role === "vendedor") && inviteData?.user) {
+    if (role && (role === "employee" || role === "admin" || role === "vendedor") && userData?.user) {
       await adminClient
         .from("user_roles")
-        .insert({ user_id: inviteData.user.id, role });
+        .insert({ user_id: userData.user.id, role });
     }
 
-    // Generate a new invitation link via Supabase admin
+    // Generate the invitation link (does NOT send any email)
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "invite",
       email,
@@ -134,9 +135,8 @@ Deno.serve(async (req) => {
 
     if (linkError || !linkData?.properties?.action_link) {
       console.error("Link generation error:", linkError);
-      // Still success — user was created, email via Supabase default will be sent
       return new Response(
-        JSON.stringify({ message: "Usuario invitado correctamente. Se envió un email de invitación." }),
+        JSON.stringify({ message: "Usuario creado. No se pudo generar el enlace de invitación." }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
