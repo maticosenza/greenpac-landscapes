@@ -94,49 +94,50 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create user WITHOUT sending the default Supabase/Lovable invitation email
-    const { data: userData, error: createError } = await adminClient.auth.admin.createUser({
-      email,
-      email_confirm: false,
-      user_metadata: {
+    // Step 1: Use inviteUserByEmail to create user in proper "invited" state
+    // This allows updateUser(password) to work correctly after the user clicks the link.
+    // The default email sent by Lovable Cloud hook will be superseded by a new token
+    // generated in step 2 (old token is invalidated when a new invite link is generated).
+    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: {
         invited_role: role || "customer",
         full_name: email.split("@")[0],
       },
+      redirectTo: `https://greenpac-landscapes.lovable.app/panel`,
     });
 
-    if (createError) {
-      console.error("Create user error:", createError);
-      return new Response(JSON.stringify({ error: createError.message }), {
+    if (inviteError) {
+      console.error("Invite error:", inviteError);
+      return new Response(JSON.stringify({ error: inviteError.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log("User created successfully:", email);
+    console.log("User invited successfully:", email);
 
     // Assign role if specified
-    if (role && (role === "employee" || role === "admin" || role === "vendedor") && userData?.user) {
+    if (role && (role === "employee" || role === "admin" || role === "vendedor") && inviteData?.user) {
       await adminClient
         .from("user_roles")
-        .insert({ user_id: userData.user.id, role });
+        .insert({ user_id: inviteData.user.id, role });
     }
 
-    // Generate the invitation link (does NOT send any email)
+    // Step 2: Generate a FRESH invite link — this invalidates the token from Step 1
+    // so the Lovable Cloud hook email link won't work, only our Resend email will.
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "invite",
       email,
       options: {
         redirectTo: `https://greenpac-landscapes.lovable.app/panel`,
-        data: {
-          invited_role: role || "customer",
-        },
+        data: { invited_role: role || "customer" },
       },
     });
 
     if (linkError || !linkData?.properties?.action_link) {
       console.error("Link generation error:", linkError);
       return new Response(
-        JSON.stringify({ message: "Usuario creado. No se pudo generar el enlace de invitación." }),
+        JSON.stringify({ message: "Usuario invitado correctamente." }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
