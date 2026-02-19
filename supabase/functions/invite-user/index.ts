@@ -94,42 +94,41 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Step 1: Use inviteUserByEmail to create user in proper "invited" state
-    // This allows updateUser(password) to work correctly after the user clicks the link.
-    // The default email sent by Lovable Cloud hook will be superseded by a new token
-    // generated in step 2 (old token is invalidated when a new invite link is generated).
-    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-      data: {
+    // Use admin.createUser to create the user WITHOUT triggering the Lovable Cloud email hook.
+    // This avoids the "double token" problem (two competing invite emails).
+    // email_confirm: false keeps the user in "invited" state so updateUser(password) works correctly.
+    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+      email,
+      email_confirm: false,
+      user_metadata: {
         invited_role: role || "customer",
         full_name: email.split("@")[0],
       },
-      redirectTo: `https://greenpac.com.ar/panel`,
     });
 
-    if (inviteError) {
-      console.error("Invite error:", inviteError);
-      return new Response(JSON.stringify({ error: inviteError.message }), {
+    if (createError || !newUser?.user) {
+      console.error("Create user error:", createError);
+      return new Response(JSON.stringify({ error: createError?.message || "Error al crear usuario" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log("User invited successfully:", email);
+    console.log("User created successfully:", email, newUser.user.id);
 
     // Assign role if specified
-    if (role && (role === "employee" || role === "admin" || role === "vendedor") && inviteData?.user) {
+    if (role && (role === "employee" || role === "admin" || role === "vendedor")) {
       await adminClient
         .from("user_roles")
-        .insert({ user_id: inviteData.user.id, role });
+        .insert({ user_id: newUser.user.id, role });
     }
 
-    // Step 2: Generate a FRESH invite link — this invalidates the token from Step 1
-    // so the Lovable Cloud hook email link won't work, only our Resend email will.
+    // Generate the ONE invite link — no competing tokens
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "invite",
       email,
       options: {
-        redirectTo: `https://greenpac.com.ar/panel`,
+        redirectTo: `https://greenpac.com.ar/auth`,
         data: { invited_role: role || "customer" },
       },
     });
@@ -137,15 +136,15 @@ Deno.serve(async (req) => {
     if (linkError || !linkData?.properties?.action_link) {
       console.error("Link generation error:", linkError);
       return new Response(
-        JSON.stringify({ message: "Usuario invitado correctamente." }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Usuario creado pero no se pudo generar el enlace de invitación." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const inviteLink = linkData.properties.action_link;
     const roleName = role === "admin" ? "Administrador" : role === "employee" ? "Empleado" : role === "vendedor" ? "Vendedor" : "Cliente";
 
-    // Send custom invitation email via Resend from info@greenpac.com.ar
+    // Send invitation email via Resend from info@greenpac.com.ar
     const emailHtml = `
       <!DOCTYPE html>
       <html lang="es">
@@ -163,7 +162,7 @@ Deno.serve(async (req) => {
                 <tr>
                   <td style="background-color:#1a5c2a;padding:32px 40px;text-align:center;">
                     <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;letter-spacing:1px;">GREENPAC</h1>
-                    <p style="color:#a8d5b5;margin:8px 0 0;font-size:14px;">Soluciones de packaging sustentable</p>
+                    <p style="color:#a8d5b5;margin:8px 0 0;font-size:14px;">Maquinaria Agrícola</p>
                   </td>
                 </tr>
                 <!-- Body -->
@@ -225,7 +224,6 @@ Deno.serve(async (req) => {
     if (!resendResponse.ok) {
       const resendError = await resendResponse.text();
       console.error("Resend error:", resendError);
-      // Still return success since user was created
     } else {
       console.log("Invitation email sent via Resend to:", email);
     }

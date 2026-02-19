@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import logo from "@/assets/greenpac-logo-new.png";
 import ForgotPasswordDialog from "@/components/auth/ForgotPasswordDialog";
+import CreatePasswordDialog from "@/components/auth/CreatePasswordDialog";
 
 const loginSchema = z.object({
   email: z.string().email("Ingresá un email válido"),
@@ -41,17 +42,18 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp, isLoading: authLoading } = useAuth();
+  const { user, signIn, signUp, isLoading: authLoading, needsPasswordSetup, clearPasswordSetup } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  // Redirect to panel only when user is logged in AND doesn't need password setup
   useEffect(() => {
-    if (user && !authLoading) {
+    if (user && !authLoading && !needsPasswordSetup) {
       navigate("/panel");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, needsPasswordSetup]);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -99,6 +101,12 @@ const Auth = () => {
       setRegisteredEmail(data.email);
       setShowEmailConfirmation(true);
     }
+  };
+
+  // Handle successful password creation from invite flow
+  const handlePasswordCreated = () => {
+    clearPasswordSetup();
+    navigate("/panel");
   };
 
   if (authLoading) {
@@ -173,6 +181,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-muted flex flex-col">
+      {/* Create password dialog for invited users — shown on top of auth page */}
+      <CreatePasswordDialog
+        open={needsPasswordSetup}
+        onSuccess={handlePasswordCreated}
+      />
+
       <div className="p-4">
         <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
