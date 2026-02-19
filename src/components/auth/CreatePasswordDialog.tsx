@@ -51,6 +51,7 @@ const CreatePasswordDialog = ({ open, onSuccess }: CreatePasswordDialogProps) =>
 
     const { error } = await supabase.auth.updateUser({
       password: data.password,
+      data: { invited_role: null },
     });
 
     setIsSubmitting(false);

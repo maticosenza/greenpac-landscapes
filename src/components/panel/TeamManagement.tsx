@@ -802,7 +802,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           <DialogHeader>
             <DialogTitle>Invitar Miembro al Equipo</DialogTitle>
             <DialogDescription>
-              Se creará una cuenta con contraseña provisoria y se enviará por email.
+              Se enviará un email con un enlace para que el usuario cree su contraseña.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -847,7 +847,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           <DialogHeader>
             <DialogTitle>Invitar Usuario</DialogTitle>
             <DialogDescription>
-              Se creará una cuenta con contraseña provisoria y se enviará por email.
+              Se enviará un email con un enlace para que el usuario cree su contraseña.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

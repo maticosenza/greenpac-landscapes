@@ -75,8 +75,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Check URL hash for invite/signup tokens on mount
     const hash = window.location.hash;
-    if (hash && (hash.includes("type=invite") || hash.includes("type=signup") || hash.includes("type=magiclink"))) {
+    if (hash && (hash.includes("type=invite") || hash.includes("type=signup") || hash.includes("type=magiclink") || hash.includes("type=recovery"))) {
       setNeedsPasswordSetup(true);
+      // Clean the hash to avoid re-triggering
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
     }
 
     // Set up auth state listener FIRST
@@ -86,6 +88,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (event === "PASSWORD_RECOVERY") {
+          setNeedsPasswordSetup(true);
+        }
+
+        // Detect invited users: they have invited_role in metadata and arrive via SIGNED_IN
+        if (event === "SIGNED_IN" && session?.user?.user_metadata?.invited_role) {
           setNeedsPasswordSetup(true);
         }
 
