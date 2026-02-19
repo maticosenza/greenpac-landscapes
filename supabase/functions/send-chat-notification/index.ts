@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// send-chat-notification edge function
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -86,4 +86,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+Deno.serve(handler);
