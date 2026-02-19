@@ -32,7 +32,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus, Key } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus, Key, UserX } from "lucide-react";
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
 interface TeamManagementProps {
@@ -85,6 +95,15 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   const [permissionsRole, setPermissionsRole] = useState<AppRole>("employee");
   const [editingPermissions, setEditingPermissions] = useState<Record<string, boolean>>({});
   const [isSavingPermissions, setIsSavingPermissions] = useState(false);
+
+  // Delete user dialog
+  const [deleteUserDialog, setDeleteUserDialog] = useState<{
+    open: boolean;
+    userId: string;
+    userName: string;
+    userEmail: string;
+  }>({ open: false, userId: "", userName: "", userEmail: "" });
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   // Combine global search with local search
   const effectiveSearchTerm = localSearchTerm || searchTerm;
@@ -310,6 +329,38 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     }
   };
 
+  const handleDeleteUser = async () => {
+    setIsDeletingUser(true);
+    try {
+      const { data: sessionData } = await supabaseClient.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionData.session?.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ userId: deleteUserDialog.userId }),
+        }
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        toast.error(result.error || "Error al eliminar usuario");
+      } else {
+        toast.success("Usuario eliminado correctamente");
+        queryClient.invalidateQueries({ queryKey: ["users-with-roles"] });
+        queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      }
+    } catch {
+      toast.error("Error al eliminar usuario");
+    } finally {
+      setIsDeletingUser(false);
+      setDeleteUserDialog({ open: false, userId: "", userName: "", userEmail: "" });
+    }
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Cargando equipo...</p>;
   }
@@ -427,6 +478,17 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                             {getRoleLabel(role)}
                           </Button>
                         ))}
+                      {member.id !== user?.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteUserDialog({ open: true, userId: member.id, userName: member.full_name, userEmail: member.email })}
+                        >
+                          <UserX className="h-4 w-4 mr-1" />
+                          Eliminar
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -489,6 +551,16 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                                   <span className="ml-1 text-xs">{getRoleLabel(role)}</span>
                                 </Button>
                               ))}
+                            {member.id !== user?.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => setDeleteUserDialog({ open: true, userId: member.id, userName: member.full_name, userEmail: member.email })}
+                              >
+                                <UserX className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -554,15 +626,27 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                         </Badge>
                       )}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddRole(userItem)}
-                      className="w-full"
-                    >
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Agregar Rol
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddRole(userItem)}
+                        className="flex-1"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Agregar Rol
+                      </Button>
+                      {userItem.id !== user?.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteUserDialog({ open: true, userId: userItem.id, userName: userItem.full_name, userEmail: userItem.email })}
+                        >
+                          <UserX className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -603,14 +687,26 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddRole(userItem)}
-                          >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Agregar Rol
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAddRole(userItem)}
+                            >
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Agregar Rol
+                            </Button>
+                            {userItem.id !== user?.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => setDeleteUserDialog({ open: true, userId: userItem.id, userName: userItem.full_name, userEmail: userItem.email })}
+                              >
+                                <UserX className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -846,6 +942,29 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation */}
+      <AlertDialog open={deleteUserDialog.open} onOpenChange={(open) => setDeleteUserDialog({ ...deleteUserDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar a <strong>{deleteUserDialog.userName}</strong> ({deleteUserDialog.userEmail})? Esta acción no se puede deshacer y eliminará toda la información del usuario.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingUser}>Cancelar</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={isDeletingUser}
+            >
+              {isDeletingUser && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Eliminar Usuario
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
