@@ -121,7 +121,7 @@
   }
 
   .greenpac-container {
-    @apply container mx-auto px-4 md:px-8;
+    @apply container mx-auto px-6 sm:px-8 md:px-12 lg:px-16;
   }
 
   .greenpac-title {
