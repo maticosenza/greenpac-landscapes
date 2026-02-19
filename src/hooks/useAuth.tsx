@@ -73,9 +73,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Check URL hash for invite/signup tokens on mount
+    // Check URL hash for invite/signup tokens on mount — must happen BEFORE listener setup
     const hash = window.location.hash;
-    if (hash && (hash.includes("type=invite") || hash.includes("type=signup") || hash.includes("type=magiclink") || hash.includes("type=recovery"))) {
+    const isInviteFlow = hash && (
+      hash.includes("type=invite") ||
+      hash.includes("type=signup") ||
+      hash.includes("type=magiclink") ||
+      hash.includes("type=recovery")
+    );
+    if (isInviteFlow) {
       setNeedsPasswordSetup(true);
       // Clean the hash to avoid re-triggering
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -92,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Detect invited users: they have invited_role in metadata and arrive via SIGNED_IN
+        // Also covers the case where hash was already cleaned but user just signed in via invite
         if (event === "SIGNED_IN" && session?.user?.user_metadata?.invited_role) {
           setNeedsPasswordSetup(true);
         }

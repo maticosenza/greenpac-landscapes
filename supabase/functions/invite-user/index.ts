@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
         invited_role: role || "customer",
         full_name: email.split("@")[0],
       },
-      redirectTo: `https://greenpac-landscapes.lovable.app/panel`,
+      redirectTo: `https://greenpac.com.ar/panel`,
     });
 
     if (inviteError) {
@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
       type: "invite",
       email,
       options: {
-        redirectTo: `https://greenpac-landscapes.lovable.app/panel`,
+        redirectTo: `https://greenpac.com.ar/panel`,
         data: { invited_role: role || "customer" },
       },
     });
