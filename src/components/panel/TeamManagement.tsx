@@ -42,7 +42,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus, Key, UserX } from "lucide-react";
+import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus, Key, UserX, Pencil } from "lucide-react";
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
 interface TeamManagementProps {
@@ -105,6 +105,16 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     userEmail: string;
   }>({ open: false, userId: "", userName: "", userEmail: "" });
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+
+  // Edit user dialog
+  const [editUserDialog, setEditUserDialog] = useState<{
+    open: boolean;
+    userId: string;
+    full_name: string;
+    phone: string;
+    company: string;
+  }>({ open: false, userId: "", full_name: "", phone: "", company: "" });
+  const [isSavingUser, setIsSavingUser] = useState(false);
 
   // Combine global search with local search
   const effectiveSearchTerm = localSearchTerm || searchTerm;
@@ -362,6 +372,40 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     }
   };
 
+  const handleEditUser = (userItem: ProfileWithRoles) => {
+    setEditUserDialog({
+      open: true,
+      userId: userItem.id,
+      full_name: userItem.full_name,
+      phone: userItem.phone || "",
+      company: userItem.company || "",
+    });
+  };
+
+  const handleSaveUser = async () => {
+    setIsSavingUser(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: editUserDialog.full_name.trim(),
+          phone: editUserDialog.phone.trim() || null,
+          company: editUserDialog.company.trim() || null,
+        })
+        .eq("id", editUserDialog.userId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["users-with-roles"] });
+      toast.success("Datos actualizados correctamente");
+      setEditUserDialog({ open: false, userId: "", full_name: "", phone: "", company: "" });
+    } catch {
+      toast.error("Error al guardar los datos");
+    } finally {
+      setIsSavingUser(false);
+    }
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Cargando equipo...</p>;
   }
@@ -434,13 +478,24 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                 {teamMembers.map((member) => (
                   <div key={member.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <h3 className="font-medium text-sm truncate">{member.full_name}</h3>
                         <p className="text-xs text-muted-foreground truncate">{member.email}</p>
                         {member.phone && (
                           <p className="text-xs text-muted-foreground">{member.phone}</p>
                         )}
+                        {member.company && (
+                          <p className="text-xs text-muted-foreground">{member.company}</p>
+                        )}
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(member)}
+                        className="shrink-0"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {member.roles.map((role) => (
@@ -511,64 +566,72 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                     {teamMembers.map((member) => (
                       <TableRow key={member.id}>
                         <TableCell className="font-medium">{member.full_name}</TableCell>
-                        <TableCell>{member.email}</TableCell>
-                        <TableCell>{member.phone || "-"}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1 flex-wrap">
-                            {member.roles.map((role) => (
-                              <Badge
-                                key={role}
-                                variant={getRoleBadgeVariant(role)}
-                                className="text-xs"
-                              >
-                                {getRoleLabel(role)}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {!member.roles.includes("admin") && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAddRole(member)}
-                              >
-                                <UserPlus className="h-4 w-4" />
-                              </Button>
-                            )}
-                            {member.roles
-                              .filter((role) => role !== "customer")
-                              .map((role) => (
-                                <Button
-                                  key={role}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive"
-                                  onClick={() => handleRemoveRole(member.id, role, member.full_name)}
-                                  disabled={member.id === user?.id && role === "admin"}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  <span className="ml-1 text-xs">{getRoleLabel(role)}</span>
-                                </Button>
-                              ))}
-                            {member.id !== user?.id && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive"
-                                onClick={() => setDeleteUserDialog({ open: true, userId: member.id, userName: member.full_name, userEmail: member.email })}
-                              >
-                                <UserX className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                         <TableCell>{member.email}</TableCell>
+                         <TableCell>{member.phone || "-"}</TableCell>
+                         <TableCell>
+                           <div className="flex gap-1 flex-wrap">
+                             {member.roles.map((role) => (
+                               <Badge
+                                 key={role}
+                                 variant={getRoleBadgeVariant(role)}
+                                 className="text-xs"
+                               >
+                                 {getRoleLabel(role)}
+                               </Badge>
+                             ))}
+                           </div>
+                         </TableCell>
+                         <TableCell>
+                           <div className="flex gap-2 flex-wrap">
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => handleEditUser(member)}
+                               title="Editar datos"
+                             >
+                               <Pencil className="h-4 w-4" />
+                             </Button>
+                             {!member.roles.includes("admin") && (
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => handleAddRole(member)}
+                               >
+                                 <UserPlus className="h-4 w-4" />
+                               </Button>
+                             )}
+                             {member.roles
+                               .filter((role) => role !== "customer")
+                               .map((role) => (
+                                 <Button
+                                   key={role}
+                                   variant="ghost"
+                                   size="sm"
+                                   className="text-destructive hover:text-destructive"
+                                   onClick={() => handleRemoveRole(member.id, role, member.full_name)}
+                                   disabled={member.id === user?.id && role === "admin"}
+                                 >
+                                   <Trash2 className="h-4 w-4" />
+                                   <span className="ml-1 text-xs">{getRoleLabel(role)}</span>
+                                 </Button>
+                               ))}
+                             {member.id !== user?.id && (
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 className="text-destructive hover:text-destructive"
+                                 onClick={() => setDeleteUserDialog({ open: true, userId: member.id, userName: member.full_name, userEmail: member.email })}
+                               >
+                                 <UserX className="h-4 w-4" />
+                               </Button>
+                             )}
+                           </div>
+                         </TableCell>
+                       </TableRow>
+                     ))}
+                   </TableBody>
+                 </Table>
+               </div>
             </>
           ) : (
             <p className="text-muted-foreground text-center py-8">
@@ -605,50 +668,66 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
               {/* Mobile card layout */}
               <div className="block md:hidden space-y-4">
                 {filteredUsers.map((userItem) => (
-                  <div key={userItem.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="min-w-0">
-                      <h3 className="font-medium text-sm truncate">{userItem.full_name}</h3>
-                      <p className="text-xs text-muted-foreground truncate">{userItem.email}</p>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {userItem.roles.length > 0 ? (
-                        userItem.roles.map((role) => (
-                          <Badge
-                            key={role}
-                            variant={getRoleBadgeVariant(role)}
-                            className="text-xs"
-                          >
-                            {getRoleLabel(role)}
-                          </Badge>
-                        ))
-                      ) : (
-                        <Badge variant="outline" className="text-xs">
-                          Sin roles
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAddRole(userItem)}
-                        className="flex-1"
-                      >
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Agregar Rol
-                      </Button>
-                      {userItem.id !== user?.id && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteUserDialog({ open: true, userId: userItem.id, userName: userItem.full_name, userEmail: userItem.email })}
-                        >
-                          <UserX className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                   <div key={userItem.id} className="border rounded-lg p-4 space-y-3">
+                     <div className="flex items-start justify-between gap-2">
+                       <div className="min-w-0 flex-1">
+                         <h3 className="font-medium text-sm truncate">{userItem.full_name}</h3>
+                         <p className="text-xs text-muted-foreground truncate">{userItem.email}</p>
+                         {userItem.phone && (
+                           <p className="text-xs text-muted-foreground">{userItem.phone}</p>
+                         )}
+                         {userItem.company && (
+                           <p className="text-xs text-muted-foreground">{userItem.company}</p>
+                         )}
+                       </div>
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => handleEditUser(userItem)}
+                         className="shrink-0"
+                       >
+                         <Pencil className="h-3.5 w-3.5" />
+                       </Button>
+                     </div>
+                     <div className="flex flex-wrap gap-1">
+                       {userItem.roles.length > 0 ? (
+                         userItem.roles.map((role) => (
+                           <Badge
+                             key={role}
+                             variant={getRoleBadgeVariant(role)}
+                             className="text-xs"
+                           >
+                             {getRoleLabel(role)}
+                           </Badge>
+                         ))
+                       ) : (
+                         <Badge variant="outline" className="text-xs">
+                           Sin roles
+                         </Badge>
+                       )}
+                     </div>
+                     <div className="flex flex-wrap gap-2">
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => handleAddRole(userItem)}
+                         className="flex-1"
+                       >
+                         <UserPlus className="h-4 w-4 mr-2" />
+                         Agregar Rol
+                       </Button>
+                       {userItem.id !== user?.id && (
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           className="text-destructive hover:text-destructive"
+                           onClick={() => setDeleteUserDialog({ open: true, userId: userItem.id, userName: userItem.full_name, userEmail: userItem.email })}
+                         >
+                           <UserX className="h-4 w-4" />
+                         </Button>
+                       )}
+                     </div>
+                   </div>
                 ))}
               </div>
 
@@ -687,28 +766,36 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAddRole(userItem)}
-                            >
-                              <UserPlus className="h-4 w-4 mr-2" />
-                              Agregar Rol
-                            </Button>
-                            {userItem.id !== user?.id && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive"
-                                onClick={() => setDeleteUserDialog({ open: true, userId: userItem.id, userName: userItem.full_name, userEmail: userItem.email })}
-                              >
-                                <UserX className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
+                         <TableCell>
+                           <div className="flex gap-2 flex-wrap">
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => handleEditUser(userItem)}
+                               title="Editar datos"
+                             >
+                               <Pencil className="h-4 w-4" />
+                             </Button>
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => handleAddRole(userItem)}
+                             >
+                               <UserPlus className="h-4 w-4 mr-2" />
+                               Agregar Rol
+                             </Button>
+                             {userItem.id !== user?.id && (
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 className="text-destructive hover:text-destructive"
+                                 onClick={() => setDeleteUserDialog({ open: true, userId: userItem.id, userName: userItem.full_name, userEmail: userItem.email })}
+                               >
+                                 <UserX className="h-4 w-4" />
+                               </Button>
+                             )}
+                           </div>
+                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -966,6 +1053,65 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editUserDialog.open} onOpenChange={(open) => setEditUserDialog({ ...editUserDialog, open })}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar datos del usuario</DialogTitle>
+            <DialogDescription>
+              Modificá el nombre, teléfono o empresa del usuario.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Nombre completo</Label>
+              <Input
+                id="edit-name"
+                value={editUserDialog.full_name}
+                onChange={(e) => setEditUserDialog({ ...editUserDialog, full_name: e.target.value })}
+                placeholder="Nombre completo"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-phone">Teléfono</Label>
+              <Input
+                id="edit-phone"
+                value={editUserDialog.phone}
+                onChange={(e) => setEditUserDialog({ ...editUserDialog, phone: e.target.value })}
+                placeholder="+54 11 1234-5678"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-company">Empresa</Label>
+              <Input
+                id="edit-company"
+                value={editUserDialog.company}
+                onChange={(e) => setEditUserDialog({ ...editUserDialog, company: e.target.value })}
+                placeholder="Nombre de la empresa"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => setEditUserDialog({ open: false, userId: "", full_name: "", phone: "", company: "" })}
+              disabled={isSavingUser}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={handleSaveUser}
+              disabled={isSavingUser || !editUserDialog.full_name.trim()}
+            >
+              {isSavingUser && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar cambios
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
