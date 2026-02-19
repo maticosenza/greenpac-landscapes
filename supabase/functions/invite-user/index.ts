@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
         invited_role: role || "customer",
         full_name: email.split("@")[0],
       },
-      redirectTo: `${supabaseUrl.replace('.supabase.co', '.supabase.co')}/auth/v1/verify?redirect_to=https://greenpac-landscapes.lovable.app/reset-password`,
+      redirectTo: `https://greenpac-landscapes.lovable.app/panel`,
     });
 
     if (inviteError) {
