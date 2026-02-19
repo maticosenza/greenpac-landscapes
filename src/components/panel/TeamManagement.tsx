@@ -30,8 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus } from "lucide-react";
+import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus, Key } from "lucide-react";
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
 interface TeamManagementProps {
@@ -48,8 +49,15 @@ interface ProfileWithRoles {
   roles: string[];
 }
 
-type AppRole = "customer" | "employee" | "admin";
+type AppRole = "customer" | "employee" | "admin" | "vendedor";
 type BadgeVariant = "destructive" | "default" | "secondary" | "outline";
+
+const TOOL_LABELS: Record<string, string> = {
+  products: "Productos",
+  quotations: "Cotizaciones",
+  clients: "Clientes",
+  contact_inquiries: "Consultas de contacto",
+};
 
 const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   const queryClient = useQueryClient();
@@ -72,13 +80,18 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   const [inviteRole, setInviteRole] = useState<AppRole>("employee");
   const [isInviting, setIsInviting] = useState(false);
 
+  // Permissions dialog
+  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
+  const [permissionsRole, setPermissionsRole] = useState<AppRole>("employee");
+  const [editingPermissions, setEditingPermissions] = useState<Record<string, boolean>>({});
+  const [isSavingPermissions, setIsSavingPermissions] = useState(false);
+
   // Combine global search with local search
   const effectiveSearchTerm = localSearchTerm || searchTerm;
 
   const { data: usersWithRoles, isLoading } = useQuery({
     queryKey: ["users-with-roles"],
     queryFn: async () => {
-      // Fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -86,14 +99,12 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch all roles
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id, role");
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with their roles
       const usersWithRoles: ProfileWithRoles[] = profiles.map((profile) => ({
         ...profile,
         roles: roles
@@ -102,6 +113,17 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
       }));
 
       return usersWithRoles;
+    },
+  });
+
+  const { data: rolePermissions } = useQuery({
+    queryKey: ["role-permissions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("role_permissions")
+        .select("*");
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -160,17 +182,19 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   });
 
   const teamMembers = filteredUsers?.filter(
-    (u) => u.roles.includes("employee") || u.roles.includes("admin")
+    (u) => u.roles.includes("employee") || u.roles.includes("admin") || u.roles.includes("vendedor")
   );
 
-  const getRoleBadgeVariant = (role: string): "destructive" | "default" | "secondary" | "outline" => {
+  const getRoleBadgeVariant = (role: string): BadgeVariant => {
     switch (role) {
       case "admin":
         return "destructive";
       case "employee":
         return "default";
-      default:
+      case "vendedor":
         return "secondary";
+      default:
+        return "outline";
     }
   };
 
@@ -180,6 +204,8 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
         return "Admin";
       case "employee":
         return "Empleado";
+      case "vendedor":
+        return "Vendedor";
       case "customer":
         return "Cliente";
       default:
@@ -200,7 +226,6 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
   };
 
   const handleRemoveRole = (userId: string, role: string, userName: string) => {
-    // Prevent removing own admin role
     if (userId === user?.id && role === "admin") {
       toast.error("No podés remover tu propio rol de admin");
       return;
@@ -248,6 +273,43 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     }
   };
 
+  const openPermissionsDialog = (role: AppRole) => {
+    setPermissionsRole(role);
+    const perms: Record<string, boolean> = {};
+    Object.keys(TOOL_LABELS).forEach((tool) => {
+      const perm = rolePermissions?.find((p) => p.role === role && p.tool_key === tool);
+      perms[tool] = perm?.is_enabled ?? false;
+    });
+    setEditingPermissions(perms);
+    setIsPermissionsOpen(true);
+  };
+
+  const handleSavePermissions = async () => {
+    setIsSavingPermissions(true);
+    try {
+      for (const [tool, enabled] of Object.entries(editingPermissions)) {
+        const existing = rolePermissions?.find((p) => p.role === permissionsRole && p.tool_key === tool);
+        if (existing) {
+          await supabase
+            .from("role_permissions")
+            .update({ is_enabled: enabled })
+            .eq("id", existing.id);
+        } else {
+          await supabase
+            .from("role_permissions")
+            .insert({ role: permissionsRole as any, tool_key: tool, is_enabled: enabled });
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
+      toast.success(`Permisos de ${getRoleLabel(permissionsRole)} actualizados`);
+      setIsPermissionsOpen(false);
+    } catch {
+      toast.error("Error al guardar permisos");
+    } finally {
+      setIsSavingPermissions(false);
+    }
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Cargando equipo...</p>;
   }
@@ -267,17 +329,17 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
 
       {/* Team Members Card */}
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-2">
+        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-2">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Shield className="h-5 w-5" />
               Miembros del Equipo
             </CardTitle>
             <CardDescription>
-              Empleados y administradores con acceso al panel interno
+              Empleados, vendedores y administradores con acceso al panel interno
             </CardDescription>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <Button
               size="sm"
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -301,6 +363,14 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
             >
               <ShieldPlus className="h-4 w-4 mr-1.5" />
               Dar rol
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openPermissionsDialog("employee")}
+            >
+              <Key className="h-4 w-4 mr-1.5" />
+              Permisos por rol
             </Button>
           </div>
         </CardHeader>
@@ -441,7 +511,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           <div>
             <CardTitle className="text-lg sm:text-xl">Todos los Usuarios</CardTitle>
             <CardDescription>
-              Lista completa de usuarios registrados. Podés asignar roles de empleado o admin.
+              Lista completa de usuarios registrados. Podés asignar roles de empleado, vendedor o admin.
             </CardDescription>
           </div>
           <Button
@@ -562,7 +632,9 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           <DialogHeader>
             <DialogTitle>Asignar Rol</DialogTitle>
             <DialogDescription>
-              Asignar un nuevo rol a {selectedUser?.full_name}
+              {selectedUser
+                ? `Asignar un nuevo rol a ${selectedUser.full_name}`
+                : "Seleccioná un usuario y asigná un rol"}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -572,6 +644,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="employee">Empleado</SelectItem>
+                <SelectItem value="vendedor">Vendedor</SelectItem>
                 <SelectItem value="admin">Administrador</SelectItem>
               </SelectContent>
             </Select>
@@ -632,7 +705,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           <DialogHeader>
             <DialogTitle>Invitar Miembro al Equipo</DialogTitle>
             <DialogDescription>
-              Enviá una invitación por email para que se registre y forme parte del equipo.
+              Se creará una cuenta con contraseña provisoria y se enviará por email.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -653,6 +726,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="employee">Empleado</SelectItem>
+                  <SelectItem value="vendedor">Vendedor</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
                 </SelectContent>
               </Select>
@@ -676,7 +750,7 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
           <DialogHeader>
             <DialogTitle>Invitar Usuario</DialogTitle>
             <DialogDescription>
-              Enviá una invitación por email para que se registre en la plataforma.
+              Se creará una cuenta con contraseña provisoria y se enviará por email.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -697,6 +771,77 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
             <Button onClick={() => handleInvite("user")} disabled={isInviting}>
               {isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Enviar Invitación
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Permissions Dialog */}
+      <Dialog open={isPermissionsOpen} onOpenChange={setIsPermissionsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Permisos por Rol</DialogTitle>
+            <DialogDescription>
+              Configurá qué herramientas puede usar cada rol.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Rol</Label>
+              <Select
+                value={permissionsRole}
+                onValueChange={(v) => {
+                  const role = v as AppRole;
+                  setPermissionsRole(role);
+                  const perms: Record<string, boolean> = {};
+                  Object.keys(TOOL_LABELS).forEach((tool) => {
+                    const perm = rolePermissions?.find((p) => p.role === role && p.tool_key === tool);
+                    perms[tool] = perm?.is_enabled ?? false;
+                  });
+                  setEditingPermissions(perms);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">Empleado</SelectItem>
+                  <SelectItem value="vendedor">Vendedor</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3 border rounded-lg p-4">
+              <Label className="text-sm font-semibold">Herramientas habilitadas</Label>
+              {Object.entries(TOOL_LABELS).map(([key, label]) => (
+                <div key={key} className="flex items-center gap-3">
+                  <Checkbox
+                    id={`perm-${key}`}
+                    checked={editingPermissions[key] ?? false}
+                    onCheckedChange={(checked) =>
+                      setEditingPermissions((prev) => ({ ...prev, [key]: !!checked }))
+                    }
+                    disabled={permissionsRole === "admin"}
+                  />
+                  <Label htmlFor={`perm-${key}`} className="text-sm cursor-pointer">
+                    {label}
+                  </Label>
+                </div>
+              ))}
+              {permissionsRole === "admin" && (
+                <p className="text-xs text-muted-foreground">
+                  Los administradores tienen acceso a todas las herramientas.
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPermissionsOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSavePermissions} disabled={isSavingPermissions || permissionsRole === "admin"}>
+              {isSavingPermissions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar Permisos
             </Button>
           </DialogFooter>
         </DialogContent>

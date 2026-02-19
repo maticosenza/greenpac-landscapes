@@ -324,6 +324,33 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          tool_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          tool_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          tool_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_assets: {
         Row: {
           alt_text: string | null
