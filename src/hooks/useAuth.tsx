@@ -73,19 +73,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Check URL hash for invite/signup tokens on mount — must happen BEFORE listener setup
-    const hash = window.location.hash;
-    const isInviteFlow = hash && (
-      hash.includes("type=invite") ||
-      hash.includes("type=signup") ||
-      hash.includes("type=magiclink") ||
-      hash.includes("type=recovery")
-    );
-    if (isInviteFlow) {
-      setNeedsPasswordSetup(true);
-      // Clean the hash to avoid re-triggering
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
+    // IMPORTANT: Do NOT clear the URL hash here. Supabase needs to read the
+    // access_token from the hash to establish a session. Clearing it early
+    // causes "Auth session missing!" errors when the user tries to set a password.
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
