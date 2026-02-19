@@ -219,74 +219,70 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-end sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-32 sm:pb-20 lg:pb-24">
-          {/* Text block: kicker + h1 + subtitle — draggable */}
-          <DraggableHeroBlock posKey="hero-text-block-pos">
-            <EditableSection
-              sectionId="Hero Textos"
-              fields={[
-                { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria de alto rendimiento" },
-                { key: "hero-title", label: "Título H1", type: "text", fallback: "Tecnología y potencia para el campo argentino" },
-                { key: "hero-subtitle-line1", label: "Subtítulo — Línea 1", type: "text", fallback: "Equipos listos para trabajar, con asesoramiento experto." },
-                { key: "hero-subtitle-line2", label: "Subtítulo — Línea 2", type: "text", fallback: "Cotizá en minutos y coordinamos entrega a todo el país." },
-                { key: "hero-cta-primary", label: "Botón primario", type: "text", fallback: "Solicitar Cotización" },
-                { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
-              ]}
-            >
-              <div className={`animate-slide-up space-y-4 sm:space-y-5 lg:space-y-7 xl:space-y-8 flex flex-col ${itemsClass(h1Align)}`}>
-                {/* Kicker with leaf icon */}
-                <div className="flex items-center gap-2.5">
-                  <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                  <p className="text-primary font-semibold text-[clamp(0.95rem,1.1vw,1.1rem)] md:text-[0.85rem] lg:text-[0.85rem] tracking-[0.2em] uppercase">
-                    {kicker}
-                  </p>
-                </div>
-
-                {/* H1 with alignment toggle */}
-                <div className="w-full relative">
-                  {isEditMode && (
-                    <div className="absolute -top-8 left-0 z-20">
-                      <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
-                    </div>
-                  )}
-                  <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.35rem,4.6vw,5.1rem)] md:text-[3rem] lg:text-[clamp(2.35rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
-                    Tecnología y<br />potencia para el<br />campo argentino
-                  </h1>
-                </div>
-
-                {/* Subtitle with alignment toggle */}
-                <div className="w-full relative">
-                  {isEditMode && (
-                    <div className="absolute -top-8 left-0 z-20">
-                      <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
-                    </div>
-                  )}
-                  <p className={`text-primary-foreground/85 text-[clamp(1.02rem,1.5vw,1.55rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
-                    {subtitleLine1}
-                    {subtitleLine2 ? (
-                      <>
-                        <span className="inline lg:hidden"> </span>
-                        <br className="hidden lg:block" />
-                        {subtitleLine2}
-                      </>
-                    ) : null}
-                  </p>
-                </div>
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-16 sm:pb-20 lg:pb-24">
+          {/* Single unified block: text + CTAs always together */}
+          <EditableSection
+            sectionId="Hero Textos"
+            fields={[
+              { key: "hero-kicker", label: "Kicker (subtítulo superior)", type: "text", fallback: "Maquinaria de alto rendimiento" },
+              { key: "hero-title", label: "Título H1", type: "text", fallback: "Tecnología y potencia para el campo argentino" },
+              { key: "hero-subtitle-line1", label: "Subtítulo — Línea 1", type: "text", fallback: "Equipos listos para trabajar, con asesoramiento experto." },
+              { key: "hero-subtitle-line2", label: "Subtítulo — Línea 2", type: "text", fallback: "Cotizá en minutos y coordinamos entrega a todo el país." },
+              { key: "hero-cta-primary", label: "Botón primario", type: "text", fallback: "Solicitar Cotización" },
+              { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
+            ]}
+          >
+            <div className={`animate-slide-up flex flex-col ${itemsClass(h1Align)} space-y-4 sm:space-y-5 lg:space-y-7`}>
+              {/* Kicker with leaf icon */}
+              <div className="flex items-center gap-2.5">
+                <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
+                <p className="text-primary font-semibold text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
+                  {kicker}
+                </p>
               </div>
-            </EditableSection>
-          </DraggableHeroBlock>
 
-          {/* CTA buttons — draggable */}
-          <DraggableHeroBlock posKey="hero-cta-block-pos">
-            <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 mt-7 sm:mt-8 lg:mt-10 animate-slide-up ${justifyClass(h1Align)}`}>
-              <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
-                <a href="#cotizacion">{ctaQuote}</a>
-              </Button>
-              <Button variant="hero" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
-                <a href="#productos">{ctaProducts}</a>
-              </Button>
+              {/* H1 */}
+              <div className="w-full relative">
+                {isEditMode && (
+                  <div className="absolute -top-8 left-0 z-20">
+                    <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
+                  </div>
+                )}
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.2rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
+                  Tecnología y<br />potencia para el<br />campo argentino
+                </h1>
+              </div>
+
+              {/* Subtitle */}
+              <div className="w-full relative">
+                {isEditMode && (
+                  <div className="absolute -top-8 left-0 z-20">
+                    <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
+                  </div>
+                )}
+                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
+                  {subtitleLine1}
+                  {subtitleLine2 ? (
+                    <>
+                      <span className="inline lg:hidden"> </span>
+                      <br className="hidden lg:block" />
+                      {subtitleLine2}
+                    </>
+                  ) : null}
+                </p>
+              </div>
+
+              {/* CTA buttons — always immediately below text */}
+              <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 pt-2 sm:pt-3 w-full ${justifyClass(h1Align)}`}>
+                <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
+                  <a href="#cotizacion">{ctaQuote}</a>
+                </Button>
+                <Button variant="hero" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
+                  <a href="#productos">{ctaProducts}</a>
+                </Button>
+              </div>
             </div>
-          </DraggableHeroBlock>
+          </EditableSection>
         </div>
       </div>
 
