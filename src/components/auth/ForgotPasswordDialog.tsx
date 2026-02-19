@@ -47,8 +47,8 @@ const ForgotPasswordDialog = ({ open, onOpenChange }: ForgotPasswordDialogProps)
   const handleSubmit = async (data: ForgotPasswordFormData) => {
     setIsSubmitting(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const { error } = await supabase.functions.invoke("send-reset-password", {
+      body: { email: data.email },
     });
 
     setIsSubmitting(false);
