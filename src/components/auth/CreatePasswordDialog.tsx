@@ -49,19 +49,26 @@ const CreatePasswordDialog = ({ open, onSuccess }: CreatePasswordDialogProps) =>
   const handleSubmit = async (data: CreatePasswordFormData) => {
     setIsSubmitting(true);
 
-    const { error } = await supabase.auth.updateUser({
+    // Step 1: Update password only (no metadata in same call to avoid auth restrictions)
+    const { error: pwError } = await supabase.auth.updateUser({
       password: data.password,
+    });
+
+    if (pwError) {
+      console.error("Password update error:", pwError.message, pwError);
+      setIsSubmitting(false);
+      toast.error(`Error al crear la contraseña: ${pwError.message}`);
+      return;
+    }
+
+    // Step 2: Clear the invited_role metadata so dialog won't re-appear on next login
+    await supabase.auth.updateUser({
       data: { invited_role: null },
     });
 
     setIsSubmitting(false);
-
-    if (error) {
-      toast.error("Error al crear la contraseña. Intentá de nuevo.");
-    } else {
-      toast.success("¡Contraseña creada correctamente!");
-      onSuccess();
-    }
+    toast.success("¡Contraseña creada correctamente!");
+    onSuccess();
   };
 
   return (

@@ -123,20 +123,20 @@ Deno.serve(async (req) => {
         .insert({ user_id: newUser.user.id, role });
     }
 
-    // Generate the ONE invite link — no competing tokens
+    // Generate a magic link (NOT invite type) — magic link sessions are fully authorized
+    // and allow updateUser({ password }) without restrictions.
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: "invite",
+      type: "magiclink",
       email,
       options: {
         redirectTo: `https://greenpac.com.ar/auth`,
-        data: { invited_role: role || "customer" },
       },
     });
 
     if (linkError || !linkData?.properties?.action_link) {
       console.error("Link generation error:", linkError);
       return new Response(
-        JSON.stringify({ error: "Usuario creado pero no se pudo generar el enlace de invitación." }),
+        JSON.stringify({ error: "Usuario creado pero no se pudo generar el enlace de acceso." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
