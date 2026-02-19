@@ -39,7 +39,11 @@ import {
   UserCircle,
   MapPin,
   ExternalLink,
+  Pencil,
+  Save,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { generateQuotationPDF } from "@/lib/generateQuotationPDF";
 
@@ -139,6 +143,16 @@ const QuotationDetailDialog = ({
   const [uploading, setUploading] = useState(false);
   const [priceInput, setPriceInput] = useState("");
   const [editingPrice, setEditingPrice] = useState(false);
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [editForm, setEditForm] = useState({
+    client_name: "",
+    client_email: "",
+    client_phone: "",
+    company: "",
+    quotation_type: "quote",
+    message: "",
+    product_ids: [] as string[],
+  });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -168,6 +182,19 @@ const QuotationDetailDialog = ({
       return data;
     },
     enabled: !!quotation?.product_ids && quotation.product_ids.length > 0,
+  });
+
+  const { data: allProducts } = useQuery({
+    queryKey: ["all-products-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name")
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && isStaff,
   });
 
   const { data: history, isLoading: historyLoading } = useQuery({
@@ -240,6 +267,21 @@ const QuotationDetailDialog = ({
     }
   }, [quotation?.price]);
 
+  // Populate edit form when quotation loads
+  useEffect(() => {
+    if (quotation) {
+      setEditForm({
+        client_name: quotation.client_name || "",
+        client_email: quotation.client_email || "",
+        client_phone: quotation.client_phone || "",
+        company: quotation.company || "",
+        quotation_type: quotation.quotation_type || "quote",
+        message: quotation.message || "",
+        product_ids: quotation.product_ids || [],
+      });
+    }
+  }, [quotation]);
+
   const getUserName = (userId: string) =>
     profiles?.find((p) => p.id === userId)?.full_name || "Usuario";
 
@@ -302,6 +344,32 @@ const QuotationDetailDialog = ({
       toast.success("Precio actualizado");
     },
     onError: () => toast.error("Error al actualizar precio"),
+  });
+
+  const updateInfoMutation = useMutation({
+    mutationFn: async (data: typeof editForm) => {
+      const { error } = await supabase
+        .from("quotations")
+        .update({
+          client_name: data.client_name,
+          client_email: data.client_email,
+          client_phone: data.client_phone || null,
+          company: data.company || null,
+          quotation_type: data.quotation_type,
+          message: data.message || null,
+          product_ids: data.product_ids,
+        })
+        .eq("id", quotationId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quotation-detail", quotationId] });
+      queryClient.invalidateQueries({ queryKey: ["all-quotations"] });
+      queryClient.invalidateQueries({ queryKey: ["customer-quotations"] });
+      setEditingInfo(false);
+      toast.success("Cotización actualizada");
+    },
+    onError: () => toast.error("Error al guardar cambios"),
   });
 
   const sendMessageMutation = useMutation({
@@ -484,42 +552,172 @@ const QuotationDetailDialog = ({
         </DialogHeader>
 
         {/* Quotation Info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-muted-foreground text-xs">Cliente</p>
-            <p className="font-medium">{quotation.client_name}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs">Email</p>
-            <p className="font-medium break-all">{quotation.client_email}</p>
-          </div>
-          {quotation.client_phone && (
-            <div>
-              <p className="text-muted-foreground text-xs">Teléfono</p>
-              <p className="font-medium">{quotation.client_phone}</p>
+        {isStaff && editingInfo ? (
+          <div className="space-y-3 border rounded-lg p-4 bg-muted/30">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Editando datos de cotización</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Cliente *</Label>
+                <Input
+                  value={editForm.client_name}
+                  onChange={(e) => setEditForm({ ...editForm, client_name: e.target.value })}
+                  placeholder="Nombre del cliente"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Email *</Label>
+                <Input
+                  type="email"
+                  value={editForm.client_email}
+                  onChange={(e) => setEditForm({ ...editForm, client_email: e.target.value })}
+                  placeholder="email@ejemplo.com"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Teléfono</Label>
+                <Input
+                  value={editForm.client_phone}
+                  onChange={(e) => setEditForm({ ...editForm, client_phone: e.target.value })}
+                  placeholder="+54 9 11 1234-5678"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Empresa</Label>
+                <Input
+                  value={editForm.company}
+                  onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                  placeholder="Nombre de empresa"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label className="text-xs">Tipo de solicitud</Label>
+                <Select value={editForm.quotation_type} onValueChange={(v) => setEditForm({ ...editForm, quotation_type: v })}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="quote">Solo cotización</SelectItem>
+                    <SelectItem value="purchase">Compra directa</SelectItem>
+                    <SelectItem value="deposit">Seña / Reserva</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          )}
-          {quotation.company && (
-            <div>
-              <p className="text-muted-foreground text-xs">Empresa</p>
-              <p className="font-medium">{quotation.company}</p>
+            {allProducts && allProducts.length > 0 && (
+              <div className="space-y-1">
+                <Label className="text-xs">Productos</Label>
+                <div className="flex flex-col gap-2 mt-1">
+                  {allProducts.map((p) => (
+                    <div key={p.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`edit-prod-${p.id}`}
+                        checked={editForm.product_ids.includes(p.id)}
+                        onCheckedChange={(checked) => {
+                          const updated = checked
+                            ? [...editForm.product_ids, p.id]
+                            : editForm.product_ids.filter((id) => id !== p.id);
+                          setEditForm({ ...editForm, product_ids: updated });
+                        }}
+                      />
+                      <label htmlFor={`edit-prod-${p.id}`} className="text-sm cursor-pointer">{p.name}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="space-y-1">
+              <Label className="text-xs">Mensaje</Label>
+              <Textarea
+                value={editForm.message}
+                onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
+                placeholder="Mensaje adicional..."
+                className="min-h-[70px] text-sm"
+              />
             </div>
-          )}
-          <div>
-            <p className="text-muted-foreground text-xs">Fecha</p>
-            <p className="font-medium">
-              {new Date(quotation.created_at).toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "numeric" })}
-            </p>
+            <div className="flex gap-2 pt-1">
+              <Button
+                size="sm"
+                onClick={() => updateInfoMutation.mutate(editForm)}
+                disabled={updateInfoMutation.isPending || !editForm.client_name.trim() || !editForm.client_email.trim()}
+              >
+                {updateInfoMutation.isPending ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+                Guardar cambios
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setEditingInfo(false)}>
+                Cancelar
+              </Button>
+            </div>
           </div>
-          {creatorName && (
-            <div>
-              <p className="text-muted-foreground text-xs flex items-center gap-1">
-                <UserCircle className="h-3 w-3" /> Creada por
-              </p>
-              <p className="font-medium">{creatorName}</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-muted-foreground text-xs">Cliente</p>
+                <p className="font-medium">{quotation.client_name}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">Email</p>
+                <p className="font-medium break-all">{quotation.client_email}</p>
+              </div>
+              {quotation.client_phone && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Teléfono</p>
+                  <p className="font-medium">{quotation.client_phone}</p>
+                </div>
+              )}
+              {quotation.company && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Empresa</p>
+                  <p className="font-medium">{quotation.company}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-muted-foreground text-xs">Fecha</p>
+                <p className="font-medium">
+                  {new Date(quotation.created_at).toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "numeric" })}
+                </p>
+              </div>
+              {creatorName && (
+                <div>
+                  <p className="text-muted-foreground text-xs flex items-center gap-1">
+                    <UserCircle className="h-3 w-3" /> Creada por
+                  </p>
+                  <p className="font-medium">{creatorName}</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+
+            {/* Products */}
+            {products && products.length > 0 && (
+              <div className="text-sm">
+                <p className="text-muted-foreground text-xs mb-1">Productos</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {products.map((p) => (
+                    <Badge key={p.id} variant="secondary" className="text-xs">{p.name}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {quotation.message && (
+              <div className="text-sm">
+                <p className="text-muted-foreground mb-1 text-xs">Mensaje</p>
+                <p className="bg-muted p-3 rounded-lg text-sm">{quotation.message}</p>
+              </div>
+            )}
+
+            {isStaff && (
+              <Button size="sm" variant="outline" onClick={() => setEditingInfo(true)} className="self-start">
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                Editar datos
+              </Button>
+            )}
+          </>
+        )}
 
         {/* Address section */}
         {(quotation.province || quotation.city || quotation.address_formatted) && (
@@ -541,62 +739,6 @@ const QuotationDetailDialog = ({
                 Abrir en Google Maps
               </a>
             </div>
-          </div>
-        )}
-
-        {/* Price section */}
-        <div className="flex items-center gap-3 text-sm">
-          <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
-          {isStaff && editingPrice ? (
-            <div className="flex items-center gap-2 flex-1">
-              <Input
-                type="number"
-                placeholder="Precio..."
-                value={priceInput}
-                onChange={(e) => setPriceInput(e.target.value)}
-                className="h-8 w-32"
-                min="0"
-                step="0.01"
-              />
-              <Button size="sm" className="h-8" onClick={handleSavePrice} disabled={updatePriceMutation.isPending}>
-                Guardar
-              </Button>
-              <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingPrice(false)}>
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">
-                {quotation.price != null
-                  ? `$${Number(quotation.price).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`
-                  : "Sin precio asignado"}
-              </span>
-              {isStaff && (
-                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditingPrice(true)}>
-                  {quotation.price != null ? "Editar" : "Agregar precio"}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Products */}
-        {products && products.length > 0 && (
-          <div className="text-sm">
-            <p className="text-muted-foreground text-xs mb-1">Productos</p>
-            <div className="flex flex-wrap gap-1.5">
-              {products.map((p) => (
-                <Badge key={p.id} variant="secondary" className="text-xs">{p.name}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {quotation.message && (
-          <div className="text-sm">
-            <p className="text-muted-foreground mb-1 text-xs">Mensaje</p>
-            <p className="bg-muted p-3 rounded-lg text-sm">{quotation.message}</p>
           </div>
         )}
 
