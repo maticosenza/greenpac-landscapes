@@ -21,7 +21,7 @@ async function sendEmail(to: string[], subject: string, html: string): Promise<{
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Greenpac <onboarding@resend.dev>",
+        from: "Greenpac <info@greenpac.com.ar>",
         to,
         subject,
         html,

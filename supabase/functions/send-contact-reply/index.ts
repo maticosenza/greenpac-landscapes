@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Greenpac Argentina <noreply@greenpacargentina.com>',
+            from: 'Greenpac <info@greenpac.com.ar>',
             to: [to_email],
             subject: 'Respuesta a tu consulta - Greenpac Argentina',
             html: `
