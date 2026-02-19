@@ -67,6 +67,7 @@ const TOOL_LABELS: Record<string, string> = {
   quotations: "Cotizaciones",
   clients: "Clientes",
   contact_inquiries: "Consultas de contacto",
+  zonas: "Zonas",
 };
 
 const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
