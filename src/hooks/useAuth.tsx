@@ -18,6 +18,8 @@ interface AuthContextType {
   profile: Profile | null;
   roles: AppRole[];
   isLoading: boolean;
+  needsPasswordSetup: boolean;
+  clearPasswordSetup: () => void;
   signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -36,6 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
+
+  const clearPasswordSetup = () => setNeedsPasswordSetup(false);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -73,6 +78,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+
+        if (event === "PASSWORD_RECOVERY") {
+          setNeedsPasswordSetup(true);
+        }
 
         if (session?.user) {
           // Defer Supabase calls with setTimeout
@@ -149,6 +158,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         profile,
         roles,
         isLoading,
+        needsPasswordSetup,
+        clearPasswordSetup,
         signUp,
         signIn,
         signOut,

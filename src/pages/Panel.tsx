@@ -5,10 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import CustomerPanel from "@/components/panel/CustomerPanel";
 import EmployeePanel from "@/components/panel/EmployeePanel";
 import AdminPanel from "@/components/panel/AdminPanel";
+import CreatePasswordDialog from "@/components/auth/CreatePasswordDialog";
 
 const Panel = () => {
   const navigate = useNavigate();
-  const { user, isLoading, isEmployee, isAdmin } = useAuth();
+  const { user, isLoading, isEmployee, isAdmin, needsPasswordSetup, clearPasswordSetup } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -28,18 +29,12 @@ const Panel = () => {
     return null;
   }
 
-  // Admin gets the AdminPanel with team management
-  if (isAdmin) {
-    return <AdminPanel />;
-  }
-
-  // Employee gets EmployeePanel
-  if (isEmployee) {
-    return <EmployeePanel />;
-  }
-
-  // Customer gets CustomerPanel
-  return <CustomerPanel />;
+  return (
+    <>
+      <CreatePasswordDialog open={needsPasswordSetup} onSuccess={clearPasswordSetup} />
+      {isAdmin ? <AdminPanel /> : isEmployee ? <EmployeePanel /> : <CustomerPanel />}
+    </>
+  );
 };
 
 export default Panel;
