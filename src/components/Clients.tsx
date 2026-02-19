@@ -1,21 +1,21 @@
 import { Globe, Award, Factory, TrendingUp } from "lucide-react";
 
 const stats = [
-  { icon: Factory, value: "+20 años", label: "fabricando packaging sustentable" },
-  { icon: Globe, value: "Todo el mundo", label: "distribución internacional" },
-  { icon: Award, value: "Marcas líderes", label: "de primer nivel global" },
+  { icon: Factory, value: "+20 años", label: "fabricando maquinaria agrícola" },
+  { icon: Globe, value: "Todo el mundo", label: "exportación internacional" },
+  { icon: Award, value: "Marcas líderes", label: "del agro a nivel global" },
   { icon: TrendingUp, value: "+500 clientes", label: "en Argentina y el exterior" },
 ];
 
 const industries = [
-  "Alimentos & Bebidas",
-  "Cosmética & Belleza",
-  "Farmacéutica",
-  "Electrónica",
-  "Retail & Moda",
-  "Agro & Exportación",
-  "Química & Industrial",
-  "Hogar & Decoración",
+  "Cosechadoras & Cabezales",
+  "Cabezales Rotativos",
+  "Agroindustria",
+  "Exposiciones Agro",
+  "Soja, Maíz & Cereales",
+  "Contratistas Rurales",
+  "Cooperativas Agrícolas",
+  "Exportación & Acopio",
 ];
 
 const Clients = () => {
@@ -37,13 +37,13 @@ const Clients = () => {
             Nuestros Clientes
           </p>
           <h2 className="greenpac-title mb-6" style={{ color: "hsl(0 0% 98%)" }}>
-            Fabricamos para las{" "}
+            Maquinaria agrícola para las{" "}
             <span style={{ color: "hsl(var(--primary))" }}>
-              grandes marcas del mundo
+              grandes marcas del agro mundial
             </span>
           </h2>
           <p className="text-lg max-w-3xl mx-auto" style={{ color: "hsl(0 0% 75%)" }}>
-            Somos fabricantes de packaging sustentable con presencia global. Nuestros productos llegan a las manos de consumidores en todo el mundo a través de las marcas de primer nivel que confían en Greenpac.
+            Somos fabricantes de maquinaria agrícola de alta precisión con presencia global. Nuestros cabezales y equipos trabajan en los campos más exigentes del mundo, de la mano de las marcas líderes de la agroindustria.
           </p>
         </div>
 
@@ -78,18 +78,18 @@ const Clients = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left: description */}
           <div>
-            <h3 className="text-2xl font-display font-bold mb-6" style={{ color: "hsl(0 0% 95%)" }}>
-              De Argentina al mundo, con calidad de primer nivel
+          <h3 className="text-2xl font-display font-bold mb-6" style={{ color: "hsl(0 0% 95%)" }}>
+              De Argentina al campo del mundo, con ingeniería de primer nivel
             </h3>
             <div className="space-y-5 text-base leading-relaxed" style={{ color: "hsl(0 0% 70%)" }}>
               <p>
-                Greenpac es uno de los referentes en fabricación de packaging ecológico de América del Sur. Nuestros procesos productivos están certificados bajo estándares internacionales, lo que nos permite abastecer a grandes corporaciones y marcas globales con exigencias de calidad muy altas.
+                Greenpac es fabricante de maquinaria agrícola de alta tecnología, especializado en cabezales de cosechadora y cabezales rotativos para las cosechas más exigentes. Nuestros equipos están diseñados para maximizar el rendimiento en cultivos de soja, maíz, trigo y girasol.
               </p>
               <p>
-                Trabajamos con clientes de la industria alimenticia, cosmética, farmacéutica, retail y más. Desde materiales compostables hasta soluciones de embalaje personalizadas, somos el socio estratégico de marcas que buscan diferenciarse con packaging sustentable.
+                Trabajamos con las principales marcas de la agroindustria a nivel global, proveyendo soluciones de maquinaria para contratistas rurales, cooperativas agrícolas y grandes productores. Somos el socio estratégico de quienes buscan eficiencia y confiabilidad en el campo.
               </p>
               <p>
-                Nuestra capacidad de distribución nos permite llegar a cualquier punto del país y coordinar exportaciones a toda la región y el mundo.
+                Nuestra capacidad productiva y red de distribución nos permite abastecer a todo el país y coordinar exportaciones a toda la región y el mundo.
               </p>
             </div>
 
@@ -99,7 +99,7 @@ const Clients = () => {
                 style={{ background: "hsl(var(--greenpac-gold))" }}
               />
               <p className="text-sm font-semibold tracking-wider uppercase" style={{ color: "hsl(var(--greenpac-gold))" }}>
-                Calidad certificada · Producción local · Alcance global
+                Ingeniería certificada · Producción local · Alcance global
               </p>
             </div>
           </div>
@@ -144,7 +144,7 @@ const Clients = () => {
                   Proveedor de confianza
                 </p>
                 <p className="text-sm" style={{ color: "hsl(0 0% 65%)" }}>
-                  Marcas líderes de consumo masivo, cosméticos y alimentos confían en Greenpac para sus líneas de packaging premium y sustentable.
+                  Las marcas líderes de la agroindustria a nivel global eligen Greenpac por la precisión, durabilidad y rendimiento de nuestra maquinaria. Desde cabezales de cosechadora hasta equipos rotativos de gran porte, somos sinónimo de confianza en el campo.
                 </p>
               </div>
             </div>
