@@ -15,7 +15,8 @@ import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
 import DraggableHeroBlock from "@/components/DraggableHeroBlock";
 import HeroAlignmentToggle from "@/components/HeroAlignmentToggle";
-import heroImageDefault from "@/assets/hero-banner-greenpac-v5.jpg";
+import heroImageDefault from "@/assets/hero-banner-greenpac-v6.jpg";
+import heroMobileDefault from "@/assets/hero-banner-mobile-v2.jpg";
 
 const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
   const { updateAsset } = useSiteContent();
@@ -164,7 +165,7 @@ const Hero = () => {
   const { isEditMode } = useEditMode();
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
-  const heroMobileAsset = getAsset("hero-banner-mobile", "", "Hero móvil");
+  const heroMobileAsset = getAsset("hero-banner-mobile", heroMobileDefault, "Hero móvil");
   const kicker = getText("hero-kicker", "Maquinaria de alto rendimiento");
   const h1Text = getText("hero-title", "Tecnología y potencia para el campo argentino");
   const subtitleLine1 = getText("hero-subtitle-line1", "Equipos listos para trabajar, con asesoramiento experto.");
@@ -193,21 +194,19 @@ const Hero = () => {
       {/* Background Image */}
       <div className="absolute inset-0">
         {/* Mobile image */}
-        {heroMobileAsset.url && (
-          <img
-            src={heroMobileAsset.url}
-            alt={heroMobileAsset.alt}
-            className="w-full h-full object-cover sm:hidden"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
-        )}
-        {/* Desktop image (or fallback on mobile if no mobile banner) */}
+        <img
+          src={heroMobileAsset.url}
+          alt={heroMobileAsset.alt}
+          className="w-full h-full object-cover sm:hidden"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
+        {/* Desktop image */}
         <img
           src={heroAsset.url}
           alt={heroAsset.alt}
-          className={`w-full h-full object-cover object-center lg:object-[50%_65%] ${heroMobileAsset.url ? 'hidden sm:block' : 'max-[480px]:object-[50%_70%]'}`}
+          className="w-full h-full object-cover object-center lg:object-[50%_65%] hidden sm:block"
           loading="eager"
           fetchPriority="high"
           decoding="async"
