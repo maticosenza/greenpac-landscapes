@@ -73,6 +73,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Check URL hash for invite/signup tokens on mount
+    const hash = window.location.hash;
+    if (hash && (hash.includes("type=invite") || hash.includes("type=signup") || hash.includes("type=magiclink"))) {
+      setNeedsPasswordSetup(true);
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
