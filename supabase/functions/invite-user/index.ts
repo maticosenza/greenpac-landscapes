@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "GreenPac <info@greenpac.com.ar>",
+            from: "GreenPac <onboarding@resend.dev>",
             to: [email],
             subject: "Tu cuenta en GreenPac ha sido creada",
             html: `
