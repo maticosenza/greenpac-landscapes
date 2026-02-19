@@ -29,8 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UserPlus, Shield, Trash2, Loader2, Search } from "lucide-react";
+import { UserPlus, Shield, Trash2, Loader2, Search, Mail, ShieldPlus } from "lucide-react";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
 interface TeamManagementProps {
   searchTerm: string;
@@ -62,6 +64,13 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     role: string;
     userName: string;
   }>({ open: false, userId: "", role: "", userName: "" });
+
+  // Invite dialogs
+  const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
+  const [isInviteUserOpen, setIsInviteUserOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<AppRole>("employee");
+  const [isInviting, setIsInviting] = useState(false);
 
   // Combine global search with local search
   const effectiveSearchTerm = localSearchTerm || searchTerm;
@@ -199,6 +208,46 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
     setConfirmRemoveDialog({ open: true, userId, role, userName });
   };
 
+  const handleInvite = async (type: "member" | "user") => {
+    if (!inviteEmail) {
+      toast.error("Ingresá un email");
+      return;
+    }
+    setIsInviting(true);
+    try {
+      const { data: sessionData } = await supabaseClient.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionData.session?.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            email: inviteEmail,
+            role: type === "member" ? inviteRole : undefined,
+          }),
+        }
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        toast.error(result.error || "Error al enviar invitación");
+      } else {
+        toast.success(result.message || "Invitación enviada");
+        setInviteEmail("");
+        setIsInviteMemberOpen(false);
+        setIsInviteUserOpen(false);
+        queryClient.invalidateQueries({ queryKey: ["users-with-roles"] });
+      }
+    } catch {
+      toast.error("Error al enviar invitación");
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Cargando equipo...</p>;
   }
@@ -228,18 +277,32 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
               Empleados y administradores con acceso al panel interno
             </CardDescription>
           </div>
-          <Button
-            size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
-            onClick={() => {
-              setSelectedUser(null);
-              setSelectedRole("employee");
-              setIsAddRoleDialogOpen(true);
-            }}
-          >
-            <UserPlus className="h-4 w-4 mr-1.5" />
-            Agregar miembro
-          </Button>
+          <div className="flex gap-2 shrink-0">
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => {
+                setInviteEmail("");
+                setInviteRole("employee");
+                setIsInviteMemberOpen(true);
+              }}
+            >
+              <Mail className="h-4 w-4 mr-1.5" />
+              Invitar miembro
+            </Button>
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => {
+                setSelectedUser(null);
+                setSelectedRole("employee");
+                setIsAddRoleDialogOpen(true);
+              }}
+            >
+              <ShieldPlus className="h-4 w-4 mr-1.5" />
+              Dar rol
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {teamMembers && teamMembers.length > 0 ? (
@@ -385,13 +448,12 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
             size="sm"
             className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
             onClick={() => {
-              setSelectedUser(null);
-              setSelectedRole("customer");
-              setIsAddRoleDialogOpen(true);
+              setInviteEmail("");
+              setIsInviteUserOpen(true);
             }}
           >
-            <UserPlus className="h-4 w-4 mr-1.5" />
-            Agregar usuario
+            <Mail className="h-4 w-4 mr-1.5" />
+            Invitar usuario
           </Button>
         </CardHeader>
         <CardContent>
@@ -559,6 +621,82 @@ const TeamManagement = ({ searchTerm }: TeamManagementProps) => {
             >
               {removeRoleMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Remover Rol
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Member Dialog */}
+      <Dialog open={isInviteMemberOpen} onOpenChange={setIsInviteMemberOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invitar Miembro al Equipo</DialogTitle>
+            <DialogDescription>
+              Enviá una invitación por email para que se registre y forme parte del equipo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Rol a asignar</Label>
+              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as AppRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">Empleado</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInviteMemberOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => handleInvite("member")} disabled={isInviting}>
+              {isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Enviar Invitación
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite User Dialog */}
+      <Dialog open={isInviteUserOpen} onOpenChange={setIsInviteUserOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invitar Usuario</DialogTitle>
+            <DialogDescription>
+              Enviá una invitación por email para que se registre en la plataforma.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInviteUserOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => handleInvite("user")} disabled={isInviting}>
+              {isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Enviar Invitación
             </Button>
           </DialogFooter>
         </DialogContent>
