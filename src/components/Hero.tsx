@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf } from "lucide-react";
+import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf, Smartphone, SmartphoneNfc } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -161,7 +161,7 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
 };
 
 const Hero = () => {
-  const { getText, getAsset } = useSiteContent();
+  const { getText, getAsset, updateText } = useSiteContent();
   const { isEditMode } = useEditMode();
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
@@ -172,6 +172,7 @@ const Hero = () => {
   const subtitleLine2 = getText("hero-subtitle-line2", "Cotizá en minutos y coordinamos entrega a todo el país.");
   const ctaQuote = getText("hero-cta-primary", "Solicitar Cotización");
   const ctaProducts = getText("hero-cta-secondary", "Ver Productos");
+  const hideCtaMobile = getText("hero-cta-hide-mobile", "false") === "true";
 
   const h1Align = getText("hero-h1-align", "left");
   const subAlign = getText("hero-sub-align", "left");
@@ -272,13 +273,32 @@ const Hero = () => {
               </div>
 
               {/* CTA buttons — always immediately below text */}
-              <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 pt-2 sm:pt-3 w-full ${justifyClass(h1Align)}`}>
-                <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
-                  <a href="#cotizacion">{ctaQuote}</a>
-                </Button>
-                <Button variant="hero" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
-                  <a href="#productos">{ctaProducts}</a>
-                </Button>
+              <div className="relative w-full">
+                {isEditMode && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={hideCtaMobile ? "destructive" : "secondary"}
+                    className="absolute -top-8 left-0 z-20 gap-1.5 h-7 text-[10px] px-2 shadow-md"
+                    onClick={() => {
+                      updateText.mutate({ key: "hero-cta-hide-mobile", value: hideCtaMobile ? "false" : "true" });
+                    }}
+                  >
+                    {hideCtaMobile ? (
+                      <><Smartphone className="h-3 w-3" />Botones ocultos en móvil</>
+                    ) : (
+                      <><SmartphoneNfc className="h-3 w-3" />Botones visibles en móvil</>
+                    )}
+                  </Button>
+                )}
+                <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 pt-2 sm:pt-3 w-full ${justifyClass(h1Align)} ${hideCtaMobile ? "hidden sm:flex" : ""}`}>
+                  <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
+                    <a href="#cotizacion">{ctaQuote}</a>
+                  </Button>
+                  <Button variant="hero" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
+                    <a href="#productos">{ctaProducts}</a>
+                  </Button>
+                </div>
               </div>
             </div>
           </EditableSection>
