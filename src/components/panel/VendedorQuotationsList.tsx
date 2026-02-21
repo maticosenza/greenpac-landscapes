@@ -56,6 +56,8 @@ interface Quotation {
   created_at: string;
   customer_id: string | null;
   is_archived: boolean | null;
+  created_by_employee_id: string | null;
+  hidden_from_vendedores: boolean;
 }
 
 const STATUS_OPTIONS = [
@@ -80,7 +82,6 @@ const VendedorQuotationsList = ({ searchTerm, vendedorId }: Props) => {
       const { data, error } = await supabase
         .from("quotations")
         .select("*")
-        .eq("created_by_employee_id", vendedorId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Quotation[];
@@ -178,7 +179,7 @@ const VendedorQuotationsList = ({ searchTerm, vendedorId }: Props) => {
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <CardTitle className="text-lg sm:text-xl">
-            {showArchived ? "Cotizaciones Archivadas" : "Mis Cotizaciones"}
+            {showArchived ? "Cotizaciones Archivadas" : "Todas las Cotizaciones"}
             <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({filteredQuotations?.length ?? 0})
             </span>

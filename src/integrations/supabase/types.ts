@@ -231,6 +231,7 @@ export type Database = {
           created_at: string
           created_by_employee_id: string | null
           customer_id: string | null
+          hidden_from_vendedores: boolean
           id: string
           is_archived: boolean | null
           lat: number | null
@@ -259,6 +260,7 @@ export type Database = {
           created_at?: string
           created_by_employee_id?: string | null
           customer_id?: string | null
+          hidden_from_vendedores?: boolean
           id?: string
           is_archived?: boolean | null
           lat?: number | null
@@ -287,6 +289,7 @@ export type Database = {
           created_at?: string
           created_by_employee_id?: string | null
           customer_id?: string | null
+          hidden_from_vendedores?: boolean
           id?: string
           is_archived?: boolean | null
           lat?: number | null
