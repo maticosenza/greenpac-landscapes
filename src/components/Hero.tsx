@@ -220,7 +220,7 @@ const Hero = () => {
 
       {/* Content — mobile: centered-high, sm+: centered */}
       <div className="relative z-10 flex flex-col justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-20 sm:pt-32 pb-10 sm:pb-20 lg:pb-24 -mt-8 sm:mt-0">
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-20 sm:pt-32 pb-10 sm:pb-20 lg:pb-24 -mt-16 sm:mt-0">
           {/* Single unified block: text + CTAs always together */}
           <EditableSection
             sectionId="Hero Textos"
