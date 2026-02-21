@@ -36,7 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download, Eye, MessageSquare, List, BarChart3, X } from "lucide-react";
+import { MoreHorizontal, Archive, ArchiveRestore, Trash2, Download, Eye, MessageSquare, List, BarChart3, X, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
 import QuotationDetailDialog from "./QuotationDetailDialog";
@@ -59,6 +59,7 @@ interface Quotation {
   created_by_employee_id: string | null;
   product_ids: string[] | null;
   is_archived: boolean | null;
+  hidden_from_vendedores: boolean;
 }
 
 interface Profile {
@@ -193,6 +194,21 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
     onError: () => {
       toast.error("Error al eliminar");
     },
+  });
+
+  const toggleVendedorVisibilityMutation = useMutation({
+    mutationFn: async ({ id, hidden }: { id: string; hidden: boolean }) => {
+      const { error } = await supabase
+        .from("quotations")
+        .update({ hidden_from_vendedores: hidden })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { hidden }) => {
+      queryClient.invalidateQueries({ queryKey: ["all-quotations"] });
+      toast.success(hidden ? "Oculta para vendedores" : "Visible para vendedores");
+    },
+    onError: () => toast.error("Error al cambiar visibilidad"),
   });
 
   const handleDelete = (id: string) => {
@@ -399,6 +415,26 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                             )}
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            onClick={() =>
+                              toggleVendedorVisibilityMutation.mutate({
+                                id: quotation.id,
+                                hidden: !quotation.hidden_from_vendedores,
+                              })
+                            }
+                          >
+                            {quotation.hidden_from_vendedores ? (
+                              <>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Mostrar a vendedores
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="h-4 w-4 mr-2" />
+                                Ocultar de vendedores
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => handleDelete(quotation.id)}
                           >
@@ -464,6 +500,11 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-1.5">
                           {quotation.client_name}
+                          {quotation.hidden_from_vendedores && (
+                            <span className="flex items-center gap-0.5 bg-muted text-muted-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium" title="Oculta de vendedores">
+                              <EyeOff className="h-3 w-3" />
+                            </span>
+                          )}
                           {getUnreadCount(quotation.id) > 0 && (
                             <span className="flex items-center gap-0.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
                               <MessageSquare className="h-3 w-3" />
@@ -524,6 +565,26 @@ const QuotationsList = ({ searchTerm }: QuotationsListProps) => {
                                 <>
                                   <Archive className="h-4 w-4 mr-2" />
                                   Archivar
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                toggleVendedorVisibilityMutation.mutate({
+                                  id: quotation.id,
+                                  hidden: !quotation.hidden_from_vendedores,
+                                })
+                              }
+                            >
+                              {quotation.hidden_from_vendedores ? (
+                                <>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Mostrar a vendedores
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="h-4 w-4 mr-2" />
+                                  Ocultar de vendedores
                                 </>
                               )}
                             </DropdownMenuItem>
