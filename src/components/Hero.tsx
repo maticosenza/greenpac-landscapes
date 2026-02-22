@@ -250,7 +250,8 @@ const Hero = () => {
                   </div>
                 )}
                 <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[2.8rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
-                  Tecnología y<br />potencia para el<br />campo argentino
+                  <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
+                  <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
               </div>
 
@@ -296,7 +297,7 @@ const Hero = () => {
                     )}
                   </Button>
                 )}
-                <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 pt-2 sm:pt-3 w-full ${justifyClass(h1Align)} ${hideCtaMobile ? "hidden sm:flex" : ""}`}>
+                <div className={`hidden sm:flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 pt-2 sm:pt-3 w-full ${justifyClass(h1Align)}`}>
                   <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
