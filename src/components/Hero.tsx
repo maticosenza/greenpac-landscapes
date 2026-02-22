@@ -220,7 +220,7 @@ const Hero = () => {
 
       {/* Content — mobile: centered-high, sm+: centered */}
       <div className="relative z-10 flex flex-col justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-20 sm:pt-32 pb-10 sm:pb-20 lg:pb-24 -mt-16 sm:mt-0">
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-10 sm:pb-20 lg:pb-24 -mt-8 sm:mt-0">
           {/* Single unified block: text + CTAs always together */}
           <EditableSection
             sectionId="Hero Textos"
@@ -237,7 +237,7 @@ const Hero = () => {
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2.5">
                 <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[0.7rem] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
+                <p className="text-primary font-semibold text-[0.65rem] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
                   {kicker}
                 </p>
               </div>
@@ -249,7 +249,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[2.8rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
                   <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
                   <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
