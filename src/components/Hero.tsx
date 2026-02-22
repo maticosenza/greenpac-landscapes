@@ -237,7 +237,7 @@ const Hero = () => {
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2.5">
                 <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
+                <p className="text-primary font-semibold text-[0.7rem] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
                   {kicker}
                 </p>
               </div>
@@ -249,7 +249,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[2.4rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[2.8rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
                   Tecnología y<br />potencia para el<br />campo argentino
                 </h1>
               </div>
@@ -262,13 +262,18 @@ const Hero = () => {
                   </div>
                 )}
                 <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
-                  {subtitleLine1}
-                  {subtitleLine2 ? (
-                    <>
-                      <br />
-                      {subtitleLine2}
-                    </>
-                  ) : null}
+                  <span className="hidden sm:inline">
+                    {subtitleLine1}
+                    {subtitleLine2 ? (
+                      <>
+                        <br />
+                        {subtitleLine2}
+                      </>
+                    ) : null}
+                  </span>
+                  <span className="sm:hidden">
+                    Equipos listos para trabajar, asesoramiento experto. Cotizaciones en minutos.
+                  </span>
                 </p>
               </div>
 
