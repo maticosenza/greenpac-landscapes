@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare, UserCircle } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare, UserCircle, Package, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,9 @@ import CreateQuotationDialog from "./CreateQuotationDialog";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 import VendedorQuotationsList from "./VendedorQuotationsList";
 import VendedorCustomersList from "./VendedorCustomersList";
+import ContactInquiriesList from "./ContactInquiriesList";
+import ProductManagement from "./ProductManagement";
+import ZonalReports from "./ZonalReports";
 
 const VendedorPanel = () => {
   const navigate = useNavigate();
@@ -41,7 +44,6 @@ const VendedorPanel = () => {
       const quotations = quotationsRes.data || [];
       const messages = messagesRes.data || [];
 
-      // Count unread messages (client messages with no staff response after)
       const quotationIds = quotations.map((q) => q.id);
       let unreadChats = 0;
       for (const qId of quotationIds) {
@@ -51,7 +53,6 @@ const VendedorPanel = () => {
         }
       }
 
-      // Unique customers
       const uniqueCustomers = new Set(quotations.map((q) => q.customer_id).filter(Boolean));
 
       return {
@@ -64,10 +65,48 @@ const VendedorPanel = () => {
     enabled: !!user?.id,
   });
 
+  const { data: rolePermissions } = useQuery({
+    queryKey: ["role-permissions", "vendedor"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("role_permissions")
+        .select("*")
+        .eq("role", "vendedor");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const enabledTools = useMemo(() => {
+    const tools: Record<string, boolean> = {
+      quotations: true,
+      products: false,
+      clients: false,
+      contact_inquiries: false,
+      zonas: false,
+    };
+    rolePermissions?.forEach((p) => {
+      tools[p.tool_key] = p.is_enabled;
+    });
+    return tools;
+  }, [rolePermissions]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
+
+  const visibleTabs = useMemo(() => {
+    const tabs: { value: string; label: string; shortLabel: string; icon: any }[] = [];
+    if (enabledTools.quotations) tabs.push({ value: "quotations", label: "Mis Cotizaciones", shortLabel: "Cotiz.", icon: FileText });
+    if (enabledTools.contact_inquiries) tabs.push({ value: "inquiries", label: "Consultas", shortLabel: "Consult.", icon: MessageSquare });
+    if (enabledTools.products) tabs.push({ value: "products", label: "Productos", shortLabel: "Prod.", icon: Package });
+    if (enabledTools.clients) tabs.push({ value: "customers", label: "Mis Clientes", shortLabel: "Client.", icon: Users });
+    if (enabledTools.zonas) tabs.push({ value: "zones", label: "Zonas", shortLabel: "Zonas", icon: MapPin });
+    return tabs;
+  }, [enabledTools]);
+
+  const defaultTab = visibleTabs.length > 0 ? visibleTabs[0].value : "quotations";
 
   return (
     <div className="min-h-screen bg-muted">
@@ -155,48 +194,64 @@ const VendedorPanel = () => {
               className="pl-10"
             />
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Cotización
-          </Button>
+          {enabledTools.quotations && (
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Cotización
+            </Button>
+          )}
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="quotations" className="w-full">
-          <div className="bg-card rounded-xl border shadow-sm p-1.5 sm:p-2 mb-6">
-            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg grid grid-cols-2 gap-1">
-              <TabsTrigger
-                value="quotations"
-                className="text-xs sm:text-sm px-2 sm:px-4 py-2.5 min-h-[44px] sm:min-h-[40px] rounded-md gap-2 flex items-center justify-center data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
-                <FileText className="h-[18px] w-[18px] sm:h-4 sm:w-4 shrink-0" />
-                <span className="hidden sm:inline">Mis Cotizaciones</span>
-                <span className="sm:hidden">Cotiz.</span>
-                {(stats?.unreadChats ?? 0) > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
-                    {stats?.unreadChats}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="customers"
-                className="text-xs sm:text-sm px-2 sm:px-4 py-2.5 min-h-[44px] sm:min-h-[40px] rounded-md gap-2 flex items-center justify-center data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
-                <Users className="h-[18px] w-[18px] sm:h-4 sm:w-4 shrink-0" />
-                <span className="hidden sm:inline">Mis Clientes</span>
-                <span className="sm:hidden">Client.</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        {visibleTabs.length > 0 ? (
+          <Tabs defaultValue={defaultTab} className="w-full">
+            <div className="bg-card rounded-xl border shadow-sm p-1.5 sm:p-2 mb-6">
+              <TabsList className={`w-full h-auto p-1 bg-muted/50 rounded-lg grid gap-1`} style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, 1fr)` }}>
+                {visibleTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <TabsTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      className="relative text-xs sm:text-sm px-2 sm:px-4 py-2.5 min-h-[44px] sm:min-h-[40px] rounded-md gap-2 flex items-center justify-center data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
+                    >
+                      <Icon className="h-[18px] w-[18px] sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                      <span className="sm:hidden">{tab.shortLabel}</span>
+                      {tab.value === "quotations" && (stats?.unreadChats ?? 0) > 0 && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+                          {stats?.unreadChats}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </div>
 
-          <TabsContent value="quotations">
-            <VendedorQuotationsList searchTerm={searchTerm} vendedorId={user?.id ?? ""} />
-          </TabsContent>
+            <TabsContent value="quotations">
+              <VendedorQuotationsList searchTerm={searchTerm} vendedorId={user?.id ?? ""} />
+            </TabsContent>
 
-          <TabsContent value="customers">
-            <VendedorCustomersList searchTerm={searchTerm} vendedorId={user?.id ?? ""} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="inquiries">
+              <ContactInquiriesList searchTerm={searchTerm} />
+            </TabsContent>
+
+            <TabsContent value="products">
+              <ProductManagement searchTerm={searchTerm} />
+            </TabsContent>
+
+            <TabsContent value="customers">
+              <VendedorCustomersList searchTerm={searchTerm} vendedorId={user?.id ?? ""} />
+            </TabsContent>
+
+            <TabsContent value="zones">
+              <ZonalReports />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <p className="text-muted-foreground text-center py-12">No tenés herramientas habilitadas. Contactá a un administrador.</p>
+        )}
 
         <CreateQuotationDialog
           open={isCreateDialogOpen}
