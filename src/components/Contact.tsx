@@ -13,7 +13,7 @@ const contactIcons = [Mail, Phone, MapPin, Clock];
 const defaultContactInfo = [
   { label: "Email", value: "info@greenpac.com.ar", href: "mailto:info@greenpac.com.ar" },
   { label: "Teléfono", value: "+54 11 XXXX-XXXX", href: "tel:+5411XXXXXXXX" },
-  { label: "Ubicación", value: "Argentina", href: "#" },
+  { label: "Ubicación", value: "Luis Maria Drago 3249, Burzaco.", href: "https://www.google.com/maps/place//data=!4m2!3m1!1s0x95bcd5f5af10ecef:0x72dc685efac9954f?entry=s&sa=X&ved=2ahUKEwjzhfDt2--SAxVunpUCHUdcA5YQ4kB6BAgUEAA&hl=es" },
   { label: "Horario", value: "Lun - Vie: 9:00 - 18:00", href: "#" },
 ];
 
@@ -32,14 +32,14 @@ const Contact = () => {
   const contactSubtitle = getText("contact-subtitle", "Estamos listos para asesorarte y encontrar la solución perfecta para las necesidades de tu establecimiento.");
   const contactEmail = getText("contact-email", "info@greenpac.com.ar");
   const contactPhone = getText("contact-phone", "+54 11 XXXX-XXXX");
-  const contactLocation = getText("contact-location", "Argentina");
+  const contactLocation = getText("contact-location", "Luis Maria Drago 3249, Burzaco.");
   const contactHours = getText("contact-hours", "Lun - Vie: 9:00 - 18:00");
   const formButtonLabel = getText("contact-form-button", "Enviar Mensaje");
 
   const contactInfo = [
     { icon: Mail, label: "Email", value: contactEmail, href: `mailto:${contactEmail}` },
     { icon: Phone, label: "Teléfono", value: contactPhone, href: `tel:${contactPhone.replace(/\s/g, "")}` },
-    { icon: MapPin, label: "Ubicación", value: contactLocation, href: "#" },
+    { icon: MapPin, label: "Ubicación", value: contactLocation, href: "https://www.google.com/maps/place//data=!4m2!3m1!1s0x95bcd5f5af10ecef:0x72dc685efac9954f?entry=s&sa=X&ved=2ahUKEwjzhfDt2--SAxVunpUCHUdcA5YQ4kB6BAgUEAA&hl=es" },
     { icon: Clock, label: "Horario", value: contactHours, href: "#" },
   ];
 
@@ -84,7 +84,7 @@ const Contact = () => {
             { key: "contact-subtitle", label: "Subtítulo", type: "textarea", fallback: contactSubtitle },
             { key: "contact-email", label: "Email", type: "text", fallback: "info@greenpac.com.ar" },
             { key: "contact-phone", label: "Teléfono", type: "text", fallback: "+54 11 XXXX-XXXX" },
-            { key: "contact-location", label: "Ubicación", type: "text", fallback: "Argentina" },
+            { key: "contact-location", label: "Ubicación", type: "text", fallback: "Luis Maria Drago 3249, Burzaco." },
             { key: "contact-hours", label: "Horario", type: "text", fallback: "Lun - Vie: 9:00 - 18:00" },
             { key: "contact-form-button", label: "Texto del botón", type: "text", fallback: "Enviar Mensaje" },
           ]}
@@ -109,6 +109,8 @@ const Contact = () => {
               <a
                 key={item.label}
                 href={item.href}
+                target={item.href.startsWith("http") ? "_blank" : undefined}
+                rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 className="flex items-start gap-4 p-4 rounded-xl bg-primary-foreground/5 hover:bg-primary-foreground/10 transition-colors group"
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
