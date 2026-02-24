@@ -219,8 +219,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: centered-high, sm+: centered */}
-      <div className="relative z-10 flex flex-col justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-24 sm:pt-32 pb-10 sm:pb-20 lg:pb-24 -mt-8 sm:mt-0">
+      <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-[clamp(5.5rem,22vw,7.5rem)] sm:pt-32 pb-10 sm:pb-20 lg:pb-24 sm:mt-0">
           {/* Single unified block: text + CTAs always together */}
           <EditableSection
             sectionId="Hero Textos"
@@ -233,11 +233,11 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col ${itemsClass(h1Align)} space-y-4 sm:space-y-5 lg:space-y-7`}>
+            <div className={`animate-slide-up flex flex-col ${itemsClass(h1Align)} space-y-[clamp(0.75rem,2.5vw,1rem)] sm:space-y-5 lg:space-y-7`}>
               {/* Kicker with leaf icon */}
-              <div className="flex items-center gap-2.5">
-                <Leaf className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[0.65rem] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
+              <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
+                <Leaf className="h-[clamp(1rem,4vw,1.25rem)] w-[clamp(1rem,4vw,1.25rem)] sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
+                <p className="text-primary font-semibold text-[clamp(0.6rem,2.2vw,0.75rem)] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
                   {kicker}
                 </p>
               </div>
@@ -249,7 +249,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.1rem,7.5vw,2.8rem)] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
                   <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
                   <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
@@ -262,7 +262,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[clamp(0.85rem,3.2vw,1.05rem)] sm:text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
                   <span className="hidden sm:inline">
                     {subtitleLine1}
                     {subtitleLine2 ? (
