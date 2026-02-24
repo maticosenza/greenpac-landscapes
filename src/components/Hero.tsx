@@ -276,6 +276,13 @@ const Hero = () => {
                     Equipos listos para trabajar, asesoramiento experto. Cotizaciones en minutos.
                   </span>
                 </p>
+                {/* Mobile-only CTA */}
+                <a
+                  href="#cotizacion"
+                  className="sm:hidden inline-block mt-4 w-fit border border-white/80 text-white text-sm font-medium px-5 py-2 rounded-md hover:bg-white/10 transition-colors"
+                >
+                  Solicitar Cotización
+                </a>
               </div>
 
               {/* CTA buttons — always immediately below text */}
