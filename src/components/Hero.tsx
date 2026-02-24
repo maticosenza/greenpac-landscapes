@@ -220,7 +220,7 @@ const Hero = () => {
 
       {/* Content — mobile: centered-high, sm+: centered */}
       <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-[clamp(9rem,32vw,13rem)] sm:pt-32 pb-10 sm:pb-20 lg:pb-24 sm:mt-0">
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-[clamp(11rem,38vw,16rem)] sm:pt-32 pb-10 sm:pb-20 lg:pb-24 sm:mt-0">
           {/* Single unified block: text + CTAs always together */}
           <EditableSection
             sectionId="Hero Textos"
@@ -249,7 +249,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.1rem,7.5vw,2.8rem)] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[clamp(2.4rem,8.5vw,3.2rem)] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] ${alignClass(h1Align)}`}>
                   <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
                   <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
