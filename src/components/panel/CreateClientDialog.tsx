@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
+import { CLIENT_STATUSES } from "./clientConstants";
 
 interface Props {
   open: boolean;
@@ -45,6 +46,7 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
     postal_code: "",
     address: "",
     notes: "",
+    status: "activo",
   });
 
   const resetForm = () =>
@@ -60,6 +62,7 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
       postal_code: "",
       address: "",
       notes: "",
+      status: "activo",
     });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,6 +87,7 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
         postal_code: form.postal_code.trim() || null,
         address: form.address.trim() || null,
         notes: form.notes.trim() || null,
+        status: form.status,
         created_by: user.id,
       } as any);
 
@@ -132,6 +136,22 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
                 maxLength={50}
                 placeholder="DNI / CUIT"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Estado</Label>
+              <Select value={form.status} onValueChange={(v) => update("status", v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CLIENT_STATUSES.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
