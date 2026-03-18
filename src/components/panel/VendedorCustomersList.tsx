@@ -154,10 +154,11 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                 className="pl-10"
               />
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
               <Button
                 variant={statusFilter === "all" ? "default" : "outline"}
                 size="sm"
+                className="whitespace-nowrap shrink-0"
                 onClick={() => setStatusFilter("all")}
               >
                 Todos
@@ -167,6 +168,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                   key={s.value}
                   variant={statusFilter === s.value ? "default" : "outline"}
                   size="sm"
+                  className="whitespace-nowrap shrink-0"
                   onClick={() => setStatusFilter(s.value)}
                 >
                   {s.label}
