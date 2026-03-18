@@ -39,6 +39,7 @@ const Contact = () => {
 
   const contactInfo = [
     { icon: Mail, label: "Email", value: contactEmail, href: `mailto:${contactEmail}` },
+    { icon: Mail, label: "Email Ventas", value: contactEmail2, href: `mailto:${contactEmail2}` },
     { icon: Phone, label: "Teléfono", value: contactPhone, href: `tel:${contactPhone.replace(/\s/g, "")}` },
     { icon: MapPin, label: "Ubicación", value: contactLocation, href: "https://www.google.com/maps/place//data=!4m2!3m1!1s0x95bcd5f5af10ecef:0x72dc685efac9954f?entry=s&sa=X&ved=2ahUKEwjzhfDt2--SAxVunpUCHUdcA5YQ4kB6BAgUEAA&hl=es" },
     { icon: Clock, label: "Horario", value: contactHours, href: "#" },
