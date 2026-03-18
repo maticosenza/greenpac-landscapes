@@ -76,14 +76,16 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
     }
   };
 
+  const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = clients?.filter((c) => {
-    const s = searchTerm.toLowerCase();
+    if (statusFilter !== "all" && c.status !== statusFilter) return false;
+    if (!combinedSearch) return true;
     return (
-      c.full_name.toLowerCase().includes(s) ||
-      (c.email && c.email.toLowerCase().includes(s)) ||
-      (c.document && c.document.toLowerCase().includes(s)) ||
-      (c.product_interest && c.product_interest.toLowerCase().includes(s)) ||
-      (c.city && c.city.toLowerCase().includes(s))
+      c.full_name.toLowerCase().includes(combinedSearch) ||
+      (c.email && c.email.toLowerCase().includes(combinedSearch)) ||
+      (c.document && c.document.toLowerCase().includes(combinedSearch)) ||
+      (c.product_interest && c.product_interest.toLowerCase().includes(combinedSearch)) ||
+      (c.city && c.city.toLowerCase().includes(combinedSearch))
     );
   });
 
