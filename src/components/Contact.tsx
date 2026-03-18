@@ -31,6 +31,7 @@ const Contact = () => {
   const contactTitle = getText("contact-title", "Hablemos de tu Proyecto");
   const contactSubtitle = getText("contact-subtitle", "Estamos listos para asesorarte y encontrar la solución perfecta para las necesidades de tu establecimiento.");
   const contactEmail = getText("contact-email", "info@greenpac.com.ar");
+  const contactEmail2 = getText("contact-email-2", "Ventas.lacasadelaspicadoras@gmail.com");
   const contactPhone = getText("contact-phone", "+54 9 2392 67-7879");
   const contactLocation = getText("contact-location", "Luis Maria Drago 3249, Burzaco.");
   const contactHours = getText("contact-hours", "Lun - Vie: 9:00 - 18:00");
