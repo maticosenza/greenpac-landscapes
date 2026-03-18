@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2, Download, Plus } from "lucide-react";
+import { getStatusInfo } from "./clientConstants";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
 import {
