@@ -548,7 +548,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     queryClient.invalidateQueries({ queryKey: ["products"] });
   };
 
-  const handleProductDragEnd = (event: DragEndEvent) => {
+  const handleProductDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over || active.id === over.id || !filteredProducts) return;
     const oldIndex = filteredProducts.findIndex(p => p.id === active.id);
