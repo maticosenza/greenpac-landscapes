@@ -144,6 +144,36 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar cliente..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={statusFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter("all")}
+              >
+                Todos
+              </Button>
+              {CLIENT_STATUSES.map((s) => (
+                <Button
+                  key={s.value}
+                  variant={statusFilter === s.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter(s.value)}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
           {filtered && filtered.length > 0 ? (
             <>
               {/* Mobile */}
