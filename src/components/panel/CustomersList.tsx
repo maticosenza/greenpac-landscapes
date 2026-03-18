@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2, Download } from "lucide-react";
+import { Trash2, Loader2, Download, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
 import {
@@ -25,126 +24,89 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useAuth } from "@/hooks/useAuth";
+import CreateClientDialog from "./CreateClientDialog";
+import ClientDetailDialog, { type ClientRecord } from "./ClientDetailDialog";
 
 interface CustomersListProps {
   searchTerm: string;
 }
 
-interface Profile {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  company: string | null;
-  created_at: string;
-}
-
 const CustomersList = ({ searchTerm }: CustomersListProps) => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [customerToDelete, setCustomerToDelete] = useState<Profile | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
 
-  const { data: customers, isLoading } = useQuery({
-    queryKey: ["all-customers"],
+  const { data: clients, isLoading } = useQuery({
+    queryKey: ["crm-clients"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("clients" as any)
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Profile[];
+      return (data as any[]) as ClientRecord[];
     },
   });
 
-  const { data: quotationCounts } = useQuery({
-    queryKey: ["customer-quotation-counts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quotations")
-        .select("customer_id");
-
-      if (error) throw error;
-
-      const counts: Record<string, number> = {};
-      data?.forEach((q) => {
-        if (q.customer_id) {
-          counts[q.customer_id] = (counts[q.customer_id] || 0) + 1;
-        }
-      });
-
-      return counts;
-    },
-  });
-
-  const handleDeleteCustomer = async () => {
-    if (!customerToDelete) return;
-
-    setDeletingId(customerToDelete.id);
+  const handleDelete = async () => {
+    if (!clientToDelete) return;
+    setDeletingId(clientToDelete.id);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionData.session?.access_token}`,
-          },
-          body: JSON.stringify({ userId: customerToDelete.id }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Error al eliminar el cliente");
-      }
-
-      toast.success("Cliente eliminado correctamente");
-      queryClient.invalidateQueries({ queryKey: ["all-customers"] });
-      queryClient.invalidateQueries({ queryKey: ["customer-quotation-counts"] });
-    } catch (error: any) {
-      toast.error(error.message || "Error al eliminar el cliente");
+      const { error } = await supabase
+        .from("clients" as any)
+        .delete()
+        .eq("id", clientToDelete.id);
+      if (error) throw error;
+      toast.success("Cliente eliminado");
+      queryClient.invalidateQueries({ queryKey: ["crm-clients"] });
+    } catch (err: any) {
+      toast.error(err.message || "Error al eliminar");
     } finally {
       setDeletingId(null);
-      setCustomerToDelete(null);
+      setClientToDelete(null);
     }
   };
 
-  const filteredCustomers = customers?.filter((c) => {
-    const search = searchTerm.toLowerCase();
+  const filtered = clients?.filter((c) => {
+    const s = searchTerm.toLowerCase();
     return (
-      c.full_name.toLowerCase().includes(search) ||
-      c.email.toLowerCase().includes(search) ||
-      (c.company && c.company.toLowerCase().includes(search))
+      c.full_name.toLowerCase().includes(s) ||
+      (c.email && c.email.toLowerCase().includes(s)) ||
+      (c.document && c.document.toLowerCase().includes(s)) ||
+      (c.product_interest && c.product_interest.toLowerCase().includes(s)) ||
+      (c.city && c.city.toLowerCase().includes(s))
     );
   });
 
   const handleExportCSV = () => {
-    if (!filteredCustomers || filteredCustomers.length === 0) {
+    if (!filtered || filtered.length === 0) {
       toast.error("No hay clientes para exportar");
       return;
     }
-
-    const dataToExport = filteredCustomers.map((c) => ({
-      ...c,
-      quotation_count: quotationCounts?.[c.id] || 0,
-      created_at_formatted: new Date(c.created_at).toLocaleDateString("es-AR"),
-    }));
-
-    exportToCSV(dataToExport, `clientes-${new Date().toISOString().split("T")[0]}`, [
-      { key: "full_name", label: "Nombre" },
-      { key: "email", label: "Email" },
-      { key: "phone", label: "Teléfono" },
-      { key: "company", label: "Empresa" },
-      { key: "quotation_count", label: "Cotizaciones" },
-      { key: "created_at_formatted", label: "Fecha de Registro" },
-    ]);
-
+    exportToCSV(
+      filtered.map((c) => ({
+        ...c,
+        price_str: c.price != null ? String(c.price) : "",
+        created_at_formatted: new Date(c.created_at).toLocaleDateString("es-AR"),
+      })),
+      `clientes-${new Date().toISOString().split("T")[0]}`,
+      [
+        { key: "full_name", label: "Nombre" },
+        { key: "document", label: "Documento" },
+        { key: "email", label: "Email" },
+        { key: "phone", label: "Teléfono" },
+        { key: "product_interest", label: "Producto de Interés" },
+        { key: "price_str", label: "Precio" },
+        { key: "province", label: "Provincia" },
+        { key: "city", label: "Localidad" },
+        { key: "postal_code", label: "Código Postal" },
+        { key: "address", label: "Domicilio" },
+        { key: "created_at_formatted", label: "Fecha de Registro" },
+      ]
+    );
     toast.success("Archivo CSV descargado");
   };
 
@@ -156,32 +118,50 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
     <>
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <CardTitle className="text-lg sm:text-xl">Historial de Clientes</CardTitle>
-          <Button variant="outline" size="sm" onClick={handleExportCSV} className="w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar CSV
-          </Button>
+          <CardTitle className="text-lg sm:text-xl">
+            Clientes
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              ({filtered?.length ?? 0})
+            </span>
+          </CardTitle>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-initial">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
+            <Button size="sm" onClick={() => setShowCreateDialog(true)} className="flex-1 sm:flex-initial">
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cliente
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          {filteredCustomers && filteredCustomers.length > 0 ? (
+          {filtered && filtered.length > 0 ? (
             <>
-              {/* Mobile card layout */}
+              {/* Mobile */}
               <div className="block md:hidden space-y-4">
-                {filteredCustomers.map((customer) => (
-                  <div key={customer.id} className="border rounded-lg p-4 space-y-2">
+                {filtered.map((c) => (
+                  <div
+                    key={c.id}
+                    className="border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setSelectedClient(c)}
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h3 className="font-medium text-sm truncate">{customer.full_name}</h3>
-                        <p className="text-xs text-muted-foreground truncate">{customer.email}</p>
+                        <h3 className="font-medium text-sm truncate">{c.full_name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{c.email || "Sin email"}</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
-                        onClick={() => setCustomerToDelete(customer)}
-                        disabled={deletingId === customer.id || customer.id === user?.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setClientToDelete(c);
+                        }}
+                        disabled={deletingId === c.id}
                       >
-                        {deletingId === customer.id ? (
+                        {deletingId === c.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <Trash2 className="h-4 w-4" />
@@ -189,60 +169,73 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                       </Button>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {customer.phone && <span>{customer.phone}</span>}
-                      {customer.company && <span>• {customer.company}</span>}
+                      {c.phone && <span>{c.phone}</span>}
+                      {c.product_interest && <span>• {c.product_interest}</span>}
+                      {c.province && <span>• {c.province}</span>}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs">
-                        {quotationCounts?.[customer.id] || 0} cotizaciones
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(customer.created_at).toLocaleDateString("es-AR")}
-                      </span>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      {c.price != null && (
+                        <span className="font-medium text-foreground">
+                          ${Number(c.price).toLocaleString("es-AR")}
+                        </span>
+                      )}
+                      <span>{new Date(c.created_at).toLocaleDateString("es-AR")}</span>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Desktop table layout */}
+              {/* Desktop */}
               <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nombre</TableHead>
+                      <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>Cotizaciones</TableHead>
+                      <TableHead>Producto</TableHead>
+                      <TableHead>Precio</TableHead>
+                      <TableHead>Provincia</TableHead>
+                      <TableHead>Localidad</TableHead>
                       <TableHead>Registro</TableHead>
-                      <TableHead className="w-[80px]">Acciones</TableHead>
+                      <TableHead className="w-[60px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCustomers.map((customer) => (
-                      <TableRow key={customer.id}>
-                        <TableCell className="font-medium">{customer.full_name}</TableCell>
-                        <TableCell>{customer.email}</TableCell>
-                        <TableCell>{customer.phone || "-"}</TableCell>
-                        <TableCell>{customer.company || "-"}</TableCell>
+                    {filtered.map((c) => (
+                      <TableRow
+                        key={c.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => setSelectedClient(c)}
+                      >
+                        <TableCell className="font-medium">{c.full_name}</TableCell>
+                        <TableCell>{c.document || "—"}</TableCell>
+                        <TableCell>{c.email || "—"}</TableCell>
+                        <TableCell>{c.phone || "—"}</TableCell>
+                        <TableCell>{c.product_interest || "—"}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
-                            {quotationCounts?.[customer.id] || 0}
-                          </Badge>
+                          {c.price != null
+                            ? `$${Number(c.price).toLocaleString("es-AR")}`
+                            : "—"}
                         </TableCell>
+                        <TableCell>{c.province || "—"}</TableCell>
+                        <TableCell>{c.city || "—"}</TableCell>
                         <TableCell className="whitespace-nowrap">
-                          {new Date(customer.created_at).toLocaleDateString("es-AR")}
+                          {new Date(c.created_at).toLocaleDateString("es-AR")}
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setCustomerToDelete(customer)}
-                            disabled={deletingId === customer.id || customer.id === user?.id}
-                            title={customer.id === user?.id ? "No podés eliminar tu propia cuenta" : "Eliminar cliente"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setClientToDelete(c);
+                            }}
+                            disabled={deletingId === c.id}
                           >
-                            {deletingId === customer.id ? (
+                            {deletingId === c.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <Trash2 className="h-4 w-4" />
@@ -257,33 +250,36 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
             </>
           ) : (
             <p className="text-muted-foreground text-center py-8">
-              No hay clientes que coincidan con la búsqueda.
+              {searchTerm
+                ? "No hay clientes que coincidan con la búsqueda."
+                : "Aún no hay clientes. Usá el botón \"Agregar Cliente\" para comenzar."}
             </p>
           )}
         </CardContent>
       </Card>
 
-      <AlertDialog open={!!customerToDelete} onOpenChange={() => setCustomerToDelete(null)}>
+      <CreateClientDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+
+      <ClientDetailDialog
+        client={selectedClient}
+        open={!!selectedClient}
+        onOpenChange={(open) => !open && setSelectedClient(null)}
+      />
+
+      <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
             <AlertDialogDescription>
-              Estás por eliminar a <strong>{customerToDelete?.full_name}</strong> ({customerToDelete?.email}).
+              Estás por eliminar a <strong>{clientToDelete?.full_name}</strong>.
               <br /><br />
-              Esta acción es irreversible y eliminará:
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>La cuenta del usuario</li>
-                <li>Su perfil y datos asociados</li>
-                <li>Sus roles asignados</li>
-              </ul>
-              <br />
-              <strong className="text-destructive">Las cotizaciones asociadas se mantendrán en el sistema.</strong>
+              Esta acción es irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteCustomer}
+              onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
