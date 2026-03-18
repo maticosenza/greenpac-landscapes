@@ -12,7 +12,7 @@ const contactIcons = [Mail, Phone, MapPin, Clock];
 
 const defaultContactInfo = [
   { label: "Email", value: "info@greenpac.com.ar", href: "mailto:info@greenpac.com.ar" },
-  { label: "Teléfono", value: "+54 11 XXXX-XXXX", href: "tel:+5411XXXXXXXX" },
+  { label: "Teléfono", value: "+54 9 2392 67-7879", href: "tel:+5492392677879" },
   { label: "Ubicación", value: "Luis Maria Drago 3249, Burzaco.", href: "https://www.google.com/maps/place//data=!4m2!3m1!1s0x95bcd5f5af10ecef:0x72dc685efac9954f?entry=s&sa=X&ved=2ahUKEwjzhfDt2--SAxVunpUCHUdcA5YQ4kB6BAgUEAA&hl=es" },
   { label: "Horario", value: "Lun - Vie: 9:00 - 18:00", href: "#" },
 ];
