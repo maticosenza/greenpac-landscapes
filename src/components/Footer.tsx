@@ -39,7 +39,7 @@ const Footer = () => {
       <div className="border-t border-primary-foreground/10 py-3">
         <p className="text-primary-foreground/50 text-xs text-center">
           Diseñado por{" "}
-          <a href="https://www.velocentum.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-foreground/50 transition-colors">
+          <a href="https://www.velocentum.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-foreground/70 transition-colors">
             Velocentum
           </a>
         </p>
