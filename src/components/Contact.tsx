@@ -118,9 +118,9 @@ const Contact = () => {
                 <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-primary-foreground/60 text-sm font-medium">{item.label}</p>
-                  <p className="text-primary-foreground font-medium">{item.value}</p>
+                <div className="min-w-0">
+                  <p className="text-primary-foreground/60 text-sm font-medium mb-1">{item.label}</p>
+                  <p className="text-primary-foreground font-medium break-all">{item.value}</p>
                 </div>
               </a>
             ))}
