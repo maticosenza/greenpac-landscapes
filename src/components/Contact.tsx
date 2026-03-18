@@ -31,6 +31,7 @@ const Contact = () => {
   const contactTitle = getText("contact-title", "Hablemos de tu Proyecto");
   const contactSubtitle = getText("contact-subtitle", "Estamos listos para asesorarte y encontrar la solución perfecta para las necesidades de tu establecimiento.");
   const contactEmail = getText("contact-email", "info@greenpac.com.ar");
+  const contactEmail2 = getText("contact-email-2", "Ventas.lacasadelaspicadoras@gmail.com");
   const contactPhone = getText("contact-phone", "+54 9 2392 67-7879");
   const contactLocation = getText("contact-location", "Luis Maria Drago 3249, Burzaco.");
   const contactHours = getText("contact-hours", "Lun - Vie: 9:00 - 18:00");
@@ -38,6 +39,7 @@ const Contact = () => {
 
   const contactInfo = [
     { icon: Mail, label: "Email", value: contactEmail, href: `mailto:${contactEmail}` },
+    { icon: Mail, label: "Email Ventas", value: contactEmail2, href: `mailto:${contactEmail2}` },
     { icon: Phone, label: "Teléfono", value: contactPhone, href: `tel:${contactPhone.replace(/\s/g, "")}` },
     { icon: MapPin, label: "Ubicación", value: contactLocation, href: "https://www.google.com/maps/place//data=!4m2!3m1!1s0x95bcd5f5af10ecef:0x72dc685efac9954f?entry=s&sa=X&ved=2ahUKEwjzhfDt2--SAxVunpUCHUdcA5YQ4kB6BAgUEAA&hl=es" },
     { icon: Clock, label: "Horario", value: contactHours, href: "#" },
