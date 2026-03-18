@@ -37,7 +37,7 @@ const Footer = () => {
         </EditableSection>
       </div>
       <div className="border-t border-primary-foreground/10 py-3">
-        <p className="text-primary-foreground/30 text-xs text-center">
+        <p className="text-primary-foreground/50 text-xs text-center">
           Diseñado por{" "}
           <a href="https://www.velocentum.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-foreground/50 transition-colors">
             Velocentum
