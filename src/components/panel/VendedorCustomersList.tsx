@@ -1,7 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Trash2, Loader2, Download, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { exportToCSV } from "@/lib/exportCsv";
 import {
   Table,
   TableBody,
@@ -10,153 +14,279 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import CreateClientDialog from "./CreateClientDialog";
+import ClientDetailDialog, { type ClientRecord } from "./ClientDetailDialog";
 
 interface Props {
   searchTerm: string;
   vendedorId: string;
 }
 
-interface CustomerRow {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  company: string | null;
-  created_at: string;
-  quotation_count: number;
-}
-
 const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
-  const { data: customers, isLoading } = useQuery({
-    queryKey: ["vendedor-customers", vendedorId],
+  const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+
+  const { data: clients, isLoading } = useQuery({
+    queryKey: ["crm-clients"],
     queryFn: async () => {
-      // Get quotations from this vendor that have a linked customer
-      const { data: quotations, error: qError } = await supabase
-        .from("quotations")
-        .select("customer_id, client_name, client_email, client_phone, company")
-        .eq("created_by_employee_id", vendedorId)
-        .not("customer_id", "is", null);
+      const { data, error } = await supabase
+        .from("clients" as any)
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (qError) throw qError;
-
-      // Build unique customer ids and count quotations per customer
-      const countMap: Record<string, number> = {};
-      const customerIds: string[] = [];
-      for (const q of quotations ?? []) {
-        if (q.customer_id) {
-          countMap[q.customer_id] = (countMap[q.customer_id] || 0) + 1;
-          if (!customerIds.includes(q.customer_id)) customerIds.push(q.customer_id);
-        }
-      }
-
-      if (customerIds.length === 0) return [];
-
-      // Fetch profiles for those customers
-      const { data: profiles, error: pError } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, phone, company, created_at")
-        .in("id", customerIds)
-        .order("full_name");
-
-      if (pError) throw pError;
-
-      return (profiles ?? []).map((p) => ({
-        ...p,
-        quotation_count: countMap[p.id] || 0,
-      })) as CustomerRow[];
+      if (error) throw error;
+      return (data as any[]) as ClientRecord[];
     },
-    enabled: !!vendedorId,
   });
 
-  const filtered = customers?.filter((c) => {
+  const handleDelete = async () => {
+    if (!clientToDelete) return;
+    setDeletingId(clientToDelete.id);
+    try {
+      const { error } = await supabase
+        .from("clients" as any)
+        .delete()
+        .eq("id", clientToDelete.id);
+      if (error) throw error;
+      toast.success("Cliente eliminado");
+      queryClient.invalidateQueries({ queryKey: ["crm-clients"] });
+    } catch (err: any) {
+      toast.error(err.message || "Error al eliminar");
+    } finally {
+      setDeletingId(null);
+      setClientToDelete(null);
+    }
+  };
+
+  const filtered = clients?.filter((c) => {
     const s = searchTerm.toLowerCase();
     return (
       c.full_name.toLowerCase().includes(s) ||
-      c.email.toLowerCase().includes(s) ||
-      (c.company && c.company.toLowerCase().includes(s))
+      (c.email && c.email.toLowerCase().includes(s)) ||
+      (c.document && c.document.toLowerCase().includes(s)) ||
+      (c.product_interest && c.product_interest.toLowerCase().includes(s)) ||
+      (c.city && c.city.toLowerCase().includes(s))
     );
   });
+
+  const handleExportCSV = () => {
+    if (!filtered || filtered.length === 0) {
+      toast.error("No hay clientes para exportar");
+      return;
+    }
+    exportToCSV(
+      filtered.map((c) => ({
+        ...c,
+        price_str: c.price != null ? String(c.price) : "",
+        created_at_formatted: new Date(c.created_at).toLocaleDateString("es-AR"),
+      })),
+      `clientes-${new Date().toISOString().split("T")[0]}`,
+      [
+        { key: "full_name", label: "Nombre" },
+        { key: "document", label: "Documento" },
+        { key: "email", label: "Email" },
+        { key: "phone", label: "Teléfono" },
+        { key: "product_interest", label: "Producto de Interés" },
+        { key: "price_str", label: "Precio" },
+        { key: "province", label: "Provincia" },
+        { key: "city", label: "Localidad" },
+        { key: "postal_code", label: "Código Postal" },
+        { key: "address", label: "Domicilio" },
+        { key: "created_at_formatted", label: "Fecha de Registro" },
+      ]
+    );
+    toast.success("Archivo CSV descargado");
+  };
 
   if (isLoading) return <p className="text-muted-foreground">Cargando clientes...</p>;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">
-          Mis Clientes
-          <span className="ml-2 text-sm font-normal text-muted-foreground">
-            ({filtered?.length ?? 0})
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {filtered && filtered.length > 0 ? (
-          <>
-            {/* Mobile */}
-            <div className="block md:hidden space-y-4">
-              {filtered.map((c) => (
-                <div key={c.id} className="border rounded-lg p-4 space-y-2">
-                  <div className="min-w-0">
-                    <h3 className="font-medium text-sm truncate">{c.full_name}</h3>
-                    <p className="text-xs text-muted-foreground truncate">{c.email}</p>
+    <>
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <CardTitle className="text-lg sm:text-xl">
+            Mis Clientes
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              ({filtered?.length ?? 0})
+            </span>
+          </CardTitle>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-initial">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
+            <Button size="sm" onClick={() => setShowCreateDialog(true)} className="flex-1 sm:flex-initial">
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cliente
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filtered && filtered.length > 0 ? (
+            <>
+              {/* Mobile */}
+              <div className="block md:hidden space-y-4">
+                {filtered.map((c) => (
+                  <div
+                    key={c.id}
+                    className="border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setSelectedClient(c)}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-sm truncate">{c.full_name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{c.email || "Sin email"}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setClientToDelete(c);
+                        }}
+                        disabled={deletingId === c.id}
+                      >
+                        {deletingId === c.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      {c.phone && <span>{c.phone}</span>}
+                      {c.product_interest && <span>• {c.product_interest}</span>}
+                      {c.province && <span>• {c.province}</span>}
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      {c.price != null && (
+                        <span className="font-medium text-foreground">
+                          ${Number(c.price).toLocaleString("es-AR")}
+                        </span>
+                      )}
+                      <span>{new Date(c.created_at).toLocaleDateString("es-AR")}</span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    {c.phone && <span>{c.phone}</span>}
-                    {c.company && <span>• {c.company}</span>}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-xs">
-                      {c.quotation_count} {c.quotation_count === 1 ? "cotización" : "cotizaciones"}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(c.created_at).toLocaleDateString("es-AR")}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Desktop */}
-            <div className="hidden md:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Teléfono</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Cotizaciones</TableHead>
-                    <TableHead>Registro</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((c) => (
-                    <TableRow key={c.id}>
-                      <TableCell className="font-medium">{c.full_name}</TableCell>
-                      <TableCell>{c.email}</TableCell>
-                      <TableCell>{c.phone || "-"}</TableCell>
-                      <TableCell>{c.company || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{c.quotation_count}</Badge>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {new Date(c.created_at).toLocaleDateString("es-AR")}
-                      </TableCell>
+              {/* Desktop */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Documento</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Teléfono</TableHead>
+                      <TableHead>Producto</TableHead>
+                      <TableHead>Precio</TableHead>
+                      <TableHead>Provincia</TableHead>
+                      <TableHead>Localidad</TableHead>
+                      <TableHead>Registro</TableHead>
+                      <TableHead className="w-[60px]"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-        ) : (
-          <p className="text-muted-foreground text-center py-8">
-            {searchTerm
-              ? "No hay clientes que coincidan con la búsqueda."
-              : "Aún no tenés clientes registrados. Creá cotizaciones con clientes para verlos aquí."}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((c) => (
+                      <TableRow
+                        key={c.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => setSelectedClient(c)}
+                      >
+                        <TableCell className="font-medium">{c.full_name}</TableCell>
+                        <TableCell>{c.document || "—"}</TableCell>
+                        <TableCell>{c.email || "—"}</TableCell>
+                        <TableCell>{c.phone || "—"}</TableCell>
+                        <TableCell>{c.product_interest || "—"}</TableCell>
+                        <TableCell>
+                          {c.price != null
+                            ? `$${Number(c.price).toLocaleString("es-AR")}`
+                            : "—"}
+                        </TableCell>
+                        <TableCell>{c.province || "—"}</TableCell>
+                        <TableCell>{c.city || "—"}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {new Date(c.created_at).toLocaleDateString("es-AR")}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setClientToDelete(c);
+                            }}
+                            disabled={deletingId === c.id}
+                          >
+                            {deletingId === c.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          ) : (
+            <p className="text-muted-foreground text-center py-8">
+              {searchTerm
+                ? "No hay clientes que coincidan con la búsqueda."
+                : "Aún no hay clientes. Usá el botón \"Agregar Cliente\" para comenzar."}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <CreateClientDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+
+      <ClientDetailDialog
+        client={selectedClient}
+        open={!!selectedClient}
+        onOpenChange={(open) => !open && setSelectedClient(null)}
+      />
+
+      <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estás por eliminar a <strong>{clientToDelete?.full_name}</strong>.
+              <br /><br />
+              Esta acción es irreversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
