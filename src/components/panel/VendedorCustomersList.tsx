@@ -158,6 +158,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
               <Button
                 variant={statusFilter === "all" ? "default" : "outline"}
                 size="sm"
+                className="whitespace-nowrap shrink-0"
                 onClick={() => setStatusFilter("all")}
               >
                 Todos
@@ -167,6 +168,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                   key={s.value}
                   variant={statusFilter === s.value ? "default" : "outline"}
                   size="sm"
+                  className="whitespace-nowrap shrink-0"
                   onClick={() => setStatusFilter(s.value)}
                 >
                   {s.label}

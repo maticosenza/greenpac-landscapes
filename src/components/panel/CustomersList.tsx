@@ -159,6 +159,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
               <Button
                 variant={statusFilter === "all" ? "default" : "outline"}
                 size="sm"
+                className="whitespace-nowrap shrink-0"
                 onClick={() => setStatusFilter("all")}
               >
                 Todos
@@ -168,6 +169,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                   key={s.value}
                   variant={statusFilter === s.value ? "default" : "outline"}
                   size="sm"
+                  className="whitespace-nowrap shrink-0"
                   onClick={() => setStatusFilter(s.value)}
                 >
                   {s.label}
