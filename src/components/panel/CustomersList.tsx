@@ -90,12 +90,14 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
     exportToCSV(
       filtered.map((c) => ({
         ...c,
+        status_label: getStatusInfo(c.status).label,
         price_str: c.price != null ? String(c.price) : "",
         created_at_formatted: new Date(c.created_at).toLocaleDateString("es-AR"),
       })),
       `clientes-${new Date().toISOString().split("T")[0]}`,
       [
         { key: "full_name", label: "Nombre" },
+        { key: "status_label", label: "Estado" },
         { key: "document", label: "Documento" },
         { key: "email", label: "Email" },
         { key: "phone", label: "Teléfono" },
