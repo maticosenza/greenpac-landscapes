@@ -119,19 +119,19 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <CardHeader className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <CardTitle className="text-lg sm:text-xl">
             Mis Clientes
             <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({filtered?.length ?? 0})
             </span>
           </CardTitle>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-initial">
+          <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="w-full sm:w-auto">
               <Download className="h-4 w-4 mr-2" />
               Exportar CSV
             </Button>
-            <Button size="sm" onClick={() => setShowCreateDialog(true)} className="flex-1 sm:flex-initial">
+            <Button size="sm" onClick={() => setShowCreateDialog(true)} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Agregar Cliente
             </Button>
