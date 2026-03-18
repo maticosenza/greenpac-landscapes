@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2, Download, Plus } from "lucide-react";
+import { getStatusInfo } from "./clientConstants";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
 import {
@@ -90,12 +91,14 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
     exportToCSV(
       filtered.map((c) => ({
         ...c,
+        status_label: getStatusInfo(c.status).label,
         price_str: c.price != null ? String(c.price) : "",
         created_at_formatted: new Date(c.created_at).toLocaleDateString("es-AR"),
       })),
       `clientes-${new Date().toISOString().split("T")[0]}`,
       [
         { key: "full_name", label: "Nombre" },
+        { key: "status_label", label: "Estado" },
         { key: "document", label: "Documento" },
         { key: "email", label: "Email" },
         { key: "phone", label: "Teléfono" },
@@ -168,6 +171,9 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                       </Button>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-medium ${getStatusInfo(c.status).color}`}>
+                        {getStatusInfo(c.status).label}
+                      </span>
                       {c.phone && <span>{c.phone}</span>}
                       {c.product_interest && <span>• {c.product_interest}</span>}
                       {c.province && <span>• {c.province}</span>}
@@ -190,6 +196,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nombre</TableHead>
+                      <TableHead>Estado</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
@@ -209,6 +216,11 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                         onClick={() => setSelectedClient(c)}
                       >
                         <TableCell className="font-medium">{c.full_name}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-0.5 rounded-full border text-xs font-medium ${getStatusInfo(c.status).color}`}>
+                            {getStatusInfo(c.status).label}
+                          </span>
+                        </TableCell>
                         <TableCell>{c.document || "—"}</TableCell>
                         <TableCell>{c.email || "—"}</TableCell>
                         <TableCell>{c.phone || "—"}</TableCell>

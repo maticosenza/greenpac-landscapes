@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -19,8 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Pencil, Save, X } from "lucide-react";
+import { Loader2, Pencil, Save, X, Send, Trash2 } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
+import { CLIENT_STATUSES, getStatusInfo } from "./clientConstants";
+import { Separator } from "@/components/ui/separator";
 
 export interface ClientRecord {
   id: string;
@@ -35,9 +38,19 @@ export interface ClientRecord {
   postal_code: string | null;
   address: string | null;
   notes: string | null;
+  status: string;
   created_by: string;
   created_at: string;
   updated_at: string;
+}
+
+interface ClientNote {
+  id: string;
+  client_id: string;
+  user_id: string;
+  note: string;
+  created_at: string;
+  author_name?: string;
 }
 
 interface Props {
@@ -48,16 +61,58 @@ interface Props {
 
 const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
   const queryClient = useQueryClient();
+  const { user, profile } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Partial<ClientRecord>>({});
+  const [newNote, setNewNote] = useState("");
+  const [sendingNote, setSendingNote] = useState(false);
 
   useEffect(() => {
     if (client) {
       setForm({ ...client });
       setEditing(false);
+      setNewNote("");
     }
   }, [client]);
+
+  // Fetch notes for this client
+  const { data: notes, isLoading: notesLoading } = useQuery({
+    queryKey: ["client-notes", client?.id],
+    queryFn: async () => {
+      if (!client) return [];
+      const { data, error } = await supabase
+        .from("client_notes" as any)
+        .select("*")
+        .eq("client_id", client.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      const rawNotes = (data as any[]) as ClientNote[];
+
+      // Fetch author names
+      const userIds = [...new Set(rawNotes.map((n) => n.user_id))];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+
+        const nameMap: Record<string, string> = {};
+        profiles?.forEach((p) => {
+          nameMap[p.id] = p.full_name;
+        });
+
+        return rawNotes.map((n) => ({
+          ...n,
+          author_name: nameMap[n.user_id] || "Usuario",
+        }));
+      }
+
+      return rawNotes;
+    },
+    enabled: !!client && open,
+  });
 
   if (!client) return null;
 
@@ -85,6 +140,7 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           postal_code: form.postal_code?.trim() || null,
           address: form.address?.trim() || null,
           notes: form.notes?.trim() || null,
+          status: form.status || "activo",
         } as any)
         .eq("id", client.id);
 
@@ -99,6 +155,42 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
       setSaving(false);
     }
   };
+
+  const handleAddNote = async () => {
+    if (!newNote.trim() || !user?.id) return;
+    setSendingNote(true);
+    try {
+      const { error } = await supabase.from("client_notes" as any).insert({
+        client_id: client.id,
+        user_id: user.id,
+        note: newNote.trim(),
+      } as any);
+
+      if (error) throw error;
+      setNewNote("");
+      queryClient.invalidateQueries({ queryKey: ["client-notes", client.id] });
+      toast.success("Nota agregada");
+    } catch (err: any) {
+      toast.error(err.message || "Error al agregar nota");
+    } finally {
+      setSendingNote(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const { error } = await supabase
+        .from("client_notes" as any)
+        .delete()
+        .eq("id", noteId);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["client-notes", client.id] });
+    } catch (err: any) {
+      toast.error("Error al eliminar nota");
+    }
+  };
+
+  const statusInfo = getStatusInfo(form.status || "activo");
 
   const Field = ({
     label,
@@ -115,16 +207,21 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between pr-6">
             <DialogTitle>{editing ? "Editar Cliente" : "Detalle del Cliente"}</DialogTitle>
-            {!editing && (
-              <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-                <Pencil className="h-4 w-4 mr-1" />
-                Editar
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <span className={`text-xs px-2 py-1 rounded-full border ${statusInfo.color}`}>
+                {statusInfo.label}
+              </span>
+              {!editing && (
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Editar
+                </Button>
+              )}
+            </div>
           </div>
         </DialogHeader>
 
@@ -146,6 +243,24 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                   onChange={(e) => update("document", e.target.value)}
                   maxLength={50}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Estado</Label>
+                <Select
+                  value={form.status || "activo"}
+                  onValueChange={(v) => update("status", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CLIENT_STATUSES.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
@@ -228,7 +343,7 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Notas</Label>
+              <Label>Notas generales</Label>
               <Textarea
                 value={form.notes || ""}
                 onChange={(e) => update("notes", e.target.value)}
@@ -281,10 +396,83 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
             </div>
             {form.notes && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Notas</p>
+                <p className="text-xs text-muted-foreground mb-1">Notas generales</p>
                 <p className="text-sm whitespace-pre-wrap">{form.notes}</p>
               </div>
             )}
+
+            <Separator />
+
+            {/* Follow-up history */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Historial de seguimiento</h3>
+
+              {/* Add note */}
+              <div className="flex gap-2 mb-4">
+                <Textarea
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  placeholder="Escribí una nota de seguimiento..."
+                  rows={2}
+                  maxLength={1000}
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleAddNote}
+                  disabled={sendingNote || !newNote.trim()}
+                  className="self-end"
+                >
+                  {sendingNote ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+
+              {/* Notes list */}
+              {notesLoading ? (
+                <p className="text-xs text-muted-foreground">Cargando historial...</p>
+              ) : notes && notes.length > 0 ? (
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {notes.map((n) => (
+                    <div key={n.id} className="bg-muted/50 rounded-lg p-3 relative group">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium">{n.author_name || "Usuario"}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-muted-foreground">
+                            {new Date(n.created_at).toLocaleDateString("es-AR", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          {n.user_id === user?.id && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteNote(n.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{n.note}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  Sin notas de seguimiento aún.
+                </p>
+              )}
+            </div>
+
             <div className="text-xs text-muted-foreground pt-2 border-t space-y-1">
               <p>Creado: {new Date(client.created_at).toLocaleDateString("es-AR")}</p>
               <p>Última actualización: {new Date(client.updated_at).toLocaleDateString("es-AR")}</p>
