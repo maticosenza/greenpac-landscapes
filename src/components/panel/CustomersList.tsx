@@ -195,6 +195,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nombre</TableHead>
+                      <TableHead>Estado</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
