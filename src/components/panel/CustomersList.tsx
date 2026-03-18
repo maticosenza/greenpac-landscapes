@@ -170,6 +170,9 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                       </Button>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-medium ${getStatusInfo(c.status).color}`}>
+                        {getStatusInfo(c.status).label}
+                      </span>
                       {c.phone && <span>{c.phone}</span>}
                       {c.product_interest && <span>• {c.product_interest}</span>}
                       {c.province && <span>• {c.province}</span>}
