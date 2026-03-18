@@ -256,7 +256,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     })
   );
 
-  const handleFeatureDragEnd = (event: DragEndEvent) => {
+  const handleFeatureDragEnd = (event: any) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
