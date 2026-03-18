@@ -140,7 +140,7 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="lg:col-span-3 bg-primary-foreground/5 rounded-2xl p-8">
+          <form onSubmit={handleSubmit} className="lg:col-span-3 bg-primary-foreground/5 rounded-2xl p-8 h-fit">
             <div className="grid sm:grid-cols-2 gap-5 mb-5">
               <div>
                 <label htmlFor="name" className="block text-primary-foreground/80 text-sm font-medium mb-2">Nombre completo *</label>
