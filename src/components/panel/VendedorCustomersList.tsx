@@ -3,7 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2, Download, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trash2, Loader2, Download, Plus, Search, Filter } from "lucide-react";
+import { CLIENT_STATUSES } from "./clientConstants";
 import { getStatusInfo } from "./clientConstants";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
@@ -39,6 +41,8 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
   const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+  const [localSearch, setLocalSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: clients, isLoading } = useQuery({
     queryKey: ["crm-clients"],
@@ -72,14 +76,16 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
     }
   };
 
+  const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = clients?.filter((c) => {
-    const s = searchTerm.toLowerCase();
+    if (statusFilter !== "all" && c.status !== statusFilter) return false;
+    if (!combinedSearch) return true;
     return (
-      c.full_name.toLowerCase().includes(s) ||
-      (c.email && c.email.toLowerCase().includes(s)) ||
-      (c.document && c.document.toLowerCase().includes(s)) ||
-      (c.product_interest && c.product_interest.toLowerCase().includes(s)) ||
-      (c.city && c.city.toLowerCase().includes(s))
+      c.full_name.toLowerCase().includes(combinedSearch) ||
+      (c.email && c.email.toLowerCase().includes(combinedSearch)) ||
+      (c.document && c.document.toLowerCase().includes(combinedSearch)) ||
+      (c.product_interest && c.product_interest.toLowerCase().includes(combinedSearch)) ||
+      (c.city && c.city.toLowerCase().includes(combinedSearch))
     );
   });
 
@@ -138,6 +144,36 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar cliente..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={statusFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter("all")}
+              >
+                Todos
+              </Button>
+              {CLIENT_STATUSES.map((s) => (
+                <Button
+                  key={s.value}
+                  variant={statusFilter === s.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter(s.value)}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
           {filtered && filtered.length > 0 ? (
             <>
               {/* Mobile */}
