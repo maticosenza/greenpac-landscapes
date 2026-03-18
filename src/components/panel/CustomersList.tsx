@@ -215,6 +215,11 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                         onClick={() => setSelectedClient(c)}
                       >
                         <TableCell className="font-medium">{c.full_name}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-0.5 rounded-full border text-xs font-medium ${getStatusInfo(c.status).color}`}>
+                            {getStatusInfo(c.status).label}
+                          </span>
+                        </TableCell>
                         <TableCell>{c.document || "—"}</TableCell>
                         <TableCell>{c.email || "—"}</TableCell>
                         <TableCell>{c.phone || "—"}</TableCell>
