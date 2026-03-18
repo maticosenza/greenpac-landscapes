@@ -40,6 +40,8 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
   const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+  const [localSearch, setLocalSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: clients, isLoading } = useQuery({
     queryKey: ["crm-clients"],
