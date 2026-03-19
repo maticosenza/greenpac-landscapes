@@ -24,6 +24,8 @@ import { Loader2, Pencil, Save, X, Send, Trash2 } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { CLIENT_STATUSES, getStatusInfo } from "./clientConstants";
 import { Separator } from "@/components/ui/separator";
+import LocalityAutocomplete from "./LocalityAutocomplete";
+import AddressAutocomplete from "./AddressAutocomplete";
 
 export interface ClientRecord {
   id: string;
@@ -42,6 +44,8 @@ export interface ClientRecord {
   created_by: string;
   created_at: string;
   updated_at: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 interface ClientNote {
@@ -76,22 +80,17 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
     }
   }, [client]);
 
-  // Fetch notes for this client
   const { data: notes, isLoading: notesLoading } = useQuery({
     queryKey: ["client-notes", client?.id],
     queryFn: async () => {
-      if (!client) return [];
-      const { data, error } = await supabase
+      const { data: rawNotes, error } = await supabase
         .from("client_notes" as any)
         .select("*")
-        .eq("client_id", client.id)
+        .eq("client_id", client!.id)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
-      const rawNotes = (data as any[]) as ClientNote[];
 
-      // Fetch author names
-      const userIds = [...new Set(rawNotes.map((n) => n.user_id))];
+      const userIds = [...new Set((rawNotes as any[]).map((n: any) => n.user_id))];
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
@@ -103,7 +102,7 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           nameMap[p.id] = p.full_name;
         });
 
-        return rawNotes.map((n) => ({
+        return rawNotes.map((n: any) => ({
           ...n,
           author_name: nameMap[n.user_id] || "Usuario",
         }));
@@ -141,6 +140,8 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           address: form.address?.trim() || null,
           notes: form.notes?.trim() || null,
           status: form.status || "activo",
+          lat: form.lat ?? null,
+          lng: form.lng ?? null,
         } as any)
         .eq("id", client.id);
 
@@ -303,7 +304,9 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                 <Label>Provincia</Label>
                 <Select
                   value={form.province || ""}
-                  onValueChange={(v) => update("province", v)}
+                  onValueChange={(v) => {
+                    setForm((prev) => ({ ...prev, province: v, city: "", lat: null, lng: null }));
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar..." />
@@ -319,10 +322,12 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
               </div>
               <div className="space-y-2">
                 <Label>Localidad</Label>
-                <Input
+                <LocalityAutocomplete
+                  province={form.province || ""}
                   value={form.city || ""}
-                  onChange={(e) => update("city", e.target.value)}
-                  maxLength={100}
+                  onChange={(city) => {
+                    setForm((prev) => ({ ...prev, city, lat: null, lng: null }));
+                  }}
                 />
               </div>
               <div className="space-y-2">
@@ -335,13 +340,28 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
               </div>
               <div className="space-y-2">
                 <Label>Domicilio</Label>
-                <Input
+                <AddressAutocomplete
+                  city={form.city || ""}
+                  province={form.province || ""}
                   value={form.address || ""}
-                  onChange={(e) => update("address", e.target.value)}
-                  maxLength={200}
+                  onChange={(address, lat, lng) => {
+                    setForm((prev) => ({
+                      ...prev,
+                      address,
+                      lat: lat ?? prev.lat,
+                      lng: lng ?? prev.lng,
+                    }));
+                  }}
                 />
               </div>
             </div>
+
+            {form.lat && form.lng && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                📍 Coordenadas: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+              </p>
+            )}
+
             <div className="space-y-2">
               <Label>Notas generales</Label>
               <Textarea
@@ -436,7 +456,7 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                 <p className="text-xs text-muted-foreground">Cargando historial...</p>
               ) : notes && notes.length > 0 ? (
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {notes.map((n) => (
+                  {notes.map((n: any) => (
                     <div key={n.id} className="bg-muted/50 rounded-lg p-3 relative group">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium">{n.author_name || "Usuario"}</span>
