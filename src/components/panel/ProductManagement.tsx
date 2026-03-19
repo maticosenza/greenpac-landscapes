@@ -89,6 +89,68 @@ interface ProductManagementProps {
   searchTerm: string;
 }
 
+interface SortableImageItemProps {
+  id: string;
+  url: string;
+  label?: string;
+  isFirst: boolean;
+  onRemove: () => void;
+}
+
+const SortableImageItem = ({ id, url, label, isFirst, onRemove }: SortableImageItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/img">
+      <img
+        src={url}
+        alt="Imagen producto"
+        className="w-24 h-24 object-cover rounded-lg border"
+      />
+      <button
+        type="button"
+        className="absolute top-1 left-1 cursor-grab touch-none bg-black/50 text-white rounded p-0.5 opacity-0 group-hover/img:opacity-100 transition-opacity"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </button>
+      <Button
+        type="button"
+        size="icon"
+        variant="destructive"
+        className="absolute -top-2 -right-2 h-6 w-6"
+        onClick={onRemove}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+      {isFirst && (
+        <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-xs px-1 rounded">
+          Principal
+        </span>
+      )}
+      {label && (
+        <span className="absolute bottom-1 right-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
+          {label}
+        </span>
+      )}
+    </div>
+  );
+};
+
 interface SortableFeatureItemProps {
   id: string;
   feature: string;
