@@ -22,6 +22,8 @@ interface ClientRow {
   status: string;
   created_at: string;
   created_by?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 interface ClientsMapProps {
