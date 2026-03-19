@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Users, Package } from "lucide-react";
-import { getClientCoordinates } from "@/lib/argentinaCoordinates";
+import { MapPin, Users, Package, Loader2 } from "lucide-react";
 import { getStatusInfo } from "./clientConstants";
+import { geocodeClients } from "@/lib/nominatimGeocoder";
+import ClientsMapSearch from "./ClientsMapSearch";
 
 interface ClientRow {
   id: string;
@@ -60,23 +61,43 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
+  const markersMapRef = useRef<Map<string, L.Marker>>(new Map());
 
-  // Compute markers data
+  const [geocoding, setGeocoding] = useState(false);
+  const [coordsMap, setCoordsMap] = useState<Map<string, [number, number]>>(new Map());
+
+  // Geocode clients via Nominatim queue
+  useEffect(() => {
+    if (clients.length === 0) {
+      setCoordsMap(new Map());
+      return;
+    }
+    let cancelled = false;
+    setGeocoding(true);
+    geocodeClients(clients.map((c) => ({ id: c.id, city: c.city, province: c.province })))
+      .then((result) => {
+        if (!cancelled) {
+          setCoordsMap(result);
+          setGeocoding(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setGeocoding(false);
+      });
+    return () => { cancelled = true; };
+  }, [clients]);
+
+  // Compute markers data from geocoded coords
   const markersData = useMemo(() => {
     return clients
       .map((c) => {
-        const coords = getClientCoordinates(c.city, c.province);
+        const coords = coordsMap.get(c.id);
         if (!coords) return null;
-        // Add slight jitter so same-city markers don't stack exactly
-        const jitter = () => (Math.random() - 0.5) * 0.01;
-        return {
-          client: c,
-          lat: coords[0] + jitter(),
-          lng: coords[1] + jitter(),
-        };
+        const jitter = () => (Math.random() - 0.5) * 0.005;
+        return { client: c, lat: coords[0] + jitter(), lng: coords[1] + jitter() };
       })
       .filter(Boolean) as { client: ClientRow; lat: number; lng: number }[];
-  }, [clients]);
+  }, [clients, coordsMap]);
 
   // Summary KPIs
   const totalVisible = clients.length;
@@ -93,36 +114,26 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
   // Init map once
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
-
     const map = L.map(mapContainerRef.current, {
       center: [-38.5, -63.5],
       zoom: 4,
       scrollWheelZoom: true,
       zoomControl: true,
     });
-
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 18,
     }).addTo(map);
-
     mapRef.current = map;
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
+    return () => { map.remove(); mapRef.current = null; };
   }, []);
 
   // Update markers when data changes
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-
-    // Remove old cluster group
-    if (clusterRef.current) {
-      map.removeLayer(clusterRef.current);
-    }
+    if (clusterRef.current) map.removeLayer(clusterRef.current);
+    markersMapRef.current.clear();
 
     const cluster = (L as any).markerClusterGroup({
       maxClusterRadius: 40,
@@ -130,19 +141,17 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
       showCoverageOnHover: false,
       iconCreateFunction: (clusterObj: any) => {
         const count = clusterObj.getChildCount();
-        let size = "small";
         let px = 36;
-        if (count >= 10) { size = "medium"; px = 44; }
-        if (count >= 50) { size = "large"; px = 52; }
+        let fontSize = 12;
+        if (count >= 10) { px = 44; }
+        if (count >= 50) { px = 52; fontSize = 14; }
         return L.divIcon({
           html: `<div style="
             display:flex; align-items:center; justify-content:center;
             width:${px}px; height:${px}px;
             background: hsl(142,76%,36%);
-            color: white;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: ${size === "large" ? 14 : 12}px;
+            color: white; border-radius: 50%;
+            font-weight: 700; font-size: ${fontSize}px;
             border: 3px solid white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
           ">${count}</div>`,
@@ -157,7 +166,6 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
       const color = getMarkerColor(client.status);
       const statusInfo = getStatusInfo(client.status);
       const vendedor = vendedorNames && client.created_by ? vendedorNames[client.created_by] : null;
-
       const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
       const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
       const appleUrl = `maps://maps.apple.com/?daddr=${lat},${lng}`;
@@ -173,18 +181,9 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
           ${vendedor ? `<div style="color: #555; font-size: 12px;">👤 ${vendedor}</div>` : ""}
           ${client.price ? `<div style="color: #555; font-size: 12px;">💰 $${Number(client.price).toLocaleString("es-AR")}</div>` : ""}
           <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; display: flex; gap: 6px; flex-wrap: wrap;">
-            <a href="${googleUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#16a34a;color:white;text-decoration:none;cursor:pointer;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-              Google Maps
-            </a>
-            <a href="${wazeUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f3f4f6;color:#1f2937;text-decoration:none;border:1px solid #d1d5db;cursor:pointer;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-              Waze
-            </a>
-            <a href="${appleUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f3f4f6;color:#1f2937;text-decoration:none;border:1px solid #d1d5db;cursor:pointer;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-              Apple Maps
-            </a>
+            <a href="${googleUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#16a34a;color:white;text-decoration:none;cursor:pointer;">Google Maps</a>
+            <a href="${wazeUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f3f4f6;color:#1f2937;text-decoration:none;border:1px solid #d1d5db;cursor:pointer;">Waze</a>
+            <a href="${appleUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f3f4f6;color:#1f2937;text-decoration:none;border:1px solid #d1d5db;cursor:pointer;">Apple Maps</a>
           </div>
         </div>
       `;
@@ -192,17 +191,35 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
       const marker = L.marker([lat, lng], { icon: createCircleIcon(color) });
       marker.bindPopup(popupContent, { maxWidth: 260 });
       cluster.addLayer(marker);
+      markersMapRef.current.set(client.id, marker);
     });
 
     map.addLayer(cluster);
     clusterRef.current = cluster;
 
-    // Fit bounds if we have markers
     if (markersData.length > 0) {
       const bounds = L.latLngBounds(markersData.map((m) => [m.lat, m.lng]));
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
     }
   }, [markersData, vendedorNames]);
+
+  // Handle search selection — zoom to marker and open popup
+  const handleSelectClient = useCallback((clientId: string) => {
+    const map = mapRef.current;
+    const cluster = clusterRef.current;
+    const marker = markersMapRef.current.get(clientId);
+    if (!map || !marker) return;
+
+    // Zoom to marker and spiderfy cluster if needed
+    if (cluster) {
+      cluster.zoomToShowLayer(marker, () => {
+        marker.openPopup();
+      });
+    } else {
+      map.setView(marker.getLatLng(), 14, { animate: true });
+      marker.openPopup();
+    }
+  }, []);
 
   return (
     <Card>
@@ -211,7 +228,6 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
           <CardTitle className="text-sm sm:text-base flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" /> Mapa de Clientes
           </CardTitle>
-          {/* Legend */}
           <div className="flex flex-wrap gap-2 text-[11px]">
             {Object.entries(STATUS_COLORS).map(([key, color]) => (
               <span key={key} className="flex items-center gap-1">
@@ -225,7 +241,7 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 pb-4">
-        {/* Quick KPIs above the map */}
+        {/* KPIs + Search */}
         <div className="grid grid-cols-3 gap-3 mb-3">
           <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
             <Users className="h-4 w-4 text-primary shrink-0" />
@@ -250,14 +266,28 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
           </div>
         </div>
 
-        {/* Map container */}
-        <div
-          ref={mapContainerRef}
-          className="w-full rounded-lg border overflow-hidden"
-          style={{ height: 520 }}
-        />
+        <div className="flex justify-end mb-2">
+          <ClientsMapSearch clients={clients} onSelect={handleSelectClient} />
+        </div>
 
-        {markersData.length === 0 && clients.length > 0 && (
+        {/* Map container */}
+        <div className="relative">
+          <div
+            ref={mapContainerRef}
+            className="w-full rounded-lg border overflow-hidden"
+            style={{ height: 520 }}
+          />
+          {geocoding && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-lg z-[500]">
+              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border text-sm font-medium text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Geolocalizando clientes…
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!geocoding && markersData.length === 0 && clients.length > 0 && (
           <p className="text-xs text-muted-foreground mt-2 text-center">
             No se pudieron geocodificar los clientes. Completá los datos de provincia/ciudad.
           </p>
