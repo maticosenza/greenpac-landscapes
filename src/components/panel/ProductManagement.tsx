@@ -89,6 +89,68 @@ interface ProductManagementProps {
   searchTerm: string;
 }
 
+interface SortableImageItemProps {
+  id: string;
+  url: string;
+  label?: string;
+  isFirst: boolean;
+  onRemove: () => void;
+}
+
+const SortableImageItem = ({ id, url, label, isFirst, onRemove }: SortableImageItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/img">
+      <img
+        src={url}
+        alt="Imagen producto"
+        className="w-24 h-24 object-cover rounded-lg border"
+      />
+      <button
+        type="button"
+        className="absolute top-1 left-1 cursor-grab touch-none bg-black/50 text-white rounded p-0.5 opacity-0 group-hover/img:opacity-100 transition-opacity"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </button>
+      <Button
+        type="button"
+        size="icon"
+        variant="destructive"
+        className="absolute -top-2 -right-2 h-6 w-6"
+        onClick={onRemove}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+      {isFirst && (
+        <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-xs px-1 rounded">
+          Principal
+        </span>
+      )}
+      {label && (
+        <span className="absolute bottom-1 right-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
+          {label}
+        </span>
+      )}
+    </div>
+  );
+};
+
 interface SortableFeatureItemProps {
   id: string;
   feature: string;
@@ -480,6 +542,33 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleImageDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const allIds = [
+      ...existingImages.map((_, i) => `existing-${i}`),
+      ...imagePreviews.map((_, i) => `new-${i}`),
+    ];
+    const oldIndex = allIds.indexOf(active.id as string);
+    const newIndex = allIds.indexOf(over.id as string);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const combined = [
+      ...existingImages.map((url) => ({ type: "existing" as const, url })),
+      ...imagePreviews.map((url, i) => ({ type: "new" as const, url, file: imageFiles[i] })),
+    ];
+    const reordered = arrayMove(combined, oldIndex, newIndex);
+
+    const newExisting = reordered.filter((r) => r.type === "existing").map((r) => r.url);
+    const newPreviews = reordered.filter((r) => r.type === "new").map((r) => r.url);
+    const newFiles = reordered.filter((r) => r.type === "new").map((r) => (r as any).file as File);
+
+    setExistingImages(newExisting);
+    setImagePreviews(newPreviews);
+    setImageFiles(newFiles);
+  };
+
   const addSpec = () => {
     if (newSpec.label && newSpec.value) {
       setFormData({
@@ -590,61 +679,44 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
               {/* Image Upload */}
               <div className="space-y-3">
                 <Label>Imágenes del Producto</Label>
+                <p className="text-xs text-muted-foreground">Arrastrá las imágenes para reordenarlas. La primera será la imagen principal.</p>
                 
-                {/* Existing Images */}
-                {existingImages.length > 0 && (
-                  <div className="flex flex-wrap gap-3">
-                    {existingImages.map((url, index) => (
-                      <div key={`existing-${index}`} className="relative">
-                        <img
-                          src={url}
-                          alt={`Imagen ${index + 1}`}
-                          className="w-24 h-24 object-cover rounded-lg border"
-                        />
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="destructive"
-                          className="absolute -top-2 -right-2 h-6 w-6"
-                          onClick={() => removeExistingImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                        {index === 0 && (
-                          <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-xs px-1 rounded">
-                            Principal
-                          </span>
-                        )}
+                {(existingImages.length > 0 || imagePreviews.length > 0) && (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleImageDragEnd}
+                  >
+                    <SortableContext
+                      items={[
+                        ...existingImages.map((_, i) => `existing-${i}`),
+                        ...imagePreviews.map((_, i) => `new-${i}`),
+                      ]}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="flex flex-wrap gap-3">
+                        {existingImages.map((url, index) => (
+                          <SortableImageItem
+                            key={`existing-${index}`}
+                            id={`existing-${index}`}
+                            url={url}
+                            isFirst={index === 0 && imagePreviews.length === 0}
+                            onRemove={() => removeExistingImage(index)}
+                          />
+                        ))}
+                        {imagePreviews.map((url, index) => (
+                          <SortableImageItem
+                            key={`new-${index}`}
+                            id={`new-${index}`}
+                            url={url}
+                            label="Nueva"
+                            isFirst={existingImages.length === 0 && index === 0}
+                            onRemove={() => removeNewImage(index)}
+                          />
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* New Image Previews */}
-                {imagePreviews.length > 0 && (
-                  <div className="flex flex-wrap gap-3">
-                    {imagePreviews.map((url, index) => (
-                      <div key={`new-${index}`} className="relative">
-                        <img
-                          src={url}
-                          alt={`Nueva imagen ${index + 1}`}
-                          className="w-24 h-24 object-cover rounded-lg border border-primary"
-                        />
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="destructive"
-                          className="absolute -top-2 -right-2 h-6 w-6"
-                          onClick={() => removeNewImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                        <span className="absolute bottom-1 left-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
-                          Nueva
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
 
                 {/* Upload Input */}
