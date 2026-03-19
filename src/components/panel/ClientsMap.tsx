@@ -247,7 +247,7 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
   }, []);
 
   return (
-    <Card className="relative z-0">
+    <Card className="relative z-0 isolate">
       <CardHeader className="pb-2 px-4 sm:px-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -296,14 +296,14 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
         </div>
 
         {/* Map container */}
-        <div className="relative">
+        <div className="relative z-0 isolate">
           <div
             ref={mapContainerRef}
-            className="w-full rounded-lg border overflow-hidden relative z-0"
+            className="w-full rounded-lg border overflow-hidden relative z-0 isolate"
             style={{ height: 520 }}
           />
           {geocoding && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-lg z-[500]">
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-lg z-20">
               <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border text-sm font-medium text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 Geolocalizando clientes…
