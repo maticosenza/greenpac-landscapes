@@ -194,22 +194,24 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                         <h3 className="font-medium text-sm truncate">{c.full_name}</h3>
                         <p className="text-xs text-muted-foreground truncate">{c.email || "Sin email"}</p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setClientToDelete(c);
-                        }}
-                        disabled={deletingId === c.id}
-                      >
-                        {deletingId === c.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setClientToDelete(c);
+                          }}
+                          disabled={deletingId === c.id}
+                        >
+                          {deletingId === c.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-medium ${getStatusInfo(c.status).color}`}>
