@@ -542,7 +542,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleImageDragEnd = (event: DragEndEvent) => {
+  const handleImageDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
