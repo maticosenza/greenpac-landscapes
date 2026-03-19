@@ -247,7 +247,7 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
   }, []);
 
   return (
-    <Card>
+    <Card className="relative z-0">
       <CardHeader className="pb-2 px-4 sm:px-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-sm sm:text-base flex items-center gap-2">
