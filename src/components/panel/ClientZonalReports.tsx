@@ -690,6 +690,11 @@ const ClientZonalReports = () => {
         </Button>
       </div>
 
+      {/* Interactive Map */}
+      <Suspense fallback={<div className="h-[520px] rounded-lg border bg-muted/20 animate-pulse flex items-center justify-center text-muted-foreground text-sm">Cargando mapa…</div>}>
+        <ClientsMap clients={filtered} vendedorNames={vendedorNames} />
+      </Suspense>
+
       {/* Province bar + pie */}
       <div ref={provinceRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6 bg-background p-3 rounded-lg">
         <div ref={provinceBarCardRef} className="bg-background p-1 rounded-lg">
