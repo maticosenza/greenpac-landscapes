@@ -68,23 +68,46 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
   const [geocoding, setGeocoding] = useState(false);
   const [coordsMap, setCoordsMap] = useState<Map<string, [number, number]>>(new Map());
 
-  // Geocode clients via Nominatim queue
+  // Use stored lat/lng when available, geocode only those without
   useEffect(() => {
     if (clients.length === 0) {
       setCoordsMap(new Map());
       return;
     }
     let cancelled = false;
+
+    // Clients that already have stored coordinates
+    const withCoords = new Map<string, [number, number]>();
+    const needsGeocoding: { id: string; city: string | null; province: string | null }[] = [];
+
+    clients.forEach((c) => {
+      if (c.lat && c.lng) {
+        withCoords.set(c.id, [c.lat, c.lng]);
+      } else if (c.city || c.province) {
+        needsGeocoding.push({ id: c.id, city: c.city, province: c.province });
+      }
+    });
+
+    if (needsGeocoding.length === 0) {
+      setCoordsMap(withCoords);
+      return;
+    }
+
     setGeocoding(true);
-    geocodeClients(clients.map((c) => ({ id: c.id, city: c.city, province: c.province })))
-      .then((result) => {
+    geocodeClients(needsGeocoding)
+      .then((geocoded) => {
         if (!cancelled) {
-          setCoordsMap(result);
+          // Merge stored + geocoded
+          geocoded.forEach((v, k) => withCoords.set(k, v));
+          setCoordsMap(withCoords);
           setGeocoding(false);
         }
       })
       .catch(() => {
-        if (!cancelled) setGeocoding(false);
+        if (!cancelled) {
+          setCoordsMap(withCoords);
+          setGeocoding(false);
+        }
       });
     return () => { cancelled = true; };
   }, [clients]);
