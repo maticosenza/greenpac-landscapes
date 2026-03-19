@@ -12,20 +12,29 @@ function escapeHtml(unsafe: string): string {
     .replace(/'/g, "&#039;");
 }
 
-async function sendEmail(to: string[], subject: string, html: string): Promise<{ success: boolean; data?: unknown; error?: string }> {
+interface EmailAttachment {
+  filename: string;
+  content: string; // base64
+}
+
+async function sendEmail(to: string[], subject: string, html: string, attachments?: EmailAttachment[]): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    const body: Record<string, unknown> = {
+      from: "Greenpac <info@greenpac.com.ar>",
+      to,
+      subject,
+      html,
+    };
+    if (attachments && attachments.length > 0) {
+      body.attachments = attachments;
+    }
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        from: "Greenpac <info@greenpac.com.ar>",
-        to,
-        subject,
-        html,
-      }),
+      body: JSON.stringify(body),
     });
     
     if (!response.ok) {
@@ -59,6 +68,8 @@ interface QuotationNotificationRequest {
   admin_email?: string;
   price?: number | null;
   site_url?: string;
+  pdf_base64?: string | null;
+  quotation_id?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -203,10 +214,20 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
+    const clientAttachments: EmailAttachment[] = [];
+    if (data.pdf_base64) {
+      const shortId = data.quotation_id ? data.quotation_id.slice(0, 8) : "nueva";
+      clientAttachments.push({
+        filename: `cotizacion-${shortId}.pdf`,
+        content: data.pdf_base64,
+      });
+    }
+
     const clientEmailResult = await sendEmail(
       [data.client_email],
       `Recibimos tu ${typeLabel.toLowerCase()} - Greenpac`,
-      clientEmailHtml
+      clientEmailHtml,
+      clientAttachments.length > 0 ? clientAttachments : undefined
     );
 
     return new Response(

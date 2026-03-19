@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { generateQuotationPDFBase64 } from "@/lib/generateQuotationPDF";
 import {
   Dialog,
   DialogContent,
@@ -110,7 +111,7 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
 
       const addressFull = [data.address_formatted, data.city, data.province].filter(Boolean).join(", ");
 
-      const { error } = await supabase.from("quotations").insert({
+      const { data: inserted, error } = await supabase.from("quotations").insert({
         client_name: data.client_name,
         client_email: data.client_email,
         client_phone: data.client_phone || null,
@@ -126,13 +127,50 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
         status: "pending",
         attachments: attachments,
         price: priceVal,
-      });
+      }).select("id, created_at").single();
 
       if (error) throw error;
-      // Get product names for email notification
-      const selectedProducts = products?.filter(p => data.product_ids.includes(p.id)).map(p => p.name) || [];
 
-      // Send email notification (fire and forget - don't block on errors)
+      // Get selected product details for PDF and email
+      const selectedProductsFull = products?.filter(p => data.product_ids.includes(p.id)) || [];
+      const selectedProductNames = selectedProductsFull.map(p => p.name);
+
+      // Generate PDF as base64
+      let pdfBase64: string | null = null;
+      try {
+        const { data: productDetails } = await supabase
+          .from("products")
+          .select("id, name, description, price")
+          .in("id", data.product_ids);
+
+        pdfBase64 = await generateQuotationPDFBase64(
+          {
+            id: inserted.id,
+            client_name: data.client_name,
+            client_email: data.client_email,
+            client_phone: data.client_phone || null,
+            company: data.company || null,
+            quotation_type: data.quotation_type,
+            status: "pending",
+            message: data.message || null,
+            price: priceVal,
+            created_at: inserted.created_at,
+            province: data.province || null,
+            city: data.city || null,
+            address_formatted: addressFull || null,
+          },
+          (productDetails || []).map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            price: p.price,
+          }))
+        );
+      } catch (pdfError) {
+        console.error("Error generating PDF:", pdfError);
+      }
+
+      // Send email notification with PDF
       try {
         await supabase.functions.invoke("send-quotation-notification", {
           body: {
@@ -141,16 +179,17 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
             client_phone: data.client_phone,
             company: data.company,
             quotation_type: data.quotation_type,
-            products: selectedProducts,
+            products: selectedProductNames,
             message: data.message,
             created_by_employee: profile?.full_name,
             price: priceVal,
             site_url: window.location.origin,
+            pdf_base64: pdfBase64,
+            quotation_id: inserted.id,
           },
         });
       } catch (emailError) {
         console.error("Error sending email notification:", emailError);
-        // Don't throw - email failure shouldn't block quotation creation
       }
     },
     onSuccess: () => {
