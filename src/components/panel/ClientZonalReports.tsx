@@ -114,6 +114,20 @@ const ClientZonalReports = () => {
     },
   });
 
+  const { data: vendedorNames } = useQuery({
+    queryKey: ["vendedor-names-for-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name");
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: any) => { map[p.id] = p.full_name; });
+      return map;
+    },
+  });
+
+
   const filtered = useMemo(() => {
     if (!clients) return [];
     return clients.filter((c) => {
