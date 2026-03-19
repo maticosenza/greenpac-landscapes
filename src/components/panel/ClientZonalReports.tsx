@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import { toPng } from "html-to-image";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,6 +37,8 @@ import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+const ClientsMap = lazy(() => import("./ClientsMap"));
 
 const COLORS = ["hsl(142,76%,36%)", "hsl(142,76%,46%)", "hsl(142,60%,56%)", "hsl(142,55%,62%)", "hsl(142,45%,70%)", "hsl(0,0%,75%)", "hsl(0,0%,60%)"];
 
@@ -111,6 +113,20 @@ const ClientZonalReports = () => {
       return (data as any[]) as ClientRow[];
     },
   });
+
+  const { data: vendedorNames } = useQuery({
+    queryKey: ["vendedor-names-for-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name");
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: any) => { map[p.id] = p.full_name; });
+      return map;
+    },
+  });
+
 
   const filtered = useMemo(() => {
     if (!clients) return [];
@@ -673,6 +689,11 @@ const ClientZonalReports = () => {
           <FileDown className="h-4 w-4" /> PDF Ciudad
         </Button>
       </div>
+
+      {/* Interactive Map */}
+      <Suspense fallback={<div className="h-[520px] rounded-lg border bg-muted/20 animate-pulse flex items-center justify-center text-muted-foreground text-sm">Cargando mapa…</div>}>
+        <ClientsMap clients={filtered} vendedorNames={vendedorNames} />
+      </Suspense>
 
       {/* Province bar + pie */}
       <div ref={provinceRowRef} className="grid lg:grid-cols-2 gap-4 sm:gap-6 bg-background p-3 rounded-lg">
