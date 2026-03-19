@@ -214,10 +214,20 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
+    const clientAttachments: EmailAttachment[] = [];
+    if (data.pdf_base64) {
+      const shortId = data.quotation_id ? data.quotation_id.slice(0, 8) : "nueva";
+      clientAttachments.push({
+        filename: `cotizacion-${shortId}.pdf`,
+        content: data.pdf_base64,
+      });
+    }
+
     const clientEmailResult = await sendEmail(
       [data.client_email],
       `Recibimos tu ${typeLabel.toLowerCase()} - Greenpac`,
-      clientEmailHtml
+      clientEmailHtml,
+      clientAttachments.length > 0 ? clientAttachments : undefined
     );
 
     return new Response(

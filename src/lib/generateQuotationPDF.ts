@@ -50,7 +50,7 @@ async function fetchAsDataURL(url: string): Promise<string> {
   });
 }
 
-export async function generateQuotationPDF(quotation: QuotationData, products: ProductData[]) {
+async function buildQuotationDoc(quotation: QuotationData, products: ProductData[]) {
   const logoDataUrl = await fetchAsDataURL("/brand/greenpac_logo_horizontal.png");
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -189,5 +189,15 @@ export async function generateQuotationPDF(quotation: QuotationData, products: P
   doc.setTextColor(100, 100, 100);
   doc.text("Para confirmar la cotización, responda a este documento.", pageWidth / 2, footerY + 2, { align: "center" });
 
+  return doc;
+}
+
+export async function generateQuotationPDF(quotation: QuotationData, products: ProductData[]) {
+  const doc = await buildQuotationDoc(quotation, products);
   doc.save(`cotizacion-${quotation.id.slice(0, 8)}.pdf`);
+}
+
+export async function generateQuotationPDFBase64(quotation: QuotationData, products: ProductData[]): Promise<string> {
+  const doc = await buildQuotationDoc(quotation, products);
+  return doc.output("datauristring").split(",")[1];
 }
