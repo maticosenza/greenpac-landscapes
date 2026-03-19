@@ -37,6 +37,7 @@ interface CustomersListProps {
 
 const CustomersList = ({ searchTerm }: CustomersListProps) => {
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
