@@ -224,6 +224,43 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Download uploaded attachments from storage and add to email
+    if (data.attachment_paths && data.attachment_paths.length > 0) {
+      for (const filePath of data.attachment_paths) {
+        try {
+          const { data: fileData, error: downloadError } = await supabaseClient.storage
+            .from("quotation-attachments")
+            .download(filePath);
+
+          if (downloadError || !fileData) {
+            console.error("Error downloading attachment:", filePath, downloadError);
+            continue;
+          }
+
+          const arrayBuffer = await fileData.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          let binary = "";
+          for (let i = 0; i < uint8Array.length; i++) {
+            binary += String.fromCharCode(uint8Array[i]);
+          }
+          const base64Content = btoa(binary);
+
+          // Extract original filename
+          const parts = filePath.split("/");
+          const rawName = parts[parts.length - 1];
+          // Remove timestamp prefix for cleaner filename
+          const cleanName = rawName.replace(/^\d+-[a-z0-9]+\./, "adjunto.");
+
+          clientAttachments.push({
+            filename: cleanName,
+            content: base64Content,
+          });
+        } catch (attachErr) {
+          console.error("Error processing attachment:", filePath, attachErr);
+        }
+      }
+    }
+
     const clientEmailResult = await sendEmail(
       [data.client_email],
       `Recibimos tu ${typeLabel.toLowerCase()} - Greenpac`,
