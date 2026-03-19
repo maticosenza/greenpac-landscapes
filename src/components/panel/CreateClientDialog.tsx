@@ -23,6 +23,8 @@ import {
 import { Loader2 } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { CLIENT_STATUSES } from "./clientConstants";
+import LocalityAutocomplete from "./LocalityAutocomplete";
+import AddressAutocomplete from "./AddressAutocomplete";
 
 interface Props {
   open: boolean;
@@ -47,6 +49,8 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
     address: "",
     notes: "",
     status: "activo",
+    lat: null as number | null,
+    lng: null as number | null,
   });
 
   const resetForm = () =>
@@ -63,6 +67,8 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
       address: "",
       notes: "",
       status: "activo",
+      lat: null,
+      lng: null,
     });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +95,8 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
         notes: form.notes.trim() || null,
         status: form.status,
         created_by: user.id,
+        lat: form.lat,
+        lng: form.lng,
       } as any);
 
       if (error) throw error;
@@ -106,6 +114,10 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
 
   const update = (key: string, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleProvinceChange = (v: string) => {
+    setForm((prev) => ({ ...prev, province: v, city: "", lat: null, lng: null }));
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -202,7 +214,7 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
               <Label htmlFor="province">Provincia</Label>
               <Select
                 value={form.province}
-                onValueChange={(v) => update("province", v)}
+                onValueChange={handleProvinceChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar..." />
@@ -219,11 +231,12 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
 
             <div className="space-y-2">
               <Label htmlFor="city">Localidad</Label>
-              <Input
-                id="city"
+              <LocalityAutocomplete
+                province={form.province}
                 value={form.city}
-                onChange={(e) => update("city", e.target.value)}
-                maxLength={100}
+                onChange={(city) => {
+                  setForm((prev) => ({ ...prev, city, lat: null, lng: null }));
+                }}
               />
             </div>
 
@@ -239,14 +252,27 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
 
             <div className="space-y-2">
               <Label htmlFor="address">Domicilio</Label>
-              <Input
-                id="address"
+              <AddressAutocomplete
+                city={form.city}
+                province={form.province}
                 value={form.address}
-                onChange={(e) => update("address", e.target.value)}
-                maxLength={200}
+                onChange={(address, lat, lng) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    address,
+                    lat: lat ?? prev.lat,
+                    lng: lng ?? prev.lng,
+                  }));
+                }}
               />
             </div>
           </div>
+
+          {form.lat && form.lng && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              📍 Coordenadas: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+            </p>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notas</Label>
