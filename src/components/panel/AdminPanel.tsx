@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
 import QuotationsList from "./QuotationsList";
-import CustomersList from "./CustomersList";
+import ClientsSection from "./ClientsSection";
 import TeamManagement from "./TeamManagement";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
