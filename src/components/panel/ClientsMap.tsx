@@ -158,8 +158,12 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
       const statusInfo = getStatusInfo(client.status);
       const vendedor = vendedorNames && client.created_by ? vendedorNames[client.created_by] : null;
 
+      const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+      const appleUrl = `maps://maps.apple.com/?daddr=${lat},${lng}`;
+
       const popupContent = `
-        <div style="font-family: system-ui, sans-serif; min-width: 180px; font-size: 13px; line-height: 1.5;">
+        <div style="font-family: system-ui, sans-serif; min-width: 200px; font-size: 13px; line-height: 1.5;">
           <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #1a1a1a;">${client.full_name}</div>
           <div style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: ${color}22; color: ${color}; border: 1px solid ${color}44; margin-bottom: 6px;">
             ${statusInfo.label}
@@ -168,6 +172,20 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
           ${client.city || client.province ? `<div style="color: #555; font-size: 12px;">📍 ${[client.city, client.province].filter(Boolean).join(", ")}</div>` : ""}
           ${vendedor ? `<div style="color: #555; font-size: 12px;">👤 ${vendedor}</div>` : ""}
           ${client.price ? `<div style="color: #555; font-size: 12px;">💰 $${Number(client.price).toLocaleString("es-AR")}</div>` : ""}
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; display: flex; gap: 6px; flex-wrap: wrap;">
+            <a href="${googleUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#16a34a;color:white;text-decoration:none;cursor:pointer;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              Google Maps
+            </a>
+            <a href="${wazeUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f3f4f6;color:#1f2937;text-decoration:none;border:1px solid #d1d5db;cursor:pointer;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              Waze
+            </a>
+            <a href="${appleUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f3f4f6;color:#1f2937;text-decoration:none;border:1px solid #d1d5db;cursor:pointer;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              Apple Maps
+            </a>
+          </div>
         </div>
       `;
 
