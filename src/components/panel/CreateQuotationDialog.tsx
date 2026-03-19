@@ -186,6 +186,7 @@ const CreateQuotationDialog = ({ open, onOpenChange }: CreateQuotationDialogProp
             site_url: window.location.origin,
             pdf_base64: pdfBase64,
             quotation_id: inserted.id,
+            attachment_paths: attachments.length > 0 ? attachments : undefined,
           },
         });
       } catch (emailError) {
