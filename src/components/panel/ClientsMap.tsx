@@ -20,7 +20,7 @@ interface ClientRow {
   city: string | null;
   status: string;
   created_at: string;
-  created_by: string;
+  created_by?: string;
 }
 
 interface ClientsMapProps {
