@@ -223,7 +223,7 @@ const EmployeePanel = () => {
             </TabsContent>
 
             <TabsContent value="customers">
-              <CustomersList searchTerm={searchTerm} />
+              <ClientsSection searchTerm={searchTerm} />
             </TabsContent>
 
             <TabsContent value="zones">

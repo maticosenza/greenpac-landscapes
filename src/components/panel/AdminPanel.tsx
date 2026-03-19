@@ -264,7 +264,7 @@ const AdminPanel = () => {
           </TabsContent>
 
           <TabsContent value="customers">
-            <CustomersList searchTerm={searchTerm} />
+            <ClientsSection searchTerm={searchTerm} />
           </TabsContent>
 
           <TabsContent value="team">

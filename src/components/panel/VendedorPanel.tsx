@@ -242,7 +242,7 @@ const VendedorPanel = () => {
             </TabsContent>
 
             <TabsContent value="customers">
-              <VendedorCustomersList searchTerm={searchTerm} vendedorId={user?.id ?? ""} />
+              <VendedorClientsSection searchTerm={searchTerm} vendedorId={user?.id ?? ""} />
             </TabsContent>
 
             <TabsContent value="zones">
