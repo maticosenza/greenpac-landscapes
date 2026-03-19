@@ -542,6 +542,33 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleImageDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const allIds = [
+      ...existingImages.map((_, i) => `existing-${i}`),
+      ...imagePreviews.map((_, i) => `new-${i}`),
+    ];
+    const oldIndex = allIds.indexOf(active.id as string);
+    const newIndex = allIds.indexOf(over.id as string);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const combined = [
+      ...existingImages.map((url) => ({ type: "existing" as const, url })),
+      ...imagePreviews.map((url, i) => ({ type: "new" as const, url, file: imageFiles[i] })),
+    ];
+    const reordered = arrayMove(combined, oldIndex, newIndex);
+
+    const newExisting = reordered.filter((r) => r.type === "existing").map((r) => r.url);
+    const newPreviews = reordered.filter((r) => r.type === "new").map((r) => r.url);
+    const newFiles = reordered.filter((r) => r.type === "new").map((r) => (r as any).file as File);
+
+    setExistingImages(newExisting);
+    setImagePreviews(newPreviews);
+    setImageFiles(newFiles);
+  };
+
   const addSpec = () => {
     if (newSpec.label && newSpec.value) {
       setFormData({
