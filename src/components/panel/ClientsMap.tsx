@@ -59,7 +59,7 @@ function createCircleIcon(color: string): L.DivIcon {
 const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
+  const clusterRef = useRef<any>(null);
 
   // Compute markers data
   const markersData = useMemo(() => {
