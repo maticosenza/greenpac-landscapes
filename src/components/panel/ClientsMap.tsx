@@ -299,7 +299,7 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
         <div className="relative">
           <div
             ref={mapContainerRef}
-            className="w-full rounded-lg border overflow-hidden"
+            className="w-full rounded-lg border overflow-hidden relative z-0"
             style={{ height: 520 }}
           />
           {geocoding && (
