@@ -244,7 +244,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                       <TableHead>Provincia</TableHead>
                       <TableHead>Localidad</TableHead>
                       <TableHead>Registro</TableHead>
-                      <TableHead className="w-[60px]"></TableHead>
+                      <TableHead className="w-[60px] sticky right-0 bg-background"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
