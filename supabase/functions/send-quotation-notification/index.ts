@@ -70,6 +70,7 @@ interface QuotationNotificationRequest {
   site_url?: string;
   pdf_base64?: string | null;
   quotation_id?: string;
+  attachment_paths?: string[];
 }
 
 const handler = async (req: Request): Promise<Response> => {
