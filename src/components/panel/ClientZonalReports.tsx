@@ -38,6 +38,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+const ClientsMap = lazy(() => import("./ClientsMap"));
+
 const COLORS = ["hsl(142,76%,36%)", "hsl(142,76%,46%)", "hsl(142,60%,56%)", "hsl(142,55%,62%)", "hsl(142,45%,70%)", "hsl(0,0%,75%)", "hsl(0,0%,60%)"];
 
 type SortField = "total" | "withPrice" | "avgPrice" | "totalPrice";
