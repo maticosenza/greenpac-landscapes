@@ -68,6 +68,8 @@ interface QuotationNotificationRequest {
   admin_email?: string;
   price?: number | null;
   site_url?: string;
+  pdf_base64?: string | null;
+  quotation_id?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
