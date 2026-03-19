@@ -13,7 +13,7 @@ import logo from "@/assets/greenpac-logo.png";
 import CreateQuotationDialog from "./CreateQuotationDialog";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 import VendedorQuotationsList from "./VendedorQuotationsList";
-import VendedorCustomersList from "./VendedorCustomersList";
+import VendedorClientsSection from "./VendedorClientsSection";
 import ContactInquiriesList from "./ContactInquiriesList";
 import ProductManagement from "./ProductManagement";
 import ZonalReports from "./ZonalReports";
