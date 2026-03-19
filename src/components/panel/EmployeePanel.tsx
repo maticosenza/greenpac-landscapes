@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
 import QuotationsList from "./QuotationsList";
-import CustomersList from "./CustomersList";
+import ClientsSection from "./ClientsSection";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
 import ProductManagement from "./ProductManagement";
@@ -223,7 +223,7 @@ const EmployeePanel = () => {
             </TabsContent>
 
             <TabsContent value="customers">
-              <CustomersList searchTerm={searchTerm} />
+              <ClientsSection searchTerm={searchTerm} />
             </TabsContent>
 
             <TabsContent value="zones">
