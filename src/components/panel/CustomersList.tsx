@@ -274,7 +274,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                         <TableCell className="whitespace-nowrap">
                           {new Date(c.created_at).toLocaleDateString("es-AR")}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="sticky right-0 bg-background">
                           <Button
                             variant="ghost"
                             size="icon"
