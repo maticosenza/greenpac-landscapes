@@ -212,7 +212,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                         onClick={() => setSelectedClient(c)}
                       >
                         <TableCell className="font-medium">{c.full_name}</TableCell>
-                        <TableCell>
+                        <TableCell>{c.company || "—"}</TableCell>
                           <span className={`px-2 py-0.5 rounded-full border text-xs font-medium ${getStatusInfo(c.status).color}`}>
                             {getStatusInfo(c.status).label}
                           </span>
