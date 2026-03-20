@@ -135,11 +135,17 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     setForm(emptyForm);
     setEditing(null);
     setIsDialogOpen(false);
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(null);
   };
 
   const openCreate = () => {
     setForm(emptyForm);
     setEditing(null);
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(null);
     setIsDialogOpen(true);
   };
 
