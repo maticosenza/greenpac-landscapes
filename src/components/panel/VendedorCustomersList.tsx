@@ -210,7 +210,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                       <TableHead>Provincia</TableHead>
                       <TableHead>Localidad</TableHead>
                       <TableHead>Registro</TableHead>
-                      <TableHead className="w-[60px]"></TableHead>
+                      
                     </TableRow>
                   </TableHeader>
                   <TableBody>
