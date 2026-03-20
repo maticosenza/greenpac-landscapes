@@ -240,6 +240,13 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                   onChange={(e) => update("full_name", e.target.value)}
                   maxLength={100}
                 />
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Empresa</Label>
+                <Input
+                  value={form.company || ""}
+                  onChange={(e) => update("company", e.target.value)}
+                  maxLength={200}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Documento</Label>
