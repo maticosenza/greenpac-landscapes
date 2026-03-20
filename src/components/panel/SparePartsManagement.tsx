@@ -428,6 +428,48 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
             <DialogTitle>{editing ? "Editar Repuesto" : "Nuevo Repuesto"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Image upload */}
+            <div className="space-y-2">
+              <Label>Foto del repuesto</Label>
+              <div className="flex items-center gap-4">
+                {(imagePreview || existingImageUrl) ? (
+                  <div className="relative">
+                    <img
+                      src={imagePreview || existingImageUrl!}
+                      alt="Preview"
+                      className="w-24 h-24 object-cover rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-6 w-6"
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview(null);
+                        setExistingImageUrl(null);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG o WebP. Máximo 5MB.</p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 sm:col-span-2">
                 <Label>Nombre *</Label>
