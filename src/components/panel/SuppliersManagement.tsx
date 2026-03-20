@@ -255,6 +255,23 @@ const SuppliersManagement = () => {
                 <Label>Localidad</Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} maxLength={200} />
               </div>
+              <div className="space-y-2">
+                <Label>Categoría de producto</Label>
+                <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v === "_none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Sin categoría</SelectItem>
+                    {categories?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                          {c.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label>Productos que provee</Label>
                 <Textarea value={form.products} onChange={(e) => setForm({ ...form, products: e.target.value })} maxLength={500} placeholder="Ej: Filtros de aire, correas, rodamientos..." rows={2} />
