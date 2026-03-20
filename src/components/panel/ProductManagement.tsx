@@ -459,7 +459,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: "Producto actualizado exitosamente" });
+      toast({ title: "Maquinaria actualizada exitosamente" });
       resetForm();
     },
     onError: (error: Error) => {
