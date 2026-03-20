@@ -37,8 +37,7 @@ interface Props {
 
 const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
   const queryClient = useQueryClient();
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
+  
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
   const [localSearch, setLocalSearch] = useState("");
