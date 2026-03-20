@@ -329,9 +329,18 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                 {filtered.map((p) => (
                   <div key={p.id} className="border rounded-lg p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-medium text-sm truncate">{p.name}</h3>
-                        <p className="text-xs text-muted-foreground">Código: {p.code}</p>
+                      <div className="flex items-center gap-3 min-w-0">
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded border shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-sm truncate">{p.name}</h3>
+                          <p className="text-xs text-muted-foreground">Código: {p.code}</p>
+                        </div>
                       </div>
                       <div className="flex gap-1 flex-shrink-0">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
