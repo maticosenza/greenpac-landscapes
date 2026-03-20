@@ -358,7 +358,9 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                                 <span>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "Sin precio"}</span>
                                 <span>Stock: {p.stock}</span>
                                 {cat && <Badge variant="outline" className="text-[10px] px-1.5 py-0" style={{ borderColor: cat.color, color: cat.color }}>{cat.name}</Badge>}
-                                {sup && <button className="underline text-primary text-[10px]" onClick={() => setSupplierDetail(sup)}>{sup.name}</button>}
+                                {linkedSuppliers.length > 0 && linkedSuppliers.map((s) => (
+                                  <button key={s.id} className="underline text-primary text-[10px]" onClick={() => setSupplierDetail(s)}>{s.name}</button>
+                                ))}
                               </div>
                             </div>
                           );
