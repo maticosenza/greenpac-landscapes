@@ -81,6 +81,9 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
   const [saving, setSaving] = useState(false);
   const [localSearch, setLocalSearch] = useState("");
   const [partToDelete, setPartToDelete] = useState<SparePart | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
   const { data: parts, isLoading } = useQuery({
     queryKey: ["spare-parts"],
