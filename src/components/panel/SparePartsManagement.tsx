@@ -386,7 +386,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                           <TableBody>
                             {filtered.map((p) => {
                               const cat = getCategory(p.category_id);
-                              const sup = getSupplier(p.supplier_id);
+                              const linkedSuppliers = partSuppliersMap[p.id] || [];
                               return (
                                 <TableRow key={p.id}>
                                   <TableCell>
