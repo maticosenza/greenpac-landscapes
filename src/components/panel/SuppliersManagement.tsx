@@ -51,6 +51,15 @@ const SuppliersManagement = () => {
   const [localSearch, setLocalSearch] = useState("");
   const [toDelete, setToDelete] = useState<Supplier | null>(null);
 
+  const { data: categories } = useQuery({
+    queryKey: ["spare-part-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("spare_part_categories" as any).select("*").order("name");
+      if (error) throw error;
+      return (data as any[]) as SparePartCategory[];
+    },
+  });
+
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ["suppliers"],
     queryFn: async () => {
