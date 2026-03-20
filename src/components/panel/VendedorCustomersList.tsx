@@ -191,11 +191,12 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nombre</TableHead>
+                      <TableHead>Empresa</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
-                      <TableHead>Producto</TableHead>
+                      <TableHead>Maquinaria</TableHead>
                       <TableHead>Precio</TableHead>
                       <TableHead>Provincia</TableHead>
                       <TableHead>Localidad</TableHead>
