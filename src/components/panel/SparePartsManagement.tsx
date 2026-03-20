@@ -334,7 +334,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                       <div className="block md:hidden space-y-4">
                         {filtered.map((p) => {
                           const cat = getCategory(p.category_id);
-                          const sup = getSupplier(p.supplier_id);
+                          const linkedSuppliers = partSuppliersMap[p.id] || [];
                           return (
                             <div key={p.id} className="border rounded-lg p-4 space-y-2">
                               <div className="flex items-start justify-between gap-2">
