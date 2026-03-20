@@ -48,6 +48,7 @@ interface SparePart {
   stock: number;
   vendor_id: string | null;
   supplier: string | null;
+  image_url: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
