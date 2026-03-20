@@ -68,7 +68,7 @@ const SuppliersManagement = () => {
 
   const openEdit = (s: Supplier) => {
     setEditing(s);
-    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", products: s.products || "" });
+    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", company: s.company || "", products: s.products || "" });
     setIsDialogOpen(true);
   };
 
