@@ -380,6 +380,15 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                   <TableBody>
                     {filtered.map((p) => (
                       <TableRow key={p.id}>
+                        <TableCell>
+                          {p.image_url ? (
+                            <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded border" />
+                          ) : (
+                            <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{p.name}</TableCell>
                         <TableCell>{p.code}</TableCell>
                         <TableCell>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "—"}</TableCell>
