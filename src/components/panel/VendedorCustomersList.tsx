@@ -56,24 +56,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
     },
   });
 
-  const handleDelete = async () => {
-    if (!clientToDelete) return;
-    setDeletingId(clientToDelete.id);
-    try {
-      const { error } = await supabase
-        .from("clients" as any)
-        .delete()
-        .eq("id", clientToDelete.id);
-      if (error) throw error;
-      toast.success("Cliente eliminado");
-      queryClient.invalidateQueries({ queryKey: ["crm-clients"] });
-    } catch (err: any) {
-      toast.error(err.message || "Error al eliminar");
-    } finally {
-      setDeletingId(null);
-      setClientToDelete(null);
-    }
-  };
+  
 
   const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = clients?.filter((c) => {
