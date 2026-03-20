@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Loader2, Download, Plus, Search, Filter } from "lucide-react";
+import { Loader2, Download, Plus, Search } from "lucide-react";
 import { CLIENT_STATUSES } from "./clientConstants";
 import { getStatusInfo } from "./clientConstants";
 import { toast } from "sonner";
