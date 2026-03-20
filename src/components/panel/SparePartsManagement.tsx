@@ -234,10 +234,10 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     <div className="space-y-6">
       {/* Subtabs */}
       <Tabs value={subTab} onValueChange={setSubTab}>
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="list" className="gap-1.5"><Wrench className="h-4 w-4" />Repuestos</TabsTrigger>
-          <TabsTrigger value="categories" className="gap-1.5"><Tag className="h-4 w-4" />Categorías</TabsTrigger>
-          <TabsTrigger value="suppliers" className="gap-1.5"><Truck className="h-4 w-4" />Proveedores</TabsTrigger>
+        <TabsList className="bg-muted/50 w-full justify-center">
+          <TabsTrigger value="list" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Wrench className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Repuestos</TabsTrigger>
+          <TabsTrigger value="categories" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Categorías</TabsTrigger>
+          <TabsTrigger value="suppliers" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Proveedores</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="mt-6">
