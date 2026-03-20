@@ -543,6 +543,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
               {supplierDetail.phone && <div><span className="font-medium text-muted-foreground">Teléfono:</span> {supplierDetail.phone}</div>}
               {supplierDetail.province && <div><span className="font-medium text-muted-foreground">Provincia:</span> {supplierDetail.province}</div>}
               {supplierDetail.city && <div><span className="font-medium text-muted-foreground">Localidad:</span> {supplierDetail.city}</div>}
+              {supplierDetail.products && <div><span className="font-medium text-muted-foreground">Productos que provee:</span> {supplierDetail.products}</div>}
             </div>
           )}
         </DialogContent>

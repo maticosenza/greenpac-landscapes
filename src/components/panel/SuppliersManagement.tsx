@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -31,10 +32,11 @@ export interface Supplier {
   phone: string | null;
   province: string | null;
   city: string | null;
+  products: string | null;
   created_at: string;
 }
 
-const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "" };
+const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", products: "" };
 
 const SuppliersManagement = () => {
   const queryClient = useQueryClient();
@@ -65,7 +67,7 @@ const SuppliersManagement = () => {
 
   const openEdit = (s: Supplier) => {
     setEditing(s);
-    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "" });
+    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", products: s.products || "" });
     setIsDialogOpen(true);
   };
 
@@ -81,6 +83,7 @@ const SuppliersManagement = () => {
         phone: form.phone.trim() || null,
         province: form.province || null,
         city: form.city.trim() || null,
+        products: form.products.trim() || null,
       };
       if (editing) {
         const { error } = await supabase.from("suppliers" as any).update(payload).eq("id", editing.id);
@@ -149,6 +152,7 @@ const SuppliersManagement = () => {
                       {s.email && <span>{s.email}</span>}
                       {s.phone && <span>{s.phone}</span>}
                       {s.province && <span>{s.province}{s.city ? `, ${s.city}` : ""}</span>}
+                      {s.products && <span className="text-foreground/70">Productos: {s.products}</span>}
                     </div>
                   </div>
                 ))}
@@ -232,6 +236,10 @@ const SuppliersManagement = () => {
               <div className="space-y-2">
                 <Label>Localidad</Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} maxLength={200} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Productos que provee</Label>
+                <Textarea value={form.products} onChange={(e) => setForm({ ...form, products: e.target.value })} maxLength={500} placeholder="Ej: Filtros de aire, correas, rodamientos..." rows={2} />
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
