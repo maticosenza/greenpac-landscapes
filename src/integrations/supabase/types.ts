@@ -50,6 +50,7 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          company: string | null
           created_at: string
           created_by: string
           document: string | null
@@ -64,12 +65,14 @@ export type Database = {
           price: number | null
           product_interest: string | null
           province: string | null
+          spare_part_interest: string | null
           status: string
           updated_at: string
         }
         Insert: {
           address?: string | null
           city?: string | null
+          company?: string | null
           created_at?: string
           created_by: string
           document?: string | null
@@ -84,12 +87,14 @@ export type Database = {
           price?: number | null
           product_interest?: string | null
           province?: string | null
+          spare_part_interest?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           address?: string | null
           city?: string | null
+          company?: string | null
           created_at?: string
           created_by?: string
           document?: string | null
@@ -104,6 +109,7 @@ export type Database = {
           price?: number | null
           product_interest?: string | null
           province?: string | null
+          spare_part_interest?: string | null
           status?: string
           updated_at?: string
         }
@@ -500,6 +506,45 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           value?: string
+        }
+        Relationships: []
+      }
+      spare_parts: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          price: number | null
+          stock: number
+          supplier: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          price?: number | null
+          stock?: number
+          supplier?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          price?: number | null
+          stock?: number
+          supplier?: string | null
+          updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: []
       }

@@ -290,7 +290,7 @@ const SortableProductRow = ({ product, index, total, onEdit, onDelete, onToggleA
           <Button size="icon" variant="ghost" onClick={() => onEdit(product)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { if (confirm("¿Eliminar este producto?")) onDelete(product.id); }}>
+          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { if (confirm("¿Eliminar esta maquinaria?")) onDelete(product.id); }}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -411,12 +411,12 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: "Producto creado exitosamente" });
+      toast({ title: "Maquinaria creada exitosamente" });
       resetForm();
     },
     onError: (error: Error) => {
       toast({
-        title: "Error al crear producto",
+        title: "Error al crear maquinaria",
         description: error.message,
         variant: "destructive",
       });
@@ -459,12 +459,12 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: "Producto actualizado exitosamente" });
+      toast({ title: "Maquinaria actualizada exitosamente" });
       resetForm();
     },
     onError: (error: Error) => {
       toast({
-        title: "Error al actualizar producto",
+        title: "Error al actualizar maquinaria",
         description: error.message,
         variant: "destructive",
       });
@@ -479,11 +479,11 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: "Producto eliminado" });
+      toast({ title: "Maquinaria eliminada" });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error al eliminar producto",
+        title: "Error al eliminar maquinaria",
         description: error.message,
         variant: "destructive",
       });
@@ -626,7 +626,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     } else {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: newActive ? "Producto visible" : "Producto oculto" });
+      toast({ title: newActive ? "Maquinaria visible" : "Maquinaria oculta" });
     }
   };
 
@@ -661,24 +661,24 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <CardTitle className="text-lg sm:text-xl">Gestión de Productos</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Gestión de Maquinaria</CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => resetForm()} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Nuevo Producto
+              Nueva Maquinaria
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingProduct ? "Editar Producto" : "Nuevo Producto"}
+                {editingProduct ? "Editar Maquinaria" : "Nueva Maquinaria"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Image Upload */}
               <div className="space-y-3">
-                <Label>Imágenes del Producto</Label>
+                <Label>Imágenes de la Maquinaria</Label>
                 <p className="text-xs text-muted-foreground">Arrastrá las imágenes para reordenarlas. La primera será la imagen principal.</p>
                 
                 {(existingImages.length > 0 || imagePreviews.length > 0) && (
@@ -920,8 +920,8 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                   {createMutation.isPending || updateMutation.isPending
                     ? "Guardando..."
                     : editingProduct
-                    ? "Actualizar Producto"
-                    : "Crear Producto"}
+                    ? "Actualizar Maquinaria"
+                    : "Crear Maquinaria"}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancelar

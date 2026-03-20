@@ -76,11 +76,12 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
       `clientes-${new Date().toISOString().split("T")[0]}`,
       [
         { key: "full_name", label: "Nombre" },
+        { key: "company", label: "Empresa" },
         { key: "status_label", label: "Estado" },
         { key: "document", label: "Documento" },
         { key: "email", label: "Email" },
         { key: "phone", label: "Teléfono" },
-        { key: "product_interest", label: "Producto de Interés" },
+        { key: "product_interest", label: "Maquinaria de Interés" },
         { key: "price_str", label: "Precio" },
         { key: "province", label: "Provincia" },
         { key: "city", label: "Localidad" },
@@ -191,11 +192,12 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nombre</TableHead>
+                      <TableHead>Empresa</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
-                      <TableHead>Producto</TableHead>
+                      <TableHead>Maquinaria</TableHead>
                       <TableHead>Precio</TableHead>
                       <TableHead>Provincia</TableHead>
                       <TableHead>Localidad</TableHead>
@@ -211,6 +213,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                         onClick={() => setSelectedClient(c)}
                       >
                         <TableCell className="font-medium">{c.full_name}</TableCell>
+                        <TableCell>{c.company || "—"}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-0.5 rounded-full border text-xs font-medium ${getStatusInfo(c.status).color}`}>
                             {getStatusInfo(c.status).label}

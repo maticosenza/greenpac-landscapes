@@ -30,10 +30,12 @@ import AddressAutocomplete from "./AddressAutocomplete";
 export interface ClientRecord {
   id: string;
   full_name: string;
+  company: string | null;
   document: string | null;
   email: string | null;
   phone: string | null;
   product_interest: string | null;
+  spare_part_interest: string | null;
   price: number | null;
   province: string | null;
   city: string | null;
@@ -129,10 +131,12 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
         .from("clients" as any)
         .update({
           full_name: form.full_name?.trim(),
+          company: form.company?.trim() || null,
           document: form.document?.trim() || null,
           email: form.email?.trim() || null,
           phone: form.phone?.trim() || null,
           product_interest: form.product_interest?.trim() || null,
+          spare_part_interest: form.spare_part_interest?.trim() || null,
           price: form.price || null,
           province: form.province || null,
           city: form.city?.trim() || null,
@@ -237,6 +241,14 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                   maxLength={100}
                 />
               </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Empresa</Label>
+                <Input
+                  value={form.company || ""}
+                  onChange={(e) => update("company", e.target.value)}
+                  maxLength={200}
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Documento</Label>
                 <Input
@@ -281,10 +293,18 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Producto de interés</Label>
+                <Label>Maquinaria de interés</Label>
                 <Input
                   value={form.product_interest || ""}
                   onChange={(e) => update("product_interest", e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Repuesto de interés</Label>
+                <Input
+                  value={form.spare_part_interest || ""}
+                  onChange={(e) => update("spare_part_interest", e.target.value)}
                   maxLength={200}
                 />
               </div>
@@ -397,10 +417,12 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <Field label="Nombre" value={form.full_name} />
+              <Field label="Empresa" value={form.company} />
               <Field label="Documento" value={form.document} />
               <Field label="Email" value={form.email} />
               <Field label="Teléfono" value={form.phone} />
-              <Field label="Producto de interés" value={form.product_interest} />
+              <Field label="Maquinaria de interés" value={form.product_interest} />
+              <Field label="Repuesto de interés" value={form.spare_part_interest} />
               <Field
                 label="Precio"
                 value={
