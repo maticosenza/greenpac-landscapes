@@ -119,6 +119,28 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     },
   });
 
+  const { data: supplierSpareParts } = useQuery({
+    queryKey: ["supplier-spare-parts"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("supplier_spare_parts" as any).select("*");
+      if (error) throw error;
+      return (data as any[]) as { supplier_id: string; spare_part_id: string }[];
+    },
+  });
+
+  // Reverse map: spare_part_id -> supplier names
+  const partSuppliersMap = useMemo(() => {
+    const map: Record<string, Supplier[]> = {};
+    supplierSpareParts?.forEach((r) => {
+      const sup = suppliers?.find((s) => s.id === r.supplier_id);
+      if (sup) {
+        if (!map[r.spare_part_id]) map[r.spare_part_id] = [];
+        map[r.spare_part_id].push(sup);
+      }
+    });
+    return map;
+  }, [supplierSpareParts, suppliers]);
+
   const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = parts?.filter((p) => {
     if (categoryFilter !== "all" && p.category_id !== categoryFilter) return false;
