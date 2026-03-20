@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -118,6 +118,28 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       return (data as any[]) as SparePartCategory[];
     },
   });
+
+  const { data: supplierSpareParts } = useQuery({
+    queryKey: ["supplier-spare-parts"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("supplier_spare_parts" as any).select("*");
+      if (error) throw error;
+      return (data as any[]) as { supplier_id: string; spare_part_id: string }[];
+    },
+  });
+
+  // Reverse map: spare_part_id -> supplier names
+  const partSuppliersMap = useMemo(() => {
+    const map: Record<string, Supplier[]> = {};
+    supplierSpareParts?.forEach((r) => {
+      const sup = suppliers?.find((s) => s.id === r.supplier_id);
+      if (sup) {
+        if (!map[r.spare_part_id]) map[r.spare_part_id] = [];
+        map[r.spare_part_id].push(sup);
+      }
+    });
+    return map;
+  }, [supplierSpareParts, suppliers]);
 
   const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = parts?.filter((p) => {
@@ -312,7 +334,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                       <div className="block md:hidden space-y-4">
                         {filtered.map((p) => {
                           const cat = getCategory(p.category_id);
-                          const sup = getSupplier(p.supplier_id);
+                          const linkedSuppliers = partSuppliersMap[p.id] || [];
                           return (
                             <div key={p.id} className="border rounded-lg p-4 space-y-2">
                               <div className="flex items-start justify-between gap-2">
@@ -336,7 +358,9 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                                 <span>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "Sin precio"}</span>
                                 <span>Stock: {p.stock}</span>
                                 {cat && <Badge variant="outline" className="text-[10px] px-1.5 py-0" style={{ borderColor: cat.color, color: cat.color }}>{cat.name}</Badge>}
-                                {sup && <button className="underline text-primary text-[10px]" onClick={() => setSupplierDetail(sup)}>{sup.name}</button>}
+                                {linkedSuppliers.length > 0 && linkedSuppliers.map((s) => (
+                                  <button key={s.id} className="underline text-primary text-[10px]" onClick={() => setSupplierDetail(s)}>{s.name}</button>
+                                ))}
                               </div>
                             </div>
                           );
@@ -362,7 +386,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                           <TableBody>
                             {filtered.map((p) => {
                               const cat = getCategory(p.category_id);
-                              const sup = getSupplier(p.supplier_id);
+                              const linkedSuppliers = partSuppliersMap[p.id] || [];
                               return (
                                 <TableRow key={p.id}>
                                   <TableCell>
@@ -386,11 +410,16 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                                   <TableCell>{p.stock}</TableCell>
                                   <TableCell>{getVendorName(p.vendor_id)}</TableCell>
                                   <TableCell>
-                                    {sup ? (
-                                      <button className="text-primary underline text-sm hover:text-primary/80 transition-colors" onClick={() => setSupplierDetail(sup)}>
-                                        {sup.name}
-                                      </button>
-                                    ) : (p.supplier || "—")}
+                                    {linkedSuppliers.length > 0 ? (
+                                      linkedSuppliers.map((s, i) => (
+                                        <span key={s.id}>
+                                          <button className="text-primary underline text-sm hover:text-primary/80 transition-colors" onClick={() => setSupplierDetail(s)}>
+                                            {s.name}
+                                          </button>
+                                          {i < linkedSuppliers.length - 1 && ", "}
+                                        </span>
+                                      ))
+                                    ) : "—"}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-1">
@@ -543,7 +572,22 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
               {supplierDetail.phone && <div><span className="font-medium text-muted-foreground">Teléfono:</span> {supplierDetail.phone}</div>}
               {supplierDetail.province && <div><span className="font-medium text-muted-foreground">Provincia:</span> {supplierDetail.province}</div>}
               {supplierDetail.city && <div><span className="font-medium text-muted-foreground">Localidad:</span> {supplierDetail.city}</div>}
-              {supplierDetail.products && <div><span className="font-medium text-muted-foreground">Productos que provee:</span> {supplierDetail.products}</div>}
+              {(() => {
+                const linkedParts = parts?.filter((p) => {
+                  const sups = partSuppliersMap[p.id] || [];
+                  return sups.some((s) => s.id === supplierDetail.id);
+                }) || [];
+                return linkedParts.length > 0 ? (
+                  <div>
+                    <span className="font-medium text-muted-foreground">Repuestos ({linkedParts.length}):</span>
+                    <div className="mt-1 space-y-1">
+                      {linkedParts.map((p) => (
+                        <div key={p.id} className="text-xs border rounded px-2 py-1">{p.name} <span className="text-muted-foreground">({p.code})</span></div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
           )}
         </DialogContent>
