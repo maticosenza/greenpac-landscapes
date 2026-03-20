@@ -193,7 +193,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
 
     setSaving(true);
     try {
-      const payload = {
+      const payload: any = {
         name: form.name.trim(),
         code: form.code.trim(),
         price: form.price ? parseFloat(form.price) : null,
@@ -203,17 +203,34 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       };
 
       if (editing) {
+        // Upload image if new file selected
+        if (imageFile) {
+          payload.image_url = await uploadImage(imageFile, editing.id);
+        } else if (!existingImageUrl) {
+          payload.image_url = null;
+        }
         const { error } = await supabase
           .from("spare_parts" as any)
-          .update(payload as any)
+          .update(payload)
           .eq("id", editing.id);
         if (error) throw error;
         toast.success("Repuesto actualizado");
       } else {
-        const { error } = await supabase
+        payload.created_by = user.id;
+        const { data: newPart, error } = await supabase
           .from("spare_parts" as any)
-          .insert({ ...payload, created_by: user.id } as any);
+          .insert(payload)
+          .select()
+          .single();
         if (error) throw error;
+        // Upload image after creation
+        if (imageFile && newPart) {
+          const imgUrl = await uploadImage(imageFile, (newPart as any).id);
+          await supabase
+            .from("spare_parts" as any)
+            .update({ image_url: imgUrl } as any)
+            .eq("id", (newPart as any).id);
+        }
         toast.success("Repuesto creado");
       }
 
