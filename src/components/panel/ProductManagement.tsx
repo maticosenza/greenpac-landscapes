@@ -416,7 +416,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error al crear producto",
+        title: "Error al crear maquinaria",
         description: error.message,
         variant: "destructive",
       });
