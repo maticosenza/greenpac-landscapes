@@ -416,10 +416,12 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <Field label="Nombre" value={form.full_name} />
+              <Field label="Empresa" value={form.company} />
               <Field label="Documento" value={form.document} />
               <Field label="Email" value={form.email} />
               <Field label="Teléfono" value={form.phone} />
-              <Field label="Producto de interés" value={form.product_interest} />
+              <Field label="Maquinaria de interés" value={form.product_interest} />
+              <Field label="Repuesto de interés" value={form.spare_part_interest} />
               <Field
                 label="Precio"
                 value={
