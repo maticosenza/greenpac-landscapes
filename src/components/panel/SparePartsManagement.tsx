@@ -572,7 +572,22 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
               {supplierDetail.phone && <div><span className="font-medium text-muted-foreground">Teléfono:</span> {supplierDetail.phone}</div>}
               {supplierDetail.province && <div><span className="font-medium text-muted-foreground">Provincia:</span> {supplierDetail.province}</div>}
               {supplierDetail.city && <div><span className="font-medium text-muted-foreground">Localidad:</span> {supplierDetail.city}</div>}
-              {supplierDetail.products && <div><span className="font-medium text-muted-foreground">Productos que provee:</span> {supplierDetail.products}</div>}
+              {(() => {
+                const linkedParts = parts?.filter((p) => {
+                  const sups = partSuppliersMap[p.id] || [];
+                  return sups.some((s) => s.id === supplierDetail.id);
+                }) || [];
+                return linkedParts.length > 0 ? (
+                  <div>
+                    <span className="font-medium text-muted-foreground">Repuestos ({linkedParts.length}):</span>
+                    <div className="mt-1 space-y-1">
+                      {linkedParts.map((p) => (
+                        <div key={p.id} className="text-xs border rounded px-2 py-1">{p.name} <span className="text-muted-foreground">({p.code})</span></div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
           )}
         </DialogContent>
