@@ -509,8 +509,30 @@ export type Database = {
         }
         Relationships: []
       }
+      spare_part_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       spare_parts: {
         Row: {
+          category_id: string | null
           code: string
           created_at: string
           created_by: string
@@ -520,10 +542,12 @@ export type Database = {
           price: number | null
           stock: number
           supplier: string | null
+          supplier_id: string | null
           updated_at: string
           vendor_id: string | null
         }
         Insert: {
+          category_id?: string | null
           code: string
           created_at?: string
           created_by: string
@@ -533,10 +557,12 @@ export type Database = {
           price?: number | null
           stock?: number
           supplier?: string | null
+          supplier_id?: string | null
           updated_at?: string
           vendor_id?: string | null
         }
         Update: {
+          category_id?: string | null
           code?: string
           created_at?: string
           created_by?: string
@@ -546,8 +572,57 @@ export type Database = {
           price?: number | null
           stock?: number
           supplier?: string | null
+          supplier_id?: string | null
           updated_at?: string
           vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spare_parts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "spare_part_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spare_parts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          city: string | null
+          created_at: string
+          cuit: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          province: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          cuit?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          province?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          cuit?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          province?: string | null
         }
         Relationships: []
       }
