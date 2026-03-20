@@ -159,7 +159,30 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       vendor_id: part.vendor_id || "",
       supplier: part.supplier || "",
     });
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(part.image_url || null);
     setIsDialogOpen(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+    e.target.value = "";
+  };
+
+  const uploadImage = async (file: File, partId: string): Promise<string> => {
+    const ext = file.name.split(".").pop();
+    const fileName = `${partId}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("spare-part-images")
+      .upload(fileName, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from("spare-part-images").getPublicUrl(fileName);
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
