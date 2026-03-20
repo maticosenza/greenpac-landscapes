@@ -38,7 +38,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign, Upload, X, Image as ImageIcon } from "lucide-react";
 
 interface SparePart {
   id: string;
