@@ -32,11 +32,12 @@ export interface Supplier {
   phone: string | null;
   province: string | null;
   city: string | null;
+  company: string | null;
   products: string | null;
   created_at: string;
 }
 
-const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", products: "" };
+const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", company: "", products: "" };
 
 const SuppliersManagement = () => {
   const queryClient = useQueryClient();
@@ -67,7 +68,7 @@ const SuppliersManagement = () => {
 
   const openEdit = (s: Supplier) => {
     setEditing(s);
-    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", products: s.products || "" });
+    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", company: s.company || "", products: s.products || "" });
     setIsDialogOpen(true);
   };
 
@@ -83,6 +84,7 @@ const SuppliersManagement = () => {
         phone: form.phone.trim() || null,
         province: form.province || null,
         city: form.city.trim() || null,
+        company: form.company.trim() || null,
         products: form.products.trim() || null,
       };
       if (editing) {
@@ -210,6 +212,10 @@ const SuppliersManagement = () => {
               <div className="space-y-2 sm:col-span-2">
                 <Label>Nombre / Razón Social *</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required maxLength={200} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Empresa</Label>
+                <Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} maxLength={200} placeholder="Nombre de la empresa" />
               </div>
               <div className="space-y-2">
                 <Label>CUIT</Label>

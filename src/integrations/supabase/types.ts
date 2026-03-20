@@ -596,6 +596,7 @@ export type Database = {
       suppliers: {
         Row: {
           city: string | null
+          company: string | null
           created_at: string
           cuit: string | null
           email: string | null
@@ -607,6 +608,7 @@ export type Database = {
         }
         Insert: {
           city?: string | null
+          company?: string | null
           created_at?: string
           cuit?: string | null
           email?: string | null
@@ -618,6 +620,7 @@ export type Database = {
         }
         Update: {
           city?: string | null
+          company?: string | null
           created_at?: string
           cuit?: string | null
           email?: string | null
