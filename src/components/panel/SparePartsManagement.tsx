@@ -410,11 +410,16 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                                   <TableCell>{p.stock}</TableCell>
                                   <TableCell>{getVendorName(p.vendor_id)}</TableCell>
                                   <TableCell>
-                                    {sup ? (
-                                      <button className="text-primary underline text-sm hover:text-primary/80 transition-colors" onClick={() => setSupplierDetail(sup)}>
-                                        {sup.name}
-                                      </button>
-                                    ) : (p.supplier || "—")}
+                                    {linkedSuppliers.length > 0 ? (
+                                      linkedSuppliers.map((s, i) => (
+                                        <span key={s.id}>
+                                          <button className="text-primary underline text-sm hover:text-primary/80 transition-colors" onClick={() => setSupplierDetail(s)}>
+                                            {s.name}
+                                          </button>
+                                          {i < linkedSuppliers.length - 1 && ", "}
+                                        </span>
+                                      ))
+                                    ) : "—"}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-1">
