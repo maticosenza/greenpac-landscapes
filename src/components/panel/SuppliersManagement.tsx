@@ -33,6 +33,7 @@ export interface Supplier {
   province: string | null;
   city: string | null;
   company: string | null;
+  category_id: string | null;
   products: string | null;
   created_at: string;
 }
