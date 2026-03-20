@@ -240,24 +240,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                         <TableCell className="whitespace-nowrap">
                           {new Date(c.created_at).toLocaleDateString("es-AR")}
                         </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setClientToDelete(c);
-                            }}
-                            disabled={deletingId === c.id}
-                          >
-                            {deletingId === c.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </TableCell>
+                        
                       </TableRow>
                     ))}
                   </TableBody>
