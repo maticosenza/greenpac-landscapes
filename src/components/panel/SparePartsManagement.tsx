@@ -38,7 +38,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign, Upload, X, Image as ImageIcon } from "lucide-react";
 
 interface SparePart {
   id: string;
@@ -48,6 +48,7 @@ interface SparePart {
   stock: number;
   vendor_id: string | null;
   supplier: string | null;
+  image_url: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -80,6 +81,9 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
   const [saving, setSaving] = useState(false);
   const [localSearch, setLocalSearch] = useState("");
   const [partToDelete, setPartToDelete] = useState<SparePart | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
   const { data: parts, isLoading } = useQuery({
     queryKey: ["spare-parts"],
@@ -131,11 +135,17 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     setForm(emptyForm);
     setEditing(null);
     setIsDialogOpen(false);
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(null);
   };
 
   const openCreate = () => {
     setForm(emptyForm);
     setEditing(null);
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(null);
     setIsDialogOpen(true);
   };
 
@@ -149,7 +159,30 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       vendor_id: part.vendor_id || "",
       supplier: part.supplier || "",
     });
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(part.image_url || null);
     setIsDialogOpen(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+    e.target.value = "";
+  };
+
+  const uploadImage = async (file: File, partId: string): Promise<string> => {
+    const ext = file.name.split(".").pop();
+    const fileName = `${partId}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("spare-part-images")
+      .upload(fileName, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from("spare-part-images").getPublicUrl(fileName);
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -160,7 +193,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
 
     setSaving(true);
     try {
-      const payload = {
+      const payload: any = {
         name: form.name.trim(),
         code: form.code.trim(),
         price: form.price ? parseFloat(form.price) : null,
@@ -170,17 +203,34 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       };
 
       if (editing) {
+        // Upload image if new file selected
+        if (imageFile) {
+          payload.image_url = await uploadImage(imageFile, editing.id);
+        } else if (!existingImageUrl) {
+          payload.image_url = null;
+        }
         const { error } = await supabase
           .from("spare_parts" as any)
-          .update(payload as any)
+          .update(payload)
           .eq("id", editing.id);
         if (error) throw error;
         toast.success("Repuesto actualizado");
       } else {
-        const { error } = await supabase
+        payload.created_by = user.id;
+        const { data: newPart, error } = await supabase
           .from("spare_parts" as any)
-          .insert({ ...payload, created_by: user.id } as any);
+          .insert(payload)
+          .select()
+          .single();
         if (error) throw error;
+        // Upload image after creation
+        if (imageFile && newPart) {
+          const imgUrl = await uploadImage(imageFile, (newPart as any).id);
+          await supabase
+            .from("spare_parts" as any)
+            .update({ image_url: imgUrl } as any)
+            .eq("id", (newPart as any).id);
+        }
         toast.success("Repuesto creado");
       }
 
@@ -279,9 +329,18 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                 {filtered.map((p) => (
                   <div key={p.id} className="border rounded-lg p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-medium text-sm truncate">{p.name}</h3>
-                        <p className="text-xs text-muted-foreground">Código: {p.code}</p>
+                      <div className="flex items-center gap-3 min-w-0">
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded border shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-sm truncate">{p.name}</h3>
+                          <p className="text-xs text-muted-foreground">Código: {p.code}</p>
+                        </div>
                       </div>
                       <div className="flex gap-1 flex-shrink-0">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
@@ -308,6 +367,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[60px]">Foto</TableHead>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Código</TableHead>
                       <TableHead>Precio</TableHead>
@@ -320,6 +380,15 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                   <TableBody>
                     {filtered.map((p) => (
                       <TableRow key={p.id}>
+                        <TableCell>
+                          {p.image_url ? (
+                            <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded border" />
+                          ) : (
+                            <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{p.name}</TableCell>
                         <TableCell>{p.code}</TableCell>
                         <TableCell>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "—"}</TableCell>
@@ -359,6 +428,48 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
             <DialogTitle>{editing ? "Editar Repuesto" : "Nuevo Repuesto"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Image upload */}
+            <div className="space-y-2">
+              <Label>Foto del repuesto</Label>
+              <div className="flex items-center gap-4">
+                {(imagePreview || existingImageUrl) ? (
+                  <div className="relative">
+                    <img
+                      src={imagePreview || existingImageUrl!}
+                      alt="Preview"
+                      className="w-24 h-24 object-cover rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-6 w-6"
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview(null);
+                        setExistingImageUrl(null);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG o WebP. Máximo 5MB.</p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 sm:col-span-2">
                 <Label>Nombre *</Label>
