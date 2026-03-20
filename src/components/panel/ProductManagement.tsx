@@ -626,7 +626,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     } else {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: newActive ? "Producto visible" : "Producto oculto" });
+      toast({ title: newActive ? "Maquinaria visible" : "Maquinaria oculta" });
     }
   };
 
