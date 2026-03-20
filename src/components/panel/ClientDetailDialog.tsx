@@ -292,10 +292,18 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Producto de interés</Label>
+                <Label>Maquinaria de interés</Label>
                 <Input
                   value={form.product_interest || ""}
                   onChange={(e) => update("product_interest", e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Repuesto de interés</Label>
+                <Input
+                  value={form.spare_part_interest || ""}
+                  onChange={(e) => update("spare_part_interest", e.target.value)}
                   maxLength={200}
                 />
               </div>
