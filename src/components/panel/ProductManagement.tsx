@@ -661,7 +661,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <CardTitle className="text-lg sm:text-xl">Gestión de Productos</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Gestión de Maquinaria</CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => resetForm()} className="w-full sm:w-auto">
