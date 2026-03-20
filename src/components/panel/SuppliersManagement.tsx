@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Search, Loader2, Truck } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
+import type { SparePartCategory } from "./SparePartCategoriesManager";
 
 export interface Supplier {
   id: string;
