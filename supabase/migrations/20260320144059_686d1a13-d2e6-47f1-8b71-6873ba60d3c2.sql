@@ -1,0 +1,1 @@
+ALTER TABLE public.suppliers ADD COLUMN IF NOT EXISTS category_id uuid REFERENCES public.spare_part_categories(id) ON DELETE SET NULL DEFAULT NULL;

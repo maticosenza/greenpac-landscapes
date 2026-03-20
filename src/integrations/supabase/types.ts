@@ -595,6 +595,7 @@ export type Database = {
       }
       suppliers: {
         Row: {
+          category_id: string | null
           city: string | null
           company: string | null
           created_at: string
@@ -607,6 +608,7 @@ export type Database = {
           province: string | null
         }
         Insert: {
+          category_id?: string | null
           city?: string | null
           company?: string | null
           created_at?: string
@@ -619,6 +621,7 @@ export type Database = {
           province?: string | null
         }
         Update: {
+          category_id?: string | null
           city?: string | null
           company?: string | null
           created_at?: string
@@ -630,7 +633,15 @@ export type Database = {
           products?: string | null
           province?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "spare_part_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       testimonials: {
         Row: {

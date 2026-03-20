@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Search, Loader2, Truck } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
+import type { SparePartCategory } from "./SparePartCategoriesManager";
 
 export interface Supplier {
   id: string;
@@ -33,11 +34,12 @@ export interface Supplier {
   province: string | null;
   city: string | null;
   company: string | null;
+  category_id: string | null;
   products: string | null;
   created_at: string;
 }
 
-const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", company: "", products: "" };
+const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", company: "", category_id: "", products: "" };
 
 const SuppliersManagement = () => {
   const queryClient = useQueryClient();
@@ -48,6 +50,15 @@ const SuppliersManagement = () => {
   const [saving, setSaving] = useState(false);
   const [localSearch, setLocalSearch] = useState("");
   const [toDelete, setToDelete] = useState<Supplier | null>(null);
+
+  const { data: categories } = useQuery({
+    queryKey: ["spare-part-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("spare_part_categories" as any).select("*").order("name");
+      if (error) throw error;
+      return (data as any[]) as SparePartCategory[];
+    },
+  });
 
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ["suppliers"],
@@ -68,7 +79,7 @@ const SuppliersManagement = () => {
 
   const openEdit = (s: Supplier) => {
     setEditing(s);
-    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", company: s.company || "", products: s.products || "" });
+    setForm({ name: s.name, cuit: s.cuit || "", email: s.email || "", phone: s.phone || "", province: s.province || "", city: s.city || "", company: s.company || "", category_id: s.category_id || "", products: s.products || "" });
     setIsDialogOpen(true);
   };
 
@@ -85,6 +96,7 @@ const SuppliersManagement = () => {
         province: form.province || null,
         city: form.city.trim() || null,
         company: form.company.trim() || null,
+        category_id: form.category_id || null,
         products: form.products.trim() || null,
       };
       if (editing) {
@@ -242,6 +254,23 @@ const SuppliersManagement = () => {
               <div className="space-y-2">
                 <Label>Localidad</Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} maxLength={200} />
+              </div>
+              <div className="space-y-2">
+                <Label>Categoría de producto</Label>
+                <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v === "_none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Sin categoría</SelectItem>
+                    {categories?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                          {c.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label>Productos que provee</Label>
