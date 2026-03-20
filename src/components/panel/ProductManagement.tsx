@@ -678,7 +678,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Image Upload */}
               <div className="space-y-3">
-                <Label>Imágenes del Producto</Label>
+                <Label>Imágenes de la Maquinaria</Label>
                 <p className="text-xs text-muted-foreground">Arrastrá las imágenes para reordenarlas. La primera será la imagen principal.</p>
                 
                 {(existingImages.length > 0 || imagePreviews.length > 0) && (
