@@ -84,6 +84,7 @@ const SuppliersManagement = () => {
         phone: form.phone.trim() || null,
         province: form.province || null,
         city: form.city.trim() || null,
+        company: form.company.trim() || null,
         products: form.products.trim() || null,
       };
       if (editing) {
