@@ -37,7 +37,7 @@ export interface Supplier {
   created_at: string;
 }
 
-const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", products: "" };
+const emptyForm = { name: "", cuit: "", email: "", phone: "", province: "", city: "", company: "", products: "" };
 
 const SuppliersManagement = () => {
   const queryClient = useQueryClient();
