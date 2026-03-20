@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, UserCircle, MapPin } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, UserCircle, MapPin, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import TeamManagement from "./TeamManagement";
 import ContactInquiriesList from "./ContactInquiriesList";
 import CreateQuotationDialog from "./CreateQuotationDialog";
 import ProductManagement from "./ProductManagement";
+import SparePartsManagement from "./SparePartsManagement";
 import ZonalReports from "./ZonalReports";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 
@@ -122,7 +123,7 @@ const AdminPanel = () => {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Productos</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Maquinaria</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent>
@@ -167,19 +168,13 @@ const AdminPanel = () => {
 
         <Tabs defaultValue="quotations" className="w-full">
           <div className="bg-card rounded-xl border shadow-sm p-1.5 sm:p-2 mb-6">
-            {/* Mobile: horizontal scrollable tabs */}
-            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg hidden sm:grid sm:grid-cols-6 gap-1">
-              <TabsTrigger 
-                value="quotations" 
-                className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
+            {/* Desktop */}
+            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg hidden sm:grid sm:grid-cols-7 gap-1">
+              <TabsTrigger value="quotations" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <FileText className="h-4 w-4 shrink-0" />
                 Cotizaciones
               </TabsTrigger>
-              <TabsTrigger 
-                value="inquiries" 
-                className="relative text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
+              <TabsTrigger value="inquiries" className="relative text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <MessageSquare className="h-4 w-4 shrink-0" />
                 Consultas
                 {(stats?.pendingInquiries || 0) > 0 && (
@@ -188,37 +183,29 @@ const AdminPanel = () => {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger 
-                value="products" 
-                className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
+              <TabsTrigger value="products" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <Package className="h-4 w-4 shrink-0" />
-                Productos
+                Maquinaria
               </TabsTrigger>
-              <TabsTrigger 
-                value="customers" 
-                className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
+              <TabsTrigger value="spare-parts" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+                <Wrench className="h-4 w-4 shrink-0" />
+                Repuestos
+              </TabsTrigger>
+              <TabsTrigger value="customers" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <Users className="h-4 w-4 shrink-0" />
                 Clientes
               </TabsTrigger>
-              <TabsTrigger 
-                value="team" 
-                className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
+              <TabsTrigger value="team" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <Settings className="h-4 w-4 shrink-0" />
                 Equipo
               </TabsTrigger>
-              <TabsTrigger 
-                value="zones" 
-                className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all"
-              >
+              <TabsTrigger value="zones" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <MapPin className="h-4 w-4 shrink-0" />
                 Zonas
               </TabsTrigger>
             </TabsList>
-            {/* Mobile: 2-row grid (3 columns x 2 rows) */}
-            <TabsList className="sm:hidden w-full h-auto p-2 bg-muted rounded-xl border border-border/50 grid grid-cols-3 gap-1.5">
+            {/* Mobile: 2-row grid */}
+            <TabsList className="sm:hidden w-full h-auto p-2 bg-muted rounded-xl border border-border/50 grid grid-cols-4 gap-1.5">
               <TabsTrigger value="quotations" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <FileText className="h-[18px] w-[18px]" />
                 <span>Cotizaciones</span>
@@ -234,7 +221,11 @@ const AdminPanel = () => {
               </TabsTrigger>
               <TabsTrigger value="products" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Package className="h-[18px] w-[18px]" />
-                <span>Productos</span>
+                <span>Maquinaria</span>
+              </TabsTrigger>
+              <TabsTrigger value="spare-parts" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+                <Wrench className="h-[18px] w-[18px]" />
+                <span>Repuestos</span>
               </TabsTrigger>
               <TabsTrigger value="customers" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Users className="h-[18px] w-[18px]" />
@@ -261,6 +252,10 @@ const AdminPanel = () => {
 
           <TabsContent value="products">
             <ProductManagement searchTerm={searchTerm} />
+          </TabsContent>
+
+          <TabsContent value="spare-parts">
+            <SparePartsManagement searchTerm={searchTerm} />
           </TabsContent>
 
           <TabsContent value="customers">
