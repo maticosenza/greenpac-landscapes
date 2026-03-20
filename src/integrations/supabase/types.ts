@@ -602,6 +602,7 @@ export type Database = {
           id: string
           name: string
           phone: string | null
+          products: string | null
           province: string | null
         }
         Insert: {
@@ -612,6 +613,7 @@ export type Database = {
           id?: string
           name: string
           phone?: string | null
+          products?: string | null
           province?: string | null
         }
         Update: {
@@ -622,6 +624,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+          products?: string | null
           province?: string | null
         }
         Relationships: []
