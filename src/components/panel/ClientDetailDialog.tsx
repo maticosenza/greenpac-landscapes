@@ -131,10 +131,12 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
         .from("clients" as any)
         .update({
           full_name: form.full_name?.trim(),
+          company: form.company?.trim() || null,
           document: form.document?.trim() || null,
           email: form.email?.trim() || null,
           phone: form.phone?.trim() || null,
           product_interest: form.product_interest?.trim() || null,
+          spare_part_interest: form.spare_part_interest?.trim() || null,
           price: form.price || null,
           province: form.province || null,
           city: form.city?.trim() || null,
