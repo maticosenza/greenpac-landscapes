@@ -79,7 +79,7 @@ const EmployeePanel = () => {
     const tabs: { value: string; label: string; shortLabel: string; icon: any }[] = [];
     if (enabledTools.quotations) tabs.push({ value: "quotations", label: "Cotizaciones", shortLabel: "Cotiz.", icon: FileText });
     if (enabledTools.contact_inquiries) tabs.push({ value: "inquiries", label: "Consultas", shortLabel: "Consult.", icon: MessageSquare });
-    if (enabledTools.products) tabs.push({ value: "products", label: "Productos", shortLabel: "Prod.", icon: Package });
+    if (enabledTools.products) tabs.push({ value: "products", label: "Maquinaria", shortLabel: "Maq.", icon: Package });
     if (enabledTools.clients) tabs.push({ value: "customers", label: "Clientes", shortLabel: "Client.", icon: Users });
     if (enabledTools.zonas) tabs.push({ value: "zones", label: "Zonas", shortLabel: "Zonas", icon: MapPin });
     return tabs;

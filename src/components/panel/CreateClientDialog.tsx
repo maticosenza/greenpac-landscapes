@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -38,10 +38,12 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
 
   const [form, setForm] = useState({
     full_name: "",
+    company: "",
     document: "",
     email: "",
     phone: "",
     product_interest: "",
+    spare_part_interest: "",
     price: "",
     province: "",
     city: "",
@@ -53,13 +55,40 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
     lng: null as number | null,
   });
 
+  const { data: activeProducts } = useQuery({
+    queryKey: ["active-products-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: spareParts } = useQuery({
+    queryKey: ["spare-parts-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("spare_parts" as any)
+        .select("id, name, code")
+        .order("name");
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
   const resetForm = () =>
     setForm({
       full_name: "",
+      company: "",
       document: "",
       email: "",
       phone: "",
       product_interest: "",
+      spare_part_interest: "",
       price: "",
       province: "",
       city: "",
@@ -83,10 +112,12 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
     try {
       const { error } = await supabase.from("clients" as any).insert({
         full_name: form.full_name.trim(),
+        company: form.company.trim() || null,
         document: form.document.trim() || null,
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
-        product_interest: form.product_interest.trim() || null,
+        product_interest: form.product_interest || null,
+        spare_part_interest: form.spare_part_interest || null,
         price: form.price ? parseFloat(form.price) : null,
         province: form.province || null,
         city: form.city.trim() || null,
@@ -139,6 +170,17 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
               />
             </div>
 
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="company">Empresa</Label>
+              <Input
+                id="company"
+                value={form.company}
+                onChange={(e) => update("company", e.target.value)}
+                maxLength={200}
+                placeholder="Nombre de la empresa"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="document">Documento</Label>
               <Input
@@ -188,13 +230,39 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="product_interest">Producto de interés</Label>
-              <Input
-                id="product_interest"
+              <Label>Maquinaria de interés</Label>
+              <Select
                 value={form.product_interest}
-                onChange={(e) => update("product_interest", e.target.value)}
-                maxLength={200}
-              />
+                onValueChange={(v) => update("product_interest", v === "_none" ? "" : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">Sin selección</SelectItem>
+                  {activeProducts?.map((p) => (
+                    <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Repuesto de interés</Label>
+              <Select
+                value={form.spare_part_interest}
+                onValueChange={(v) => update("spare_part_interest", v === "_none" ? "" : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">Sin selección</SelectItem>
+                  {spareParts?.map((p: any) => (
+                    <SelectItem key={p.id} value={`${p.name} (${p.code})`}>{p.name} ({p.code})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
