@@ -86,6 +86,7 @@ const SuppliersManagement = () => {
         province: form.province || null,
         city: form.city.trim() || null,
         company: form.company.trim() || null,
+        category_id: form.category_id || null,
         products: form.products.trim() || null,
       };
       if (editing) {
