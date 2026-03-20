@@ -30,10 +30,12 @@ import AddressAutocomplete from "./AddressAutocomplete";
 export interface ClientRecord {
   id: string;
   full_name: string;
+  company: string | null;
   document: string | null;
   email: string | null;
   phone: string | null;
   product_interest: string | null;
+  spare_part_interest: string | null;
   price: number | null;
   province: string | null;
   city: string | null;
