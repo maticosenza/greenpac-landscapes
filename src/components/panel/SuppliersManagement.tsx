@@ -152,6 +152,7 @@ const SuppliersManagement = () => {
                       {s.email && <span>{s.email}</span>}
                       {s.phone && <span>{s.phone}</span>}
                       {s.province && <span>{s.province}{s.city ? `, ${s.city}` : ""}</span>}
+                      {s.products && <span className="text-foreground/70">Productos: {s.products}</span>}
                     </div>
                   </div>
                 ))}
