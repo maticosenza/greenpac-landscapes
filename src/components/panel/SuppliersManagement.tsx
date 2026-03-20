@@ -213,6 +213,10 @@ const SuppliersManagement = () => {
                 <Label>Nombre / Razón Social *</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required maxLength={200} />
               </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Empresa</Label>
+                <Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} maxLength={200} placeholder="Nombre de la empresa" />
+              </div>
               <div className="space-y-2">
                 <Label>CUIT</Label>
                 <Input value={form.cuit} onChange={(e) => setForm({ ...form, cuit: e.target.value })} maxLength={20} placeholder="XX-XXXXXXXX-X" />
