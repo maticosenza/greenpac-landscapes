@@ -367,6 +367,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[60px]">Foto</TableHead>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Código</TableHead>
                       <TableHead>Precio</TableHead>
