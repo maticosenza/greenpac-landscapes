@@ -593,6 +593,42 @@ export type Database = {
           },
         ]
       }
+      supplier_spare_parts: {
+        Row: {
+          created_at: string
+          id: string
+          spare_part_id: string
+          supplier_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          spare_part_id: string
+          supplier_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          spare_part_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_spare_parts_spare_part_id_fkey"
+            columns: ["spare_part_id"]
+            isOneToOne: false
+            referencedRelation: "spare_parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_spare_parts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           category_id: string | null
