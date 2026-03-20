@@ -237,6 +237,10 @@ const SuppliersManagement = () => {
                 <Label>Localidad</Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} maxLength={200} />
               </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Productos que provee</Label>
+                <Textarea value={form.products} onChange={(e) => setForm({ ...form, products: e.target.value })} maxLength={500} placeholder="Ej: Filtros de aire, correas, rodamientos..." rows={2} />
+              </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={resetForm}>Cancelar</Button>
