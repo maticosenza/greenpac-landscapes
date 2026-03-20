@@ -105,11 +105,12 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
       `clientes-${new Date().toISOString().split("T")[0]}`,
       [
         { key: "full_name", label: "Nombre" },
+        { key: "company", label: "Empresa" },
         { key: "status_label", label: "Estado" },
         { key: "document", label: "Documento" },
         { key: "email", label: "Email" },
         { key: "phone", label: "Teléfono" },
-        { key: "product_interest", label: "Producto de Interés" },
+        { key: "product_interest", label: "Maquinaria de Interés" },
         { key: "price_str", label: "Precio" },
         { key: "province", label: "Provincia" },
         { key: "city", label: "Localidad" },
