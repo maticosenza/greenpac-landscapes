@@ -290,7 +290,7 @@ const SortableProductRow = ({ product, index, total, onEdit, onDelete, onToggleA
           <Button size="icon" variant="ghost" onClick={() => onEdit(product)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { if (confirm("¿Eliminar este producto?")) onDelete(product.id); }}>
+          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { if (confirm("¿Eliminar esta maquinaria?")) onDelete(product.id); }}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
