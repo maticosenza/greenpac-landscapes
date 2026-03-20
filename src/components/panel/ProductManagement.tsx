@@ -920,8 +920,8 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                   {createMutation.isPending || updateMutation.isPending
                     ? "Guardando..."
                     : editingProduct
-                    ? "Actualizar Producto"
-                    : "Crear Producto"}
+                    ? "Actualizar Maquinaria"
+                    : "Crear Maquinaria"}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancelar
