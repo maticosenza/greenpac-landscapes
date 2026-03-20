@@ -672,7 +672,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingProduct ? "Editar Producto" : "Nuevo Producto"}
+                {editingProduct ? "Editar Maquinaria" : "Nueva Maquinaria"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
