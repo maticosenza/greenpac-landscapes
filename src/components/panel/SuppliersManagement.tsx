@@ -83,6 +83,7 @@ const SuppliersManagement = () => {
         phone: form.phone.trim() || null,
         province: form.province || null,
         city: form.city.trim() || null,
+        products: form.products.trim() || null,
       };
       if (editing) {
         const { error } = await supabase.from("suppliers" as any).update(payload).eq("id", editing.id);
