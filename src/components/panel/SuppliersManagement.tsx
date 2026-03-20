@@ -32,6 +32,7 @@ export interface Supplier {
   phone: string | null;
   province: string | null;
   city: string | null;
+  products: string | null;
   created_at: string;
 }
 
