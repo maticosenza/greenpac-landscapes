@@ -483,7 +483,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error al eliminar producto",
+        title: "Error al eliminar maquinaria",
         description: error.message,
         variant: "destructive",
       });
