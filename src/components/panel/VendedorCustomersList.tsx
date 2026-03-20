@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Loader2, Download, Plus, Search, Filter } from "lucide-react";
+import { Loader2, Download, Plus, Search } from "lucide-react";
 import { CLIENT_STATUSES } from "./clientConstants";
 import { getStatusInfo } from "./clientConstants";
 import { toast } from "sonner";
@@ -17,16 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import CreateClientDialog from "./CreateClientDialog";
 import ClientDetailDialog, { type ClientRecord } from "./ClientDetailDialog";
 
@@ -37,8 +27,7 @@ interface Props {
 
 const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
   const queryClient = useQueryClient();
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [clientToDelete, setClientToDelete] = useState<ClientRecord | null>(null);
+  
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
   const [localSearch, setLocalSearch] = useState("");
@@ -57,24 +46,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
     },
   });
 
-  const handleDelete = async () => {
-    if (!clientToDelete) return;
-    setDeletingId(clientToDelete.id);
-    try {
-      const { error } = await supabase
-        .from("clients" as any)
-        .delete()
-        .eq("id", clientToDelete.id);
-      if (error) throw error;
-      toast.success("Cliente eliminado");
-      queryClient.invalidateQueries({ queryKey: ["crm-clients"] });
-    } catch (err: any) {
-      toast.error(err.message || "Error al eliminar");
-    } finally {
-      setDeletingId(null);
-      setClientToDelete(null);
-    }
-  };
+  
 
   const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = clients?.filter((c) => {
@@ -191,22 +163,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                         <h3 className="font-medium text-sm truncate">{c.full_name}</h3>
                         <p className="text-xs text-muted-foreground truncate">{c.email || "Sin email"}</p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setClientToDelete(c);
-                        }}
-                        disabled={deletingId === c.id}
-                      >
-                        {deletingId === c.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-medium ${getStatusInfo(c.status).color}`}>
@@ -243,7 +200,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                       <TableHead>Provincia</TableHead>
                       <TableHead>Localidad</TableHead>
                       <TableHead>Registro</TableHead>
-                      <TableHead className="w-[60px]"></TableHead>
+                      
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -273,24 +230,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                         <TableCell className="whitespace-nowrap">
                           {new Date(c.created_at).toLocaleDateString("es-AR")}
                         </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setClientToDelete(c);
-                            }}
-                            disabled={deletingId === c.id}
-                          >
-                            {deletingId === c.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </TableCell>
+                        
                       </TableRow>
                     ))}
                   </TableBody>
@@ -315,27 +255,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
         onOpenChange={(open) => !open && setSelectedClient(null)}
       />
 
-      <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Estás por eliminar a <strong>{clientToDelete?.full_name}</strong>.
-              <br /><br />
-              Esta acción es irreversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
     </>
   );
 };
