@@ -83,6 +83,24 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
     }
   }, [client]);
 
+  const { data: activeProducts } = useQuery({
+    queryKey: ["active-products-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id, name").eq("is_active", true).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: spareParts } = useQuery({
+    queryKey: ["spare-parts-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("spare_parts" as any).select("id, name, code").order("name");
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
   const { data: notes, isLoading: notesLoading } = useQuery({
     queryKey: ["client-notes", client?.id],
     queryFn: async () => {
