@@ -25,6 +25,7 @@ import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { CLIENT_STATUSES } from "./clientConstants";
 import LocalityAutocomplete from "./LocalityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
+import MultiSelectField from "./MultiSelectField";
 
 interface Props {
   open: boolean;
