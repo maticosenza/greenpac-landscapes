@@ -257,11 +257,58 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     <div className="space-y-6">
       {/* Subtabs */}
       <Tabs value={subTab} onValueChange={setSubTab}>
-        <TabsList className="bg-muted/50 w-full justify-center">
-          <TabsTrigger value="list" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Wrench className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Repuestos</TabsTrigger>
-          <TabsTrigger value="categories" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Categorías</TabsTrigger>
-          <TabsTrigger value="suppliers" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Proveedores</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <TabsList className="bg-muted/50 w-full sm:w-auto justify-center">
+            <TabsTrigger value="list" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Wrench className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Repuestos</TabsTrigger>
+            <TabsTrigger value="categories" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Categorías</TabsTrigger>
+            <TabsTrigger value="suppliers" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Proveedores</TabsTrigger>
+          </TabsList>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs"
+              onClick={() => {
+                if (!parts?.length) { toast.info("No hay repuestos para exportar"); return; }
+                const mapped = (filtered || parts).map((p) => ({
+                  name: p.name,
+                  code: p.code,
+                  price: p.price,
+                  stock: p.stock,
+                  categoryName: getCategory(p.category_id)?.name,
+                  supplierNames: (partSuppliersMap[p.id] || []).map((s) => s.name),
+                }));
+                exportSparePartsPDF(mapped);
+                toast.success("PDF de repuestos descargado");
+              }}
+            >
+              <FileDown className="h-3.5 w-3.5" />Repuestos PDF
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs"
+              onClick={() => {
+                if (!suppliers?.length) { toast.info("No hay proveedores para exportar"); return; }
+                const mapped = suppliers.map((s) => ({
+                  name: s.name,
+                  cuit: s.cuit,
+                  email: s.email,
+                  phone: s.phone,
+                  province: s.province,
+                  city: s.city,
+                  company: s.company,
+                  categoryName: categories?.find((c) => c.id === s.category_id)?.name,
+                  sparePartCount: supplierSpareParts?.filter((r) => r.supplier_id === s.id).length ?? 0,
+                }));
+                exportSuppliersPDF(mapped);
+                toast.success("PDF de proveedores descargado");
+              }}
+            >
+              <FileDown className="h-3.5 w-3.5" />Proveedores PDF
+            </Button>
+          </div>
+        </div>
 
         <TabsContent value="list" className="mt-6">
           {isLoading ? <p className="text-muted-foreground">Cargando repuestos...</p> : (
