@@ -25,6 +25,7 @@ import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
 import { CLIENT_STATUSES } from "./clientConstants";
 import LocalityAutocomplete from "./LocalityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
+import MultiSelectField from "./MultiSelectField";
 
 interface Props {
   open: boolean;
@@ -42,8 +43,8 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
     document: "",
     email: "",
     phone: "",
-    product_interest: "",
-    spare_part_interest: "",
+    product_interest: [] as string[],
+    spare_part_interest: [] as string[],
     price: "",
     province: "",
     city: "",
@@ -87,8 +88,8 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
       document: "",
       email: "",
       phone: "",
-      product_interest: "",
-      spare_part_interest: "",
+      product_interest: [],
+      spare_part_interest: [],
       price: "",
       province: "",
       city: "",
@@ -116,8 +117,8 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
         document: form.document.trim() || null,
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
-        product_interest: form.product_interest || null,
-        spare_part_interest: form.spare_part_interest || null,
+        product_interest: form.product_interest.length > 0 ? form.product_interest.join(", ") : null,
+        spare_part_interest: form.spare_part_interest.length > 0 ? form.spare_part_interest.join(", ") : null,
         price: form.price ? parseFloat(form.price) : null,
         province: form.province || null,
         city: form.city.trim() || null,
@@ -229,40 +230,24 @@ const CreateClientDialog = ({ open, onOpenChange }: Props) => {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Maquinaria de interés</Label>
-              <Select
-                value={form.product_interest}
-                onValueChange={(v) => update("product_interest", v === "_none" ? "" : v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">Sin selección</SelectItem>
-                  {activeProducts?.map((p) => (
-                    <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MultiSelectField
+                options={activeProducts?.map((p) => ({ value: p.name, label: p.name })) || []}
+                selected={form.product_interest}
+                onChange={(v) => setForm((prev) => ({ ...prev, product_interest: v }))}
+                placeholder="Seleccionar maquinarias..."
+              />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Repuesto de interés</Label>
-              <Select
-                value={form.spare_part_interest}
-                onValueChange={(v) => update("spare_part_interest", v === "_none" ? "" : v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">Sin selección</SelectItem>
-                  {spareParts?.map((p: any) => (
-                    <SelectItem key={p.id} value={`${p.name} (${p.code})`}>{p.name} ({p.code})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MultiSelectField
+                options={spareParts?.map((p: any) => ({ value: `${p.name} (${p.code})`, label: `${p.name} (${p.code})` })) || []}
+                selected={form.spare_part_interest}
+                onChange={(v) => setForm((prev) => ({ ...prev, spare_part_interest: v }))}
+                placeholder="Seleccionar repuestos..."
+              />
             </div>
 
             <div className="space-y-2">

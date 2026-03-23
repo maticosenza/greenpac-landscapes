@@ -26,6 +26,7 @@ import { CLIENT_STATUSES, getStatusInfo } from "./clientConstants";
 import { Separator } from "@/components/ui/separator";
 import LocalityAutocomplete from "./LocalityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
+import MultiSelectField from "./MultiSelectField";
 
 export interface ClientRecord {
   id: string;
@@ -81,6 +82,24 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
       setNewNote("");
     }
   }, [client]);
+
+  const { data: activeProducts } = useQuery({
+    queryKey: ["active-products-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id, name").eq("is_active", true).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: spareParts } = useQuery({
+    queryKey: ["spare-parts-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("spare_parts" as any).select("id, name, code").order("name");
+      if (error) throw error;
+      return data as any[];
+    },
+  });
 
   const { data: notes, isLoading: notesLoading } = useQuery({
     queryKey: ["client-notes", client?.id],
@@ -292,20 +311,22 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
                   maxLength={30}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2">
                 <Label>Maquinaria de interés</Label>
-                <Input
-                  value={form.product_interest || ""}
-                  onChange={(e) => update("product_interest", e.target.value)}
-                  maxLength={200}
+                <MultiSelectField
+                  options={activeProducts?.map((p) => ({ value: p.name, label: p.name })) || []}
+                  selected={form.product_interest ? form.product_interest.split(", ").filter(Boolean) : []}
+                  onChange={(v) => update("product_interest", v.join(", ") || null)}
+                  placeholder="Seleccionar maquinarias..."
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2">
                 <Label>Repuesto de interés</Label>
-                <Input
-                  value={form.spare_part_interest || ""}
-                  onChange={(e) => update("spare_part_interest", e.target.value)}
-                  maxLength={200}
+                <MultiSelectField
+                  options={spareParts?.map((p: any) => ({ value: `${p.name} (${p.code})`, label: `${p.name} (${p.code})` })) || []}
+                  selected={form.spare_part_interest ? form.spare_part_interest.split(", ").filter(Boolean) : []}
+                  onChange={(v) => update("spare_part_interest", v.join(", ") || null)}
+                  placeholder="Seleccionar repuestos..."
                 />
               </div>
               <div className="space-y-2">
