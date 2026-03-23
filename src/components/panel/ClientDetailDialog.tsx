@@ -26,6 +26,7 @@ import { CLIENT_STATUSES, getStatusInfo } from "./clientConstants";
 import { Separator } from "@/components/ui/separator";
 import LocalityAutocomplete from "./LocalityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
+import MultiSelectField from "./MultiSelectField";
 
 export interface ClientRecord {
   id: string;
