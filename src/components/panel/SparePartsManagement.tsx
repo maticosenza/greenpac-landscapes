@@ -267,26 +267,45 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
             <TabsTrigger value="suppliers" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Proveedores</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 text-xs"
-              onClick={() => {
-                if (!parts?.length) { toast.info("No hay repuestos para exportar"); return; }
-                const mapped = (filtered || parts).map((p) => ({
-                  name: p.name,
-                  code: p.code,
-                  price: p.price,
-                  stock: p.stock,
-                  categoryName: getCategory(p.category_id)?.name,
-                  supplierNames: (partSuppliersMap[p.id] || []).map((s) => s.name),
-                }));
-                exportSparePartsPDF(mapped);
-                toast.success("PDF de repuestos descargado");
-              }}
-            >
-              <FileDown className="h-3.5 w-3.5" />Repuestos PDF
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                  <FileDown className="h-3.5 w-3.5" />Repuestos PDF<ChevronDown className="h-3 w-3 ml-0.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => {
+                  if (!parts?.length) { toast.info("No hay repuestos para exportar"); return; }
+                  const mapped = (filtered || parts).map((p) => ({
+                    name: p.name, code: p.code, price: p.price, stock: p.stock,
+                    categoryName: getCategory(p.category_id)?.name,
+                    categoryColor: getCategory(p.category_id)?.color,
+                    supplierNames: (partSuppliersMap[p.id] || []).map((s) => s.name),
+                    imageUrl: p.image_url,
+                  }));
+                  exportSparePartsPDF(mapped);
+                  toast.success("PDF de repuestos descargado");
+                }}>Todos los repuestos</DropdownMenuItem>
+                {categories && categories.length > 0 && <DropdownMenuSeparator />}
+                {categories?.map((cat) => (
+                  <DropdownMenuItem key={cat.id} onClick={() => {
+                    const catParts = parts?.filter((p) => p.category_id === cat.id) || [];
+                    if (!catParts.length) { toast.info(`No hay repuestos en "${cat.name}"`); return; }
+                    const mapped = catParts.map((p) => ({
+                      name: p.name, code: p.code, price: p.price, stock: p.stock,
+                      categoryName: cat.name, categoryColor: cat.color,
+                      supplierNames: (partSuppliersMap[p.id] || []).map((s) => s.name),
+                      imageUrl: p.image_url,
+                    }));
+                    exportSparePartsPDF(mapped, cat.name);
+                    toast.success(`PDF de "${cat.name}" descargado`);
+                  }}>
+                    <div className="w-2.5 h-2.5 rounded-full mr-2 shrink-0" style={{ backgroundColor: cat.color }} />
+                    {cat.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               size="sm"
               variant="outline"
