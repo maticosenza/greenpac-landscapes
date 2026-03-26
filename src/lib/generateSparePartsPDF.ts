@@ -40,6 +40,8 @@ async function loadImageAsDataURL(url: string): Promise<string | null> {
     const res = await fetch(url);
     if (!res.ok) return null;
     const blob = await res.blob();
+    // Skip SVGs — they don't render well in jsPDF
+    if (blob.type === "image/svg+xml") return null;
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
@@ -51,6 +53,27 @@ async function loadImageAsDataURL(url: string): Promise<string | null> {
   }
 }
 
+function generatePlaceholder(name: string): string {
+  const initials = name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0] || "")
+    .join("")
+    .toUpperCase();
+  const canvas = document.createElement("canvas");
+  canvas.width = 96;
+  canvas.height = 96;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#e5e7eb";
+  ctx.fillRect(0, 0, 96, 96);
+  ctx.font = "bold 32px sans-serif";
+  ctx.fillStyle = "#6b7280";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(initials, 48, 48);
+  return canvas.toDataURL("image/png");
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   return [
@@ -60,14 +83,14 @@ function hexToRgb(hex: string): [number, number, number] {
   ];
 }
 
-function addHeader(doc: jsPDF, logoDataUrl: string, title: string, subtitle?: string) {
+function addHeader(doc: jsPDF, logoDataUrl: string, title: string) {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // Dark green header bar
   doc.setFillColor(30, 80, 30);
   doc.rect(0, 0, pageWidth, 32, "F");
 
-  // Logo — larger
+  // Logo
   const logoH = 20;
   const logoW = logoH * (320 / 72);
   doc.addImage(logoDataUrl, "PNG", 14, 6, logoW, logoH);
@@ -79,7 +102,7 @@ function addHeader(doc: jsPDF, logoDataUrl: string, title: string, subtitle?: st
   doc.text("Soluciones para el campo", pageWidth - 14, 20, { align: "right" });
 
   // Green separator line
-  doc.setDrawColor(22, 163, 74); // #16a34a
+  doc.setDrawColor(22, 163, 74);
   doc.setLineWidth(0.8);
   doc.line(14, 34, pageWidth - 14, 34);
 
@@ -88,13 +111,6 @@ function addHeader(doc: jsPDF, logoDataUrl: string, title: string, subtitle?: st
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.text(title, 14, 46);
-
-  if (subtitle) {
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(80, 80, 80);
-    doc.text(subtitle, 14, 53);
-  }
 
   // Date right
   doc.setFontSize(9);
@@ -105,7 +121,7 @@ function addHeader(doc: jsPDF, logoDataUrl: string, title: string, subtitle?: st
     month: "long",
     day: "numeric",
   });
-  doc.text(`Generado: ${dateStr}`, pageWidth - 14, 46, { align: "right" });
+  doc.text("Generado: " + dateStr, pageWidth - 14, 46, { align: "right" });
 }
 
 function addFooter(doc: jsPDF, footerLabel: string) {
@@ -115,7 +131,6 @@ function addFooter(doc: jsPDF, footerLabel: string) {
     const pageWidth = doc.internal.pageSize.getWidth();
     const footerY = doc.internal.pageSize.getHeight() - 10;
 
-    // Line
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
     doc.line(14, footerY - 4, pageWidth - 14, footerY - 4);
@@ -124,7 +139,7 @@ function addFooter(doc: jsPDF, footerLabel: string) {
     doc.setTextColor(140, 140, 140);
     doc.setFont("helvetica", "normal");
     doc.text(footerLabel, 14, footerY);
-    doc.text(`Página ${i} de ${pageCount}`, pageWidth - 14, footerY, { align: "right" });
+    doc.text("Pagina " + i + " de " + pageCount, pageWidth - 14, footerY, { align: "right" });
   }
 }
 
@@ -134,7 +149,7 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
   const gap = 6;
   const boxCount = 4;
   const boxW = (pageWidth - margin * 2 - gap * (boxCount - 1)) / boxCount;
-  const boxH = 28;
+  const boxH = 30;
 
   const totalParts = parts.length;
   const totalStock = parts.reduce((s, p) => s + p.stock, 0);
@@ -144,35 +159,45 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
   const metrics = [
     { label: "Total repuestos", value: String(totalParts), alert: false },
     { label: "Stock total", value: totalStock.toLocaleString("es-AR"), alert: false },
-    { label: "Valor inventario", value: `$${totalValue.toLocaleString("es-AR")}`, alert: false },
-    { label: "Stock bajo (≤5)", value: String(lowStock), alert: lowStock > 0 },
+    { label: "Valor inventario", value: "$" + totalValue.toLocaleString("es-AR"), alert: false },
+    { label: "Stock bajo", value: String(lowStock), alert: lowStock > 0 },
   ];
 
   metrics.forEach((m, i) => {
     const x = margin + i * (boxW + gap);
     const y = startY;
 
-    // Background
+    // Background fill
     if (m.alert) {
       doc.setFillColor(254, 242, 242); // #fef2f2
     } else {
       doc.setFillColor(255, 255, 255);
     }
-    doc.setDrawColor(229, 231, 235); // gray-200
+
+    // Border
+    doc.setDrawColor(229, 231, 235);
     doc.setLineWidth(0.4);
     doc.roundedRect(x, y, boxW, boxH, 2, 2, "FD");
 
-    // Value
+    // Green left accent border (4px = ~1.4mm)
+    doc.setFillColor(22, 163, 74); // #16a34a
+    doc.rect(x, y + 1, 1.4, boxH - 2, "F");
+
+    // Value — centered
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(m.alert ? 220 : 30, m.alert ? 38 : 30, m.alert ? 38 : 30);
+    if (m.alert) {
+      doc.setTextColor(220, 38, 38); // #dc2626
+    } else {
+      doc.setTextColor(30, 30, 30);
+    }
     doc.text(m.value, x + boxW / 2, y + 14, { align: "center" });
 
-    // Label
-    doc.setFontSize(7);
+    // Label — helvetica normal, no monospace
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(107, 114, 128);
-    doc.text(m.label, x + boxW / 2, y + 22, { align: "center" });
+    doc.text(m.label, x + boxW / 2, y + 23, { align: "center" });
   });
 
   return startY + boxH + 8;
@@ -184,43 +209,88 @@ export async function exportSparePartsPDF(
 ) {
   const logoDataUrl = await fetchAsDataURL("/brand/greenpac_logo_horizontal.png");
 
-  // Pre-load images for parts that have them
+  // Pre-load all images as base64
   const imageCache: Record<number, string> = {};
+  const placeholderCache: Record<number, string> = {};
+
   const imagePromises = parts.map(async (p, idx) => {
     if (p.imageUrl) {
       const dataUrl = await loadImageAsDataURL(p.imageUrl);
-      if (dataUrl) imageCache[idx] = dataUrl;
+      if (dataUrl) {
+        imageCache[idx] = dataUrl;
+      } else {
+        placeholderCache[idx] = generatePlaceholder(p.name);
+      }
+    } else {
+      placeholderCache[idx] = generatePlaceholder(p.name);
     }
   });
   await Promise.all(imagePromises);
 
   const doc = new jsPDF();
+  const isFiltered = !!categoryLabel;
 
-  const title = categoryLabel
-    ? `Inventario de Repuestos — ${categoryLabel}`
+  const title = isFiltered
+    ? "Inventario de Repuestos - " + categoryLabel
     : "Inventario de Repuestos";
 
   addHeader(doc, logoDataUrl, title);
 
-  // Metrics
   const tableStartY = drawMetricBoxes(doc, parts, 56);
 
-  // Table
-  autoTable(doc, {
-    startY: tableStartY,
-    head: [["", "Nombre", "Código", "Categoría", "Precio", "Stock", "Proveedor(es)"]],
-    body: parts.map((p, idx) => [
-      "", // photo cell handled in didDrawCell
+  // Build columns conditionally — hide Categoria when filtered
+  const headRow = isFiltered
+    ? ["", "Nombre", "Codigo", "Precio", "Stock", "Proveedor(es)"]
+    : ["", "Nombre", "Codigo", "Categoria", "Precio", "Stock", "Proveedor(es)"];
+
+  const bodyRows = parts.map((p) => {
+    const base = [
+      "", // photo placeholder
       p.name,
       p.code,
-      p.categoryName || "—",
-      p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "—",
+    ];
+    if (!isFiltered) {
+      base.push(""); // category — drawn as badge via didDrawCell
+    }
+    base.push(
+      p.price != null ? "$" + Number(p.price).toLocaleString("es-AR") : "-",
       String(p.stock),
-      p.supplierNames?.length ? p.supplierNames.join(", ") : "—",
-    ]),
+      p.supplierNames?.length ? p.supplierNames.join(", ") : "-"
+    );
+    return base;
+  });
+
+  // Column index mapping
+  const catColIdx = isFiltered ? -1 : 3;
+  const priceColIdx = isFiltered ? 3 : 4;
+  const stockColIdx = isFiltered ? 4 : 5;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const usable = pageWidth - 28; // margins
+
+  const colStyles: Record<number, any> = {
+    0: { cellWidth: 18 }, // photo — 60px ~ 18mm
+    1: { cellWidth: usable * 0.22 },
+    2: { cellWidth: usable * 0.13 },
+  };
+
+  if (isFiltered) {
+    colStyles[3] = { halign: "right", cellWidth: usable * 0.13 };
+    colStyles[4] = { halign: "center", cellWidth: usable * 0.1 };
+    colStyles[5] = { cellWidth: usable * 0.24 };
+  } else {
+    colStyles[3] = { cellWidth: usable * 0.16 }; // category
+    colStyles[4] = { halign: "right", cellWidth: usable * 0.12 };
+    colStyles[5] = { halign: "center", cellWidth: usable * 0.08 };
+    colStyles[6] = { cellWidth: usable * 0.18 };
+  }
+
+  autoTable(doc, {
+    startY: tableStartY,
+    head: [headRow],
+    body: bodyRows,
     theme: "plain",
     headStyles: {
-      fillColor: [22, 163, 74], // #16a34a
+      fillColor: [22, 163, 74],
       textColor: [255, 255, 255],
       fontStyle: "bold",
       fontSize: 8,
@@ -228,91 +298,84 @@ export async function exportSparePartsPDF(
     },
     styles: {
       fontSize: 8,
-      cellPadding: { top: 6, right: 3, bottom: 6, left: 3 },
+      cellPadding: { top: 4, right: 3, bottom: 4, left: 3 },
       valign: "middle",
       lineWidth: 0.2,
       lineColor: [229, 231, 235],
+      minCellHeight: 18, // ~48px to fit images
     },
     alternateRowStyles: {
-      fillColor: [249, 250, 251], // #f9fafb
+      fillColor: [249, 250, 251],
     },
     margin: { left: 14, right: 14 },
-    columnStyles: {
-      0: { cellWidth: 16 },  // photo
-      1: { cellWidth: 35 },
-      2: { cellWidth: 22 },
-      3: { cellWidth: 25 },
-      4: { halign: "right", cellWidth: 22 },
-      5: { halign: "center", cellWidth: 16 },
-    },
+    columnStyles: colStyles,
     didDrawCell: (data: any) => {
-      // Draw photo in first column body cells
-      if (data.column.index === 0 && data.section === "body") {
-        const idx = data.row.index;
-        const cellX = data.cell.x + 1;
-        const cellY = data.cell.y + 2;
-        const imgSize = Math.min(data.cell.height - 4, 12);
+      if (data.section !== "body") return;
+      const idx = data.row.index;
 
-        if (imageCache[idx]) {
+      // Photo column (always index 0)
+      if (data.column.index === 0) {
+        const imgData = imageCache[idx] || placeholderCache[idx];
+        if (imgData) {
+          const imgSize = 14; // ~48px
+          const cellX = data.cell.x + (data.cell.width - imgSize) / 2;
+          const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
           try {
-            doc.addImage(imageCache[idx], "JPEG", cellX, cellY, imgSize, imgSize);
+            doc.addImage(imgData, "PNG", cellX, cellY, imgSize, imgSize);
           } catch {
-            // fallback grey box
-            doc.setFillColor(229, 231, 235);
-            doc.roundedRect(cellX, cellY, imgSize, imgSize, 1, 1, "F");
+            // ignore
           }
-        } else {
-          doc.setFillColor(229, 231, 235);
-          doc.roundedRect(cellX, cellY, imgSize, imgSize, 1, 1, "F");
-          // small icon placeholder
-          doc.setFontSize(6);
-          doc.setTextColor(156, 163, 175);
-          doc.text("img", cellX + imgSize / 2, cellY + imgSize / 2 + 1.5, { align: "center" });
         }
       }
 
-      // Draw category badge
-      if (data.column.index === 3 && data.section === "body") {
-        const idx = data.row.index;
+      // Category badge column (only when not filtered)
+      if (catColIdx >= 0 && data.column.index === catColIdx) {
         const part = parts[idx];
         if (part?.categoryColor && part?.categoryName) {
           const text = part.categoryName;
           const cellX = data.cell.x;
           const cellY = data.cell.y;
           const cellH = data.cell.height;
-          
+          const cellW = data.cell.width;
+
+          // First, cover the auto-drawn text with background
+          const isAlt = idx % 2 === 1;
+          doc.setFillColor(isAlt ? 249 : 255, isAlt ? 250 : 255, isAlt ? 251 : 255);
+          doc.rect(cellX + 0.2, cellY + 0.2, cellW - 0.4, cellH - 0.4, "F");
+
           doc.setFontSize(7);
+          doc.setFont("helvetica", "bold");
           const textW = doc.getTextWidth(text);
-          const badgeW = textW + 6;
+          const badgeW = textW + 8;
           const badgeH = 8;
           const bx = cellX + 3;
           const by = cellY + (cellH - badgeH) / 2;
 
           const [r, g, b] = hexToRgb(part.categoryColor);
-          // Light background
+          // Soft background
           doc.setFillColor(
             Math.min(r + 180, 255),
             Math.min(g + 180, 255),
             Math.min(b + 180, 255)
           );
           doc.roundedRect(bx, by, badgeW, badgeH, 2, 2, "F");
-          
-          doc.setTextColor(r, g, b);
-          doc.setFont("helvetica", "bold");
-          doc.text(text, bx + 3, by + 5.5);
-          doc.setFont("helvetica", "normal");
 
-          // Clear original text by drawing over it - we already drew the badge
-          // The text was already drawn by autoTable, so we overlay
+          doc.setTextColor(
+            Math.max(r - 40, 0),
+            Math.max(g - 40, 0),
+            Math.max(b - 40, 0)
+          );
+          doc.text(text, bx + 4, by + 5.5);
+          doc.setFont("helvetica", "normal");
         }
       }
     },
   });
 
-  addFooter(doc, "Greenpac — Inventario de Repuestos");
+  addFooter(doc, "Greenpac - Inventario de Repuestos");
 
-  const suffix = categoryLabel ? `-${categoryLabel.toLowerCase().replace(/\s+/g, "-")}` : "";
-  doc.save(`repuestos${suffix}-${new Date().toISOString().slice(0, 10)}.pdf`);
+  const suffix = categoryLabel ? "-" + categoryLabel.toLowerCase().replace(/\s+/g, "-") : "";
+  doc.save("repuestos" + suffix + "-" + new Date().toISOString().slice(0, 10) + ".pdf");
 }
 
 export async function exportSuppliersPDF(suppliers: Supplier[]) {
@@ -324,21 +387,21 @@ export async function exportSuppliersPDF(suppliers: Supplier[]) {
   doc.setFontSize(10);
   doc.setTextColor(30, 30, 30);
   doc.setFont("helvetica", "normal");
-  doc.text(`Total: ${suppliers.length} proveedores`, 14, 55);
+  doc.text("Total: " + suppliers.length + " proveedores", 14, 55);
 
   autoTable(doc, {
     startY: 62,
-    head: [["Nombre", "Empresa", "CUIT", "Email", "Teléfono", "Provincia", "Ciudad", "Categoría", "Repuestos"]],
+    head: [["Nombre", "Empresa", "CUIT", "Email", "Telefono", "Provincia", "Ciudad", "Categoria", "Repuestos"]],
     body: suppliers.map((s) => [
       s.name,
-      s.company || "—",
-      s.cuit || "—",
-      s.email || "—",
-      s.phone || "—",
-      s.province || "—",
-      s.city || "—",
-      s.categoryName || "—",
-      s.sparePartCount > 0 ? `${s.sparePartCount}` : "—",
+      s.company || "-",
+      s.cuit || "-",
+      s.email || "-",
+      s.phone || "-",
+      s.province || "-",
+      s.city || "-",
+      s.categoryName || "-",
+      s.sparePartCount > 0 ? String(s.sparePartCount) : "-",
     ]),
     theme: "plain",
     headStyles: {
@@ -360,6 +423,6 @@ export async function exportSuppliersPDF(suppliers: Supplier[]) {
     margin: { left: 14, right: 14 },
   });
 
-  addFooter(doc, "Greenpac — Base de Proveedores");
-  doc.save(`proveedores-${new Date().toISOString().slice(0, 10)}.pdf`);
+  addFooter(doc, "Greenpac - Base de Proveedores");
+  doc.save("proveedores-" + new Date().toISOString().slice(0, 10) + ".pdf");
 }
