@@ -22,7 +22,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign, Upload, X, Image as ImageIcon, Wrench, Truck, Tag, FileDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign, Upload, X, Image as ImageIcon, Wrench, Truck, Tag, FileDown, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { exportSparePartsPDF, exportSuppliersPDF } from "@/lib/generateSparePartsPDF";
 import SuppliersManagement from "./SuppliersManagement";
 import SparePartCategoriesManager from "./SparePartCategoriesManager";
