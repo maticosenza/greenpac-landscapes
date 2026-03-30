@@ -191,7 +191,7 @@ const AdminPanel = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="quotations" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="bg-card rounded-xl border shadow-sm p-1.5 sm:p-2 mb-6">
             {/* Desktop */}
             <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg hidden sm:grid sm:grid-cols-7 gap-1">
