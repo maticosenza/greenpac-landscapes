@@ -27,6 +27,8 @@ const AdminPanel = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
+  const [activeTab, setActiveTab] = useState("quotations");
+
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
@@ -47,6 +49,15 @@ const AdminPanel = () => {
         totalProducts: productsRes.count || 0,
         activeProducts: productsRes.data?.filter((p) => p.is_active).length || 0,
       };
+    },
+  });
+
+  const { data: lowStockCount } = useQuery({
+    queryKey: ["low-stock-count"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("spare_parts" as any).select("stock, min_stock");
+      if (error) throw error;
+      return (data as any[])?.filter((p: any) => p.min_stock != null && p.stock <= p.min_stock).length ?? 0;
     },
   });
 
