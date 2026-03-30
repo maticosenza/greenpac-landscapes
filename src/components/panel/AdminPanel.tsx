@@ -173,7 +173,7 @@ const AdminPanel = () => {
               <p className="text-xs text-[#dc2626]/70">Hacé click para ver los repuestos que necesitan reposición</p>
             </div>
           </div>
-        )
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
