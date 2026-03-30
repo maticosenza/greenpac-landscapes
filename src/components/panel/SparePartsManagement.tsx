@@ -148,12 +148,17 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     return map;
   }, [supplierSpareParts, suppliers]);
 
+  const isLowStock = (p: SparePart) => p.min_stock != null && p.stock <= p.min_stock;
+
   const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = parts?.filter((p) => {
     if (categoryFilter !== "all" && p.category_id !== categoryFilter) return false;
+    if (lowStockFilter && !isLowStock(p)) return false;
     if (!combinedSearch) return true;
     return p.name.toLowerCase().includes(combinedSearch) || p.code.toLowerCase().includes(combinedSearch);
   });
+
+  const lowStockCount = parts?.filter(isLowStock).length ?? 0;
 
   const totalParts = filtered?.length ?? 0;
   const totalStock = filtered?.reduce((sum, p) => sum + p.stock, 0) ?? 0;
