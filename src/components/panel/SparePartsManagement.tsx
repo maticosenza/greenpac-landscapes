@@ -622,6 +622,11 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                 <Input type="number" min="0" step="1" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
               </div>
               <div className="space-y-2">
+                <Label>Stock mínimo</Label>
+                <Input type="number" min="0" step="1" value={form.min_stock} onChange={(e) => setForm({ ...form, min_stock: e.target.value })} placeholder="Opcional" />
+                <p className="text-[11px] text-muted-foreground">Alerta cuando el stock sea igual o menor a este valor.</p>
+              </div>
+              <div className="space-y-2">
                 <Label>Vendedor</Label>
                 <Select value={form.vendor_id} onValueChange={(v) => setForm({ ...form, vendor_id: v === "_none" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
