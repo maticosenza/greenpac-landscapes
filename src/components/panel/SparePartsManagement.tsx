@@ -402,6 +402,15 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                         className="h-7 text-xs"
                         onClick={() => setCategoryFilter("all")}
                       >Todos</Button>
+                      <Button
+                        size="sm"
+                        variant={lowStockFilter ? "destructive" : "outline"}
+                        className="h-7 text-xs gap-1.5"
+                        onClick={() => setLowStockFilter(!lowStockFilter)}
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                        Stock bajo {lowStockCount > 0 && `(${lowStockCount})`}
+                      </Button>
                       {categories.map((cat) => (
                         <Button
                           key={cat.id}
