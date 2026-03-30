@@ -346,7 +346,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
           {isLoading ? <p className="text-muted-foreground">Cargando repuestos...</p> : (
             <>
               {/* Metrics */}
-              <div className="grid gap-4 grid-cols-3 mb-6">
+               <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 mb-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs sm:text-sm font-medium">Total Repuestos</CardTitle>
@@ -367,6 +367,15 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                     <DollarSign className="h-4 w-4 text-muted-foreground hidden sm:block" />
                   </CardHeader>
                   <CardContent><div className="text-xl sm:text-2xl font-bold">${totalValue.toLocaleString("es-AR")}</div></CardContent>
+                </Card>
+                <Card className={lowStockCount > 0 ? "border-destructive/30" : ""} style={lowStockCount > 0 ? { backgroundColor: '#fef2f2' } : {}}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-xs sm:text-sm font-medium">Stock Bajo</CardTitle>
+                    <AlertTriangle className={`h-4 w-4 hidden sm:block ${lowStockCount > 0 ? 'text-[#dc2626]' : 'text-muted-foreground'}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className={`text-xl sm:text-2xl font-bold ${lowStockCount > 0 ? 'text-[#dc2626]' : 'text-green-600'}`}>{lowStockCount}</div>
+                  </CardContent>
                 </Card>
               </div>
 
