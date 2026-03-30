@@ -508,7 +508,13 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                                     ) : "—"}
                                   </TableCell>
                                   <TableCell>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "—"}</TableCell>
-                                  <TableCell>{p.stock}</TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-1.5">
+                                      {p.stock}
+                                      {p.stock === 0 && p.min_stock != null && <Badge className="text-[10px] px-1.5 py-0 bg-[#dc2626] text-white border-0">Sin stock</Badge>}
+                                      {p.stock > 0 && isLowStock(p) && <Badge className="text-[10px] px-1.5 py-0 bg-[#fef2f2] text-[#dc2626] border border-[#dc2626]/30">Stock bajo</Badge>}
+                                    </div>
+                                  </TableCell>
                                   <TableCell>{getVendorName(p.vendor_id)}</TableCell>
                                   <TableCell>
                                     {linkedSuppliers.length > 0 ? (
