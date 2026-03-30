@@ -63,6 +63,7 @@ const emptyForm = {
   code: "",
   price: "",
   stock: "0",
+  min_stock: "",
   vendor_id: "",
   supplier_id: "",
   category_id: "",
