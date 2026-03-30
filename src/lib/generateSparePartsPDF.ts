@@ -6,6 +6,7 @@ interface SparePart {
   code: string;
   price: number | null;
   stock: number;
+  minStock?: number | null;
   categoryName?: string;
   categoryColor?: string;
   supplierNames?: string[];
