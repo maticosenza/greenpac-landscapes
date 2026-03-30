@@ -454,7 +454,10 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                               </div>
                               <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                                 <span>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "Sin precio"}</span>
-                                <span>Stock: {p.stock}</span>
+                                <span className="flex items-center gap-1">Stock: {p.stock}
+                                  {p.stock === 0 && p.min_stock != null && <Badge className="text-[10px] px-1.5 py-0 bg-[#dc2626] text-white border-0">Sin stock</Badge>}
+                                  {p.stock > 0 && isLowStock(p) && <Badge className="text-[10px] px-1.5 py-0 bg-[#fef2f2] text-[#dc2626] border border-[#dc2626]/30">Stock bajo</Badge>}
+                                </span>
                                 {cat && <Badge variant="outline" className="text-[10px] px-1.5 py-0" style={{ borderColor: cat.color, color: cat.color }}>{cat.name}</Badge>}
                                 {linkedSuppliers.length > 0 && linkedSuppliers.map((s) => (
                                   <button key={s.id} className="underline text-primary text-[10px]" onClick={() => setSupplierDetail(s)}>{s.name}</button>
