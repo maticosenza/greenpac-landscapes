@@ -489,7 +489,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                               const cat = getCategory(p.category_id);
                               const linkedSuppliers = partSuppliersMap[p.id] || [];
                               return (
-                                <TableRow key={p.id}>
+                                <TableRow key={p.id} style={isLowStock(p) ? { backgroundColor: '#fef2f2' } : {}}>
                                   <TableCell>
                                     {p.image_url ? (
                                       <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded border" />
