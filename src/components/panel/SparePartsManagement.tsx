@@ -22,7 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign, Upload, X, Image as ImageIcon, Wrench, Truck, Tag, FileDown, ChevronDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Package, Hash, DollarSign, Upload, X, Image as ImageIcon, Wrench, Truck, Tag, FileDown, ChevronDown, AlertTriangle } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -38,6 +38,7 @@ interface SparePart {
   code: string;
   price: number | null;
   stock: number;
+  min_stock: number | null;
   vendor_id: string | null;
   supplier: string | null;
   supplier_id: string | null;
@@ -62,6 +63,7 @@ const emptyForm = {
   code: "",
   price: "",
   stock: "0",
+  min_stock: "",
   vendor_id: "",
   supplier_id: "",
   category_id: "",
@@ -81,6 +83,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [lowStockFilter, setLowStockFilter] = useState(false);
   const [supplierDetail, setSupplierDetail] = useState<Supplier | null>(null);
 
   const { data: parts, isLoading } = useQuery({
@@ -145,12 +148,17 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
     return map;
   }, [supplierSpareParts, suppliers]);
 
+  const isLowStock = (p: SparePart) => p.min_stock != null && p.stock <= p.min_stock;
+
   const combinedSearch = (searchTerm + " " + localSearch).trim().toLowerCase();
   const filtered = parts?.filter((p) => {
     if (categoryFilter !== "all" && p.category_id !== categoryFilter) return false;
+    if (lowStockFilter && !isLowStock(p)) return false;
     if (!combinedSearch) return true;
     return p.name.toLowerCase().includes(combinedSearch) || p.code.toLowerCase().includes(combinedSearch);
   });
+
+  const lowStockCount = parts?.filter(isLowStock).length ?? 0;
 
   const totalParts = filtered?.length ?? 0;
   const totalStock = filtered?.reduce((sum, p) => sum + p.stock, 0) ?? 0;
@@ -167,6 +175,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       code: part.code,
       price: part.price != null ? String(part.price) : "",
       stock: String(part.stock),
+      min_stock: part.min_stock != null ? String(part.min_stock) : "",
       vendor_id: part.vendor_id || "",
       supplier_id: part.supplier_id || "",
       category_id: part.category_id || "",
@@ -202,6 +211,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
         code: form.code.trim(),
         price: form.price ? parseFloat(form.price) : null,
         stock: parseInt(form.stock) || 0,
+        min_stock: form.min_stock ? parseInt(form.min_stock) : null,
         vendor_id: form.vendor_id || null,
         supplier_id: form.supplier_id || null,
         category_id: form.category_id || null,
@@ -336,7 +346,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
           {isLoading ? <p className="text-muted-foreground">Cargando repuestos...</p> : (
             <>
               {/* Metrics */}
-              <div className="grid gap-4 grid-cols-3 mb-6">
+               <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 mb-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs sm:text-sm font-medium">Total Repuestos</CardTitle>
@@ -357,6 +367,15 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                     <DollarSign className="h-4 w-4 text-muted-foreground hidden sm:block" />
                   </CardHeader>
                   <CardContent><div className="text-xl sm:text-2xl font-bold">${totalValue.toLocaleString("es-AR")}</div></CardContent>
+                </Card>
+                <Card className={lowStockCount > 0 ? "border-destructive/30" : ""} style={lowStockCount > 0 ? { backgroundColor: '#fef2f2' } : {}}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-xs sm:text-sm font-medium">Stock Bajo</CardTitle>
+                    <AlertTriangle className={`h-4 w-4 hidden sm:block ${lowStockCount > 0 ? 'text-[#dc2626]' : 'text-muted-foreground'}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className={`text-xl sm:text-2xl font-bold ${lowStockCount > 0 ? 'text-[#dc2626]' : 'text-green-600'}`}>{lowStockCount}</div>
+                  </CardContent>
                 </Card>
               </div>
 
@@ -383,6 +402,15 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                         className="h-7 text-xs"
                         onClick={() => setCategoryFilter("all")}
                       >Todos</Button>
+                      <Button
+                        size="sm"
+                        variant={lowStockFilter ? "destructive" : "outline"}
+                        className="h-7 text-xs gap-1.5"
+                        onClick={() => setLowStockFilter(!lowStockFilter)}
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                        Stock bajo {lowStockCount > 0 && `(${lowStockCount})`}
+                      </Button>
                       {categories.map((cat) => (
                         <Button
                           key={cat.id}
@@ -406,7 +434,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                           const cat = getCategory(p.category_id);
                           const linkedSuppliers = partSuppliersMap[p.id] || [];
                           return (
-                            <div key={p.id} className="border rounded-lg p-4 space-y-2">
+                            <div key={p.id} className="border rounded-lg p-4 space-y-2" style={isLowStock(p) ? { backgroundColor: '#fef2f2' } : {}}>
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-3 min-w-0">
                                   {p.image_url ? (
@@ -426,7 +454,10 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                               </div>
                               <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                                 <span>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "Sin precio"}</span>
-                                <span>Stock: {p.stock}</span>
+                                <span className="flex items-center gap-1">Stock: {p.stock}
+                                  {p.stock === 0 && p.min_stock != null && <Badge className="text-[10px] px-1.5 py-0 bg-[#dc2626] text-white border-0">Sin stock</Badge>}
+                                  {p.stock > 0 && isLowStock(p) && <Badge className="text-[10px] px-1.5 py-0 bg-[#fef2f2] text-[#dc2626] border border-[#dc2626]/30">Stock bajo</Badge>}
+                                </span>
                                 {cat && <Badge variant="outline" className="text-[10px] px-1.5 py-0" style={{ borderColor: cat.color, color: cat.color }}>{cat.name}</Badge>}
                                 {linkedSuppliers.length > 0 && linkedSuppliers.map((s) => (
                                   <button key={s.id} className="underline text-primary text-[10px]" onClick={() => setSupplierDetail(s)}>{s.name}</button>
@@ -458,7 +489,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                               const cat = getCategory(p.category_id);
                               const linkedSuppliers = partSuppliersMap[p.id] || [];
                               return (
-                                <TableRow key={p.id}>
+                                <TableRow key={p.id} style={isLowStock(p) ? { backgroundColor: '#fef2f2' } : {}}>
                                   <TableCell>
                                     {p.image_url ? (
                                       <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded border" />
@@ -477,7 +508,13 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                                     ) : "—"}
                                   </TableCell>
                                   <TableCell>{p.price != null ? `$${Number(p.price).toLocaleString("es-AR")}` : "—"}</TableCell>
-                                  <TableCell>{p.stock}</TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-1.5">
+                                      {p.stock}
+                                      {p.stock === 0 && p.min_stock != null && <Badge className="text-[10px] px-1.5 py-0 bg-[#dc2626] text-white border-0">Sin stock</Badge>}
+                                      {p.stock > 0 && isLowStock(p) && <Badge className="text-[10px] px-1.5 py-0 bg-[#fef2f2] text-[#dc2626] border border-[#dc2626]/30">Stock bajo</Badge>}
+                                    </div>
+                                  </TableCell>
                                   <TableCell>{getVendorName(p.vendor_id)}</TableCell>
                                   <TableCell>
                                     {linkedSuppliers.length > 0 ? (
@@ -583,6 +620,11 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
               <div className="space-y-2">
                 <Label>Stock</Label>
                 <Input type="number" min="0" step="1" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Stock mínimo</Label>
+                <Input type="number" min="0" step="1" value={form.min_stock} onChange={(e) => setForm({ ...form, min_stock: e.target.value })} placeholder="Opcional" />
+                <p className="text-[11px] text-muted-foreground">Alerta cuando el stock sea igual o menor a este valor.</p>
               </div>
               <div className="space-y-2">
                 <Label>Vendedor</Label>

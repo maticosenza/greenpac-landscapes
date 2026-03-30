@@ -1,0 +1,1 @@
+ALTER TABLE public.spare_parts ADD COLUMN min_stock integer DEFAULT NULL;

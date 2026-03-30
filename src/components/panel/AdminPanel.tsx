@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, UserCircle, MapPin, Wrench } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, UserCircle, MapPin, Wrench, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ const AdminPanel = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
+  const [activeTab, setActiveTab] = useState("quotations");
+
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
@@ -47,6 +49,15 @@ const AdminPanel = () => {
         totalProducts: productsRes.count || 0,
         activeProducts: productsRes.data?.filter((p) => p.is_active).length || 0,
       };
+    },
+  });
+
+  const { data: lowStockCount } = useQuery({
+    queryKey: ["low-stock-count"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("spare_parts" as any).select("stock, min_stock");
+      if (error) throw error;
+      return (data as any[])?.filter((p: any) => p.min_stock != null && p.stock <= p.min_stock).length ?? 0;
     },
   });
 
@@ -150,6 +161,20 @@ const AdminPanel = () => {
           </Card>
         </div>
 
+        {(lowStockCount ?? 0) > 0 && (
+          <div
+            className="flex items-center gap-3 rounded-lg border border-[#dc2626]/20 p-4 mb-6 cursor-pointer hover:border-[#dc2626]/40 transition-colors"
+            style={{ backgroundColor: '#fef2f2' }}
+            onClick={() => setActiveTab("spare-parts")}
+          >
+            <AlertTriangle className="h-5 w-5 text-[#dc2626] shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-[#dc2626]">{lowStockCount} repuesto{lowStockCount === 1 ? '' : 's'} con stock bajo</p>
+              <p className="text-xs text-[#dc2626]/70">Hacé click para ver los repuestos que necesitan reposición</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -166,7 +191,7 @@ const AdminPanel = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="quotations" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="bg-card rounded-xl border shadow-sm p-1.5 sm:p-2 mb-6">
             {/* Desktop */}
             <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg hidden sm:grid sm:grid-cols-7 gap-1">
