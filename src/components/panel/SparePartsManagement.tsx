@@ -83,6 +83,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [lowStockFilter, setLowStockFilter] = useState(false);
   const [supplierDetail, setSupplierDetail] = useState<Supplier | null>(null);
 
   const { data: parts, isLoading } = useQuery({
