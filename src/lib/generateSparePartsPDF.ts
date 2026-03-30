@@ -307,22 +307,32 @@ export async function exportSparePartsPDF(
       valign: "middle",
       lineWidth: 0.2,
       lineColor: [229, 231, 235],
-      minCellHeight: 18, // ~48px to fit images
+      minCellHeight: 18,
     },
     alternateRowStyles: {
       fillColor: [249, 250, 251],
     },
     margin: { left: 14, right: 14 },
     columnStyles: colStyles,
+    didParseCell: (data: any) => {
+      if (data.section !== "body") return;
+      const part = parts[data.row.index];
+      if (!part) return;
+      const partIsLow = part.minStock != null && part.stock <= part.minStock;
+      if (partIsLow) {
+        data.cell.styles.fillColor = [254, 242, 242]; // #fef2f2
+      }
+    },
     didDrawCell: (data: any) => {
       if (data.section !== "body") return;
       const idx = data.row.index;
+      const part = parts[idx];
 
       // Photo column (always index 0)
       if (data.column.index === 0) {
         const imgData = imageCache[idx] || placeholderCache[idx];
         if (imgData) {
-          const imgSize = 14; // ~48px
+          const imgSize = 14;
           const cellX = data.cell.x + (data.cell.width - imgSize) / 2;
           const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
           try {
@@ -333,9 +343,39 @@ export async function exportSparePartsPDF(
         }
       }
 
+      // Stock column — low stock indicator
+      if (data.column.index === stockColIdx && part) {
+        const partIsLow = part.minStock != null && part.stock <= part.minStock;
+        if (partIsLow) {
+          // Cover auto-drawn text
+          const cx = data.cell.x;
+          const cy = data.cell.y;
+          const cw = data.cell.width;
+          const ch = data.cell.height;
+          doc.setFillColor(254, 242, 242);
+          doc.rect(cx + 0.2, cy + 0.2, cw - 0.4, ch - 0.4, "F");
+
+          // Stock number in red bold
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(220, 38, 38); // #dc2626
+          doc.text(String(part.stock), cx + cw / 2, cy + ch / 2 - 2, { align: "center" });
+
+          // Warning label below
+          doc.setFontSize(6);
+          doc.setFont("helvetica", "normal");
+          if (part.stock === 0) {
+            doc.setTextColor(185, 28, 28); // #b91c1c
+            doc.text("Sin stock", cx + cw / 2, cy + ch / 2 + 4, { align: "center" });
+          } else {
+            doc.setTextColor(220, 38, 38);
+            doc.text("Bajo", cx + cw / 2, cy + ch / 2 + 4, { align: "center" });
+          }
+        }
+      }
+
       // Category badge column (only when not filtered)
       if (catColIdx >= 0 && data.column.index === catColIdx) {
-        const part = parts[idx];
         if (part?.categoryColor && part?.categoryName) {
           const text = part.categoryName;
           const cellX = data.cell.x;
@@ -343,9 +383,13 @@ export async function exportSparePartsPDF(
           const cellH = data.cell.height;
           const cellW = data.cell.width;
 
-          // First, cover the auto-drawn text with background
+          const partIsLow = part.minStock != null && part.stock <= part.minStock;
           const isAlt = idx % 2 === 1;
-          doc.setFillColor(isAlt ? 249 : 255, isAlt ? 250 : 255, isAlt ? 251 : 255);
+          if (partIsLow) {
+            doc.setFillColor(254, 242, 242);
+          } else {
+            doc.setFillColor(isAlt ? 249 : 255, isAlt ? 250 : 255, isAlt ? 251 : 255);
+          }
           doc.rect(cellX + 0.2, cellY + 0.2, cellW - 0.4, cellH - 0.4, "F");
 
           doc.setFontSize(7);
@@ -357,7 +401,6 @@ export async function exportSparePartsPDF(
           const by = cellY + (cellH - badgeH) / 2;
 
           const [r, g, b] = hexToRgb(part.categoryColor);
-          // Soft background
           doc.setFillColor(
             Math.min(r + 180, 255),
             Math.min(g + 180, 255),
