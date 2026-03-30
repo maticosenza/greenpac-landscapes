@@ -169,6 +169,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
       code: part.code,
       price: part.price != null ? String(part.price) : "",
       stock: String(part.stock),
+      min_stock: part.min_stock != null ? String(part.min_stock) : "",
       vendor_id: part.vendor_id || "",
       supplier_id: part.supplier_id || "",
       category_id: part.category_id || "",
