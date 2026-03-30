@@ -38,6 +38,7 @@ interface SparePart {
   code: string;
   price: number | null;
   stock: number;
+  min_stock: number | null;
   vendor_id: string | null;
   supplier: string | null;
   supplier_id: string | null;
