@@ -6,6 +6,7 @@ interface SparePart {
   code: string;
   price: number | null;
   stock: number;
+  minStock?: number | null;
   categoryName?: string;
   categoryColor?: string;
   supplierNames?: string[];
@@ -154,7 +155,7 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
   const totalParts = parts.length;
   const totalStock = parts.reduce((s, p) => s + p.stock, 0);
   const totalValue = parts.reduce((s, p) => s + (p.price ?? 0) * p.stock, 0);
-  const lowStock = parts.filter((p) => p.stock > 0 && p.stock <= 5).length;
+  const lowStock = parts.filter((p) => p.minStock != null && p.stock <= p.minStock).length;
 
   const metrics = [
     { label: "Total repuestos", value: String(totalParts), alert: false },
@@ -179,8 +180,12 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
     doc.setLineWidth(0.4);
     doc.roundedRect(x, y, boxW, boxH, 2, 2, "FD");
 
-    // Green left accent border (4px = ~1.4mm)
-    doc.setFillColor(22, 163, 74); // #16a34a
+    // Left accent border
+    if (m.alert) {
+      doc.setFillColor(220, 38, 38); // #dc2626 red
+    } else {
+      doc.setFillColor(22, 163, 74); // #16a34a green
+    }
     doc.rect(x, y + 1, 1.4, boxH - 2, "F");
 
     // Value — centered
@@ -193,7 +198,7 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
     }
     doc.text(m.value, x + boxW / 2, y + 14, { align: "center" });
 
-    // Label — helvetica normal, no monospace
+    // Label
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(107, 114, 128);
@@ -269,19 +274,19 @@ export async function exportSparePartsPDF(
 
   const colStyles: Record<number, any> = {
     0: { cellWidth: 18 }, // photo — 60px ~ 18mm
-    1: { cellWidth: usable * 0.22 },
-    2: { cellWidth: usable * 0.13 },
+    1: { cellWidth: usable * 0.25 }, // Nombre
+    2: { cellWidth: usable * 0.12 }, // Codigo
   };
 
   if (isFiltered) {
-    colStyles[3] = { halign: "right", cellWidth: usable * 0.13 };
-    colStyles[4] = { halign: "center", cellWidth: usable * 0.1 };
-    colStyles[5] = { cellWidth: usable * 0.24 };
+    colStyles[3] = { halign: "right", cellWidth: usable * 0.12 };  // Precio
+    colStyles[4] = { halign: "center", cellWidth: usable * 0.10 }; // Stock
+    colStyles[5] = { cellWidth: usable * 0.20 }; // Proveedor
   } else {
-    colStyles[3] = { cellWidth: usable * 0.16 }; // category
-    colStyles[4] = { halign: "right", cellWidth: usable * 0.12 };
-    colStyles[5] = { halign: "center", cellWidth: usable * 0.08 };
-    colStyles[6] = { cellWidth: usable * 0.18 };
+    colStyles[3] = { cellWidth: usable * 0.15 }; // category
+    colStyles[4] = { halign: "right", cellWidth: usable * 0.12 };  // Precio
+    colStyles[5] = { halign: "center", cellWidth: usable * 0.10 }; // Stock
+    colStyles[6] = { cellWidth: usable * 0.18 }; // Proveedor
   }
 
   autoTable(doc, {
@@ -302,22 +307,32 @@ export async function exportSparePartsPDF(
       valign: "middle",
       lineWidth: 0.2,
       lineColor: [229, 231, 235],
-      minCellHeight: 18, // ~48px to fit images
+      minCellHeight: 18,
     },
     alternateRowStyles: {
       fillColor: [249, 250, 251],
     },
     margin: { left: 14, right: 14 },
     columnStyles: colStyles,
+    didParseCell: (data: any) => {
+      if (data.section !== "body") return;
+      const part = parts[data.row.index];
+      if (!part) return;
+      const partIsLow = part.minStock != null && part.stock <= part.minStock;
+      if (partIsLow) {
+        data.cell.styles.fillColor = [254, 242, 242]; // #fef2f2
+      }
+    },
     didDrawCell: (data: any) => {
       if (data.section !== "body") return;
       const idx = data.row.index;
+      const part = parts[idx];
 
       // Photo column (always index 0)
       if (data.column.index === 0) {
         const imgData = imageCache[idx] || placeholderCache[idx];
         if (imgData) {
-          const imgSize = 14; // ~48px
+          const imgSize = 14;
           const cellX = data.cell.x + (data.cell.width - imgSize) / 2;
           const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
           try {
@@ -328,9 +343,39 @@ export async function exportSparePartsPDF(
         }
       }
 
+      // Stock column — low stock indicator
+      if (data.column.index === stockColIdx && part) {
+        const partIsLow = part.minStock != null && part.stock <= part.minStock;
+        if (partIsLow) {
+          // Cover auto-drawn text
+          const cx = data.cell.x;
+          const cy = data.cell.y;
+          const cw = data.cell.width;
+          const ch = data.cell.height;
+          doc.setFillColor(254, 242, 242);
+          doc.rect(cx + 0.2, cy + 0.2, cw - 0.4, ch - 0.4, "F");
+
+          // Stock number in red bold
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(220, 38, 38); // #dc2626
+          doc.text(String(part.stock), cx + cw / 2, cy + ch / 2 - 2, { align: "center" });
+
+          // Warning label below
+          doc.setFontSize(6);
+          doc.setFont("helvetica", "normal");
+          if (part.stock === 0) {
+            doc.setTextColor(185, 28, 28); // #b91c1c
+            doc.text("Sin stock", cx + cw / 2, cy + ch / 2 + 4, { align: "center" });
+          } else {
+            doc.setTextColor(220, 38, 38);
+            doc.text("Bajo", cx + cw / 2, cy + ch / 2 + 4, { align: "center" });
+          }
+        }
+      }
+
       // Category badge column (only when not filtered)
       if (catColIdx >= 0 && data.column.index === catColIdx) {
-        const part = parts[idx];
         if (part?.categoryColor && part?.categoryName) {
           const text = part.categoryName;
           const cellX = data.cell.x;
@@ -338,9 +383,13 @@ export async function exportSparePartsPDF(
           const cellH = data.cell.height;
           const cellW = data.cell.width;
 
-          // First, cover the auto-drawn text with background
+          const partIsLow = part.minStock != null && part.stock <= part.minStock;
           const isAlt = idx % 2 === 1;
-          doc.setFillColor(isAlt ? 249 : 255, isAlt ? 250 : 255, isAlt ? 251 : 255);
+          if (partIsLow) {
+            doc.setFillColor(254, 242, 242);
+          } else {
+            doc.setFillColor(isAlt ? 249 : 255, isAlt ? 250 : 255, isAlt ? 251 : 255);
+          }
           doc.rect(cellX + 0.2, cellY + 0.2, cellW - 0.4, cellH - 0.4, "F");
 
           doc.setFontSize(7);
@@ -352,7 +401,6 @@ export async function exportSparePartsPDF(
           const by = cellY + (cellH - badgeH) / 2;
 
           const [r, g, b] = hexToRgb(part.categoryColor);
-          // Soft background
           doc.setFillColor(
             Math.min(r + 180, 255),
             Math.min(g + 180, 255),

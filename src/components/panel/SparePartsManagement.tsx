@@ -287,7 +287,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                 <DropdownMenuItem onClick={() => {
                   if (!parts?.length) { toast.info("No hay repuestos para exportar"); return; }
                   const mapped = (filtered || parts).map((p) => ({
-                    name: p.name, code: p.code, price: p.price, stock: p.stock,
+                    name: p.name, code: p.code, price: p.price, stock: p.stock, minStock: p.min_stock,
                     categoryName: getCategory(p.category_id)?.name,
                     categoryColor: getCategory(p.category_id)?.color,
                     supplierNames: (partSuppliersMap[p.id] || []).map((s) => s.name),
@@ -302,7 +302,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                     const catParts = parts?.filter((p) => p.category_id === cat.id) || [];
                     if (!catParts.length) { toast.info(`No hay repuestos en "${cat.name}"`); return; }
                     const mapped = catParts.map((p) => ({
-                      name: p.name, code: p.code, price: p.price, stock: p.stock,
+                      name: p.name, code: p.code, price: p.price, stock: p.stock, minStock: p.min_stock,
                       categoryName: cat.name, categoryColor: cat.color,
                       supplierNames: (partSuppliersMap[p.id] || []).map((s) => s.name),
                       imageUrl: p.image_url,
