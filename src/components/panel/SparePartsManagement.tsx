@@ -211,6 +211,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
         code: form.code.trim(),
         price: form.price ? parseFloat(form.price) : null,
         stock: parseInt(form.stock) || 0,
+        min_stock: form.min_stock ? parseInt(form.min_stock) : null,
         vendor_id: form.vendor_id || null,
         supplier_id: form.supplier_id || null,
         category_id: form.category_id || null,
