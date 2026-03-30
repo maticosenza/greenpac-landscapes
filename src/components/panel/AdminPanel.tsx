@@ -161,6 +161,20 @@ const AdminPanel = () => {
           </Card>
         </div>
 
+        {(lowStockCount ?? 0) > 0 && (
+          <div
+            className="flex items-center gap-3 rounded-lg border border-[#dc2626]/20 p-4 mb-6 cursor-pointer hover:border-[#dc2626]/40 transition-colors"
+            style={{ backgroundColor: '#fef2f2' }}
+            onClick={() => setActiveTab("spare-parts")}
+          >
+            <AlertTriangle className="h-5 w-5 text-[#dc2626] shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-[#dc2626]">{lowStockCount} repuesto{lowStockCount === 1 ? '' : 's'} con stock bajo</p>
+              <p className="text-xs text-[#dc2626]/70">Hacé click para ver los repuestos que necesitan reposición</p>
+            </div>
+          </div>
+        )
+
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
