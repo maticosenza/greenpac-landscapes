@@ -434,7 +434,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
                           const cat = getCategory(p.category_id);
                           const linkedSuppliers = partSuppliersMap[p.id] || [];
                           return (
-                            <div key={p.id} className="border rounded-lg p-4 space-y-2">
+                            <div key={p.id} className="border rounded-lg p-4 space-y-2" style={isLowStock(p) ? { backgroundColor: '#fef2f2' } : {}}>
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-3 min-w-0">
                                   {p.image_url ? (
