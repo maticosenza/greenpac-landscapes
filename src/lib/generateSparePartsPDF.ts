@@ -155,7 +155,7 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
   const totalParts = parts.length;
   const totalStock = parts.reduce((s, p) => s + p.stock, 0);
   const totalValue = parts.reduce((s, p) => s + (p.price ?? 0) * p.stock, 0);
-  const lowStock = parts.filter((p) => p.stock > 0 && p.stock <= 5).length;
+  const lowStock = parts.filter((p) => p.minStock != null && p.stock <= p.minStock).length;
 
   const metrics = [
     { label: "Total repuestos", value: String(totalParts), alert: false },
@@ -180,8 +180,12 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
     doc.setLineWidth(0.4);
     doc.roundedRect(x, y, boxW, boxH, 2, 2, "FD");
 
-    // Green left accent border (4px = ~1.4mm)
-    doc.setFillColor(22, 163, 74); // #16a34a
+    // Left accent border
+    if (m.alert) {
+      doc.setFillColor(220, 38, 38); // #dc2626 red
+    } else {
+      doc.setFillColor(22, 163, 74); // #16a34a green
+    }
     doc.rect(x, y + 1, 1.4, boxH - 2, "F");
 
     // Value — centered
@@ -194,7 +198,7 @@ function drawMetricBoxes(doc: jsPDF, parts: SparePart[], startY: number): number
     }
     doc.text(m.value, x + boxW / 2, y + 14, { align: "center" });
 
-    // Label — helvetica normal, no monospace
+    // Label
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(107, 114, 128);
