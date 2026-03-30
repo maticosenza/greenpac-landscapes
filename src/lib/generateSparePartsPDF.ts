@@ -274,19 +274,19 @@ export async function exportSparePartsPDF(
 
   const colStyles: Record<number, any> = {
     0: { cellWidth: 18 }, // photo — 60px ~ 18mm
-    1: { cellWidth: usable * 0.22 },
-    2: { cellWidth: usable * 0.13 },
+    1: { cellWidth: usable * 0.25 }, // Nombre
+    2: { cellWidth: usable * 0.12 }, // Codigo
   };
 
   if (isFiltered) {
-    colStyles[3] = { halign: "right", cellWidth: usable * 0.13 };
-    colStyles[4] = { halign: "center", cellWidth: usable * 0.1 };
-    colStyles[5] = { cellWidth: usable * 0.24 };
+    colStyles[3] = { halign: "right", cellWidth: usable * 0.12 };  // Precio
+    colStyles[4] = { halign: "center", cellWidth: usable * 0.10 }; // Stock
+    colStyles[5] = { cellWidth: usable * 0.20 }; // Proveedor
   } else {
-    colStyles[3] = { cellWidth: usable * 0.16 }; // category
-    colStyles[4] = { halign: "right", cellWidth: usable * 0.12 };
-    colStyles[5] = { halign: "center", cellWidth: usable * 0.08 };
-    colStyles[6] = { cellWidth: usable * 0.18 };
+    colStyles[3] = { cellWidth: usable * 0.15 }; // category
+    colStyles[4] = { halign: "right", cellWidth: usable * 0.12 };  // Precio
+    colStyles[5] = { halign: "center", cellWidth: usable * 0.10 }; // Stock
+    colStyles[6] = { cellWidth: usable * 0.18 }; // Proveedor
   }
 
   autoTable(doc, {
