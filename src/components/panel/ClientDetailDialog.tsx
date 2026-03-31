@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Pencil, Save, X, Send, Trash2 } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
-import { CLIENT_STATUSES, getStatusInfo } from "./clientConstants";
+import { CLIENT_STATUSES, STATUS_BADGE_CLASS, getStatusInfo } from "./clientConstants";
 import { Separator } from "@/components/ui/separator";
 import LocalityAutocomplete from "./LocalityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
