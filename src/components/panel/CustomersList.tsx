@@ -240,7 +240,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                     <TableRow>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Empresa</TableHead>
-                      <TableHead>Estado</TableHead>
+                      <TableHead className="min-w-[130px]">Estado</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
