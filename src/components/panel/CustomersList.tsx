@@ -214,7 +214,7 @@ const CustomersList = ({ searchTerm }: CustomersListProps) => {
                       )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-medium ${getStatusInfo(c.status).color}`}>
+                      <span className={`${STATUS_BADGE_CLASS} ${getStatusInfo(c.status).color} !min-w-0 !h-5 !text-[10px] !px-2`}>
                         {getStatusInfo(c.status).label}
                       </span>
                       {c.phone && <span>{c.phone}</span>}
