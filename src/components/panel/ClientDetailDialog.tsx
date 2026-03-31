@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Pencil, Save, X, Send, Trash2 } from "lucide-react";
 import { ARGENTINA_PROVINCES } from "@/lib/argentinaProvinces";
-import { CLIENT_STATUSES, getStatusInfo } from "./clientConstants";
+import { CLIENT_STATUSES, STATUS_BADGE_CLASS, getStatusInfo } from "./clientConstants";
 import { Separator } from "@/components/ui/separator";
 import LocalityAutocomplete from "./LocalityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
@@ -236,7 +236,7 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           <div className="flex items-center justify-between pr-6">
             <DialogTitle>{editing ? "Editar Cliente" : "Detalle del Cliente"}</DialogTitle>
             <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-1 rounded-full border ${statusInfo.color}`}>
+              <span className={`${STATUS_BADGE_CLASS} ${statusInfo.color}`}>
                 {statusInfo.label}
               </span>
               {!editing && (

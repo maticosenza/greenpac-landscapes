@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Download, Plus, Search } from "lucide-react";
-import { CLIENT_STATUSES } from "./clientConstants";
-import { getStatusInfo } from "./clientConstants";
+import { CLIENT_STATUSES, STATUS_BADGE_CLASS, getStatusInfo } from "./clientConstants";
 import { toast } from "sonner";
 import { exportToCSV } from "@/lib/exportCsv";
 import {
@@ -167,7 +166,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                       
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-medium ${getStatusInfo(c.status).color}`}>
+                       <span className={`${STATUS_BADGE_CLASS} ${getStatusInfo(c.status).color} !min-w-0 !h-5 !text-[10px] !px-2`}>
                         {getStatusInfo(c.status).label}
                       </span>
                       {c.phone && <span>{c.phone}</span>}
@@ -193,7 +192,7 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                     <TableRow>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Empresa</TableHead>
-                      <TableHead>Estado</TableHead>
+                      <TableHead className="min-w-[130px]">Estado</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Teléfono</TableHead>
@@ -214,8 +213,8 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                       >
                         <TableCell className="font-medium">{c.full_name}</TableCell>
                         <TableCell>{c.company || "—"}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-0.5 rounded-full border text-xs font-medium ${getStatusInfo(c.status).color}`}>
+                        <TableCell className="text-center">
+                          <span className={`${STATUS_BADGE_CLASS} ${getStatusInfo(c.status).color}`}>
                             {getStatusInfo(c.status).label}
                           </span>
                         </TableCell>

@@ -33,10 +33,18 @@ interface ClientsMapProps {
 
 const STATUS_COLORS: Record<string, string> = {
   activo: "#16a34a",
-  en_seguimiento: "#f59e0b",
-  negociacion: "#3b82f6",
-  cerrado: "#a855f7",
-  inactivo: "#9ca3af",
+  en_seguimiento: "#854d0e",
+  negociacion: "#1d4ed8",
+  cerrado: "#374151",
+  inactivo: "#991b1b",
+};
+
+const STATUS_BG_COLORS: Record<string, string> = {
+  activo: "#dcfce7",
+  en_seguimiento: "#fef9c3",
+  negociacion: "#dbeafe",
+  cerrado: "#f3f4f6",
+  inactivo: "#fee2e2",
 };
 
 function getMarkerColor(status: string): string {
@@ -198,7 +206,7 @@ const ClientsMap = ({ clients, vendedorNames }: ClientsMapProps) => {
       const popupContent = `
         <div style="font-family: system-ui, sans-serif; min-width: 200px; font-size: 13px; line-height: 1.5;">
           <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #1a1a1a;">${client.full_name}</div>
-          <div style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: ${color}22; color: ${color}; border: 1px solid ${color}44; margin-bottom: 6px;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: ${STATUS_BG_COLORS[client.status] || '#f3f4f6'}; color: ${color}; border: 1px solid ${color}33; margin-bottom: 6px; white-space: nowrap; min-width: 80px; height: 22px;">
             ${statusInfo.label}
           </div>
           ${client.product_interest ? `<div style="color: #555; font-size: 12px;">📦 ${client.product_interest}</div>` : ""}
