@@ -213,8 +213,8 @@ const VendedorCustomersList = ({ searchTerm, vendedorId }: Props) => {
                       >
                         <TableCell className="font-medium">{c.full_name}</TableCell>
                         <TableCell>{c.company || "—"}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-0.5 rounded-full border text-xs font-medium ${getStatusInfo(c.status).color}`}>
+                        <TableCell className="text-center">
+                          <span className={`${STATUS_BADGE_CLASS} ${getStatusInfo(c.status).color}`}>
                             {getStatusInfo(c.status).label}
                           </span>
                         </TableCell>

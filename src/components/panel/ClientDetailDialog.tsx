@@ -236,7 +236,7 @@ const ClientDetailDialog = ({ client, open, onOpenChange }: Props) => {
           <div className="flex items-center justify-between pr-6">
             <DialogTitle>{editing ? "Editar Cliente" : "Detalle del Cliente"}</DialogTitle>
             <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-1 rounded-full border ${statusInfo.color}`}>
+              <span className={`${STATUS_BADGE_CLASS} ${statusInfo.color}`}>
                 {statusInfo.label}
               </span>
               {!editing && (
