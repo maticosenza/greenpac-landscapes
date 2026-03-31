@@ -33,10 +33,18 @@ interface ClientsMapProps {
 
 const STATUS_COLORS: Record<string, string> = {
   activo: "#16a34a",
-  en_seguimiento: "#f59e0b",
-  negociacion: "#3b82f6",
-  cerrado: "#a855f7",
-  inactivo: "#9ca3af",
+  en_seguimiento: "#854d0e",
+  negociacion: "#1d4ed8",
+  cerrado: "#374151",
+  inactivo: "#991b1b",
+};
+
+const STATUS_BG_COLORS: Record<string, string> = {
+  activo: "#dcfce7",
+  en_seguimiento: "#fef9c3",
+  negociacion: "#dbeafe",
+  cerrado: "#f3f4f6",
+  inactivo: "#fee2e2",
 };
 
 function getMarkerColor(status: string): string {
