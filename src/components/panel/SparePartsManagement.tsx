@@ -29,6 +29,7 @@ import {
 import { exportSparePartsPDF, exportSuppliersPDF } from "@/lib/generateSparePartsPDF";
 import SuppliersManagement from "./SuppliersManagement";
 import SparePartCategoriesManager from "./SparePartCategoriesManager";
+import CombosManagement from "./CombosManagement";
 import type { Supplier } from "./SuppliersManagement";
 import type { SparePartCategory } from "./SparePartCategoriesManager";
 
