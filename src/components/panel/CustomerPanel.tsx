@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare } from "lucide-react";
+import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 import QuotationDetailDialog from "@/components/panel/QuotationDetailDialog";
+import SparePartsStore from "@/components/panel/SparePartsStore";
 
 const CustomerPanel = () => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [detailQuotationId, setDetailQuotationId] = useState<string | null>(null);
+  const [showStore, setShowStore] = useState(false);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["customer-quotations", user?.id],
@@ -91,10 +93,16 @@ const CustomerPanel = () => {
         return <Badge variant="outline">Compra</Badge>;
       case "deposit":
         return <Badge variant="outline">Seña</Badge>;
+      case "spare_part":
+        return <Badge variant="outline" className="border-emerald-300 text-emerald-700 bg-emerald-50">Repuesto</Badge>;
       default:
         return <Badge variant="outline">Consulta</Badge>;
     }
   };
+
+  if (showStore) {
+    return <SparePartsStore onBack={() => setShowStore(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-muted">
@@ -155,6 +163,26 @@ const CustomerPanel = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Store CTA */}
+        <Card
+          className="mb-8 cursor-pointer hover:shadow-md transition-shadow border-emerald-200"
+          style={{ backgroundColor: "#f0fdf4" }}
+          onClick={() => setShowStore(true)}
+        >
+          <CardContent className="flex items-center gap-4 py-5">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#dcfce7" }}>
+              <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-sm">Tienda de Repuestos</h3>
+              <p className="text-xs text-muted-foreground">Explorá nuestro catálogo y solicitá cotización</p>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>
+              Ver catálogo →
+            </span>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

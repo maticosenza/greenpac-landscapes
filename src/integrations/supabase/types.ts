@@ -344,6 +344,8 @@ export type Database = {
           product_ids: string[] | null
           province: string | null
           quotation_type: string | null
+          spare_part_id: string | null
+          spare_part_quantity: number | null
           status: string | null
           updated_at: string
         }
@@ -373,6 +375,8 @@ export type Database = {
           product_ids?: string[] | null
           province?: string | null
           quotation_type?: string | null
+          spare_part_id?: string | null
+          spare_part_quantity?: number | null
           status?: string | null
           updated_at?: string
         }
@@ -402,10 +406,20 @@ export type Database = {
           product_ids?: string[] | null
           province?: string | null
           quotation_type?: string | null
+          spare_part_id?: string | null
+          spare_part_quantity?: number | null
           status?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quotations_spare_part_id_fkey"
+            columns: ["spare_part_id"]
+            isOneToOne: false
+            referencedRelation: "spare_parts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rate_limits: {
         Row: {
