@@ -222,7 +222,7 @@ const AdminPanel = () => {
               </TabsTrigger>
               <TabsTrigger value="team" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <Settings className="h-4 w-4 shrink-0" />
-                Equipo
+                Miembros
               </TabsTrigger>
               <TabsTrigger value="zones" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <MapPin className="h-4 w-4 shrink-0" />
@@ -258,7 +258,7 @@ const AdminPanel = () => {
               </TabsTrigger>
               <TabsTrigger value="team" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <Settings className="h-[18px] w-[18px]" />
-                <span>Equipo</span>
+                <span>Miembros</span>
               </TabsTrigger>
               <TabsTrigger value="zones" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
                 <MapPin className="h-[18px] w-[18px]" />
