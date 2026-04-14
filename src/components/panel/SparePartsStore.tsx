@@ -1,11 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, ArrowLeft } from "lucide-react";
+import { Search, Package, ArrowLeft, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SparePartStoreDetail from "./SparePartStoreDetail";
+import { useAuth } from "@/hooks/useAuth";
 
 interface StoreSparePart {
   id: string;
@@ -25,12 +27,35 @@ interface StoreCategory {
 
 interface SparePartsStoreProps {
   onBack: () => void;
+  initialCategory?: string;
 }
 
-const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
+const RECENTLY_VIEWED_KEY = "greenpac-recently-viewed-parts";
+
+export const getRecentlyViewed = (userId: string): string[] => {
+  try {
+    const data = localStorage.getItem(`${RECENTLY_VIEWED_KEY}-${userId}`);
+    return data ? JSON.parse(data) : [];
+  } catch { return []; }
+};
+
+export const addRecentlyViewed = (userId: string, partId: string) => {
+  const current = getRecentlyViewed(userId);
+  const updated = [partId, ...current.filter((id) => id !== partId)].slice(0, 10);
+  localStorage.setItem(`${RECENTLY_VIEWED_KEY}-${userId}`, JSON.stringify(updated));
+};
+
+const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>(initialCategory || "all");
   const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>("name-asc");
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  useEffect(() => {
+    if (initialCategory) setCategoryFilter(initialCategory);
+  }, [initialCategory]);
 
   const { data: parts = [] } = useQuery({
     queryKey: ["store-spare-parts"],
@@ -62,10 +87,14 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
     return map;
   }, [categories]);
 
-  // Categories that have at least one part
   const activeCategories = useMemo(() => {
-    const ids = new Set(parts.map((p) => p.category_id).filter(Boolean));
-    return categories.filter((c) => ids.has(c.id));
+    const countMap: Record<string, number> = {};
+    parts.forEach((p) => {
+      if (p.category_id) countMap[p.category_id] = (countMap[p.category_id] || 0) + 1;
+    });
+    return categories
+      .filter((c) => countMap[c.id])
+      .map((c) => ({ ...c, count: countMap[c.id] || 0 }));
   }, [parts, categories]);
 
   const filtered = useMemo(() => {
@@ -79,8 +108,25 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
         (p) => p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)
       );
     }
+    // Sort
+    list = [...list].sort((a, b) => {
+      switch (sortBy) {
+        case "price-asc":
+          return (a.price ?? 999999) - (b.price ?? 999999);
+        case "price-desc":
+          return (b.price ?? 0) - (a.price ?? 0);
+        case "name-asc":
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
     return list;
-  }, [parts, categoryFilter, search]);
+  }, [parts, categoryFilter, search, sortBy]);
+
+  const handleSelectPart = useCallback((partId: string) => {
+    setSelectedPartId(partId);
+    if (user?.id) addRecentlyViewed(user.id, partId);
+  }, [user?.id]);
 
   const selectedPart = useMemo(
     () => parts.find((p) => p.id === selectedPartId) || null,
@@ -88,27 +134,48 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
   );
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f0fdf4" }}>
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3 mb-4">
-            <Button variant="ghost" size="icon" onClick={onBack}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
-            <h1 className="text-xl font-bold">Tienda de Repuestos</h1>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={onBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
+              <h1 className="text-xl font-bold">Tienda de Repuestos</h1>
+            </div>
+            <span className="text-sm text-muted-foreground hidden sm:block">
+              Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
+            </span>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nombre o código..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
+          {/* Search + Sort row */}
+          <div className="flex gap-3 mb-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre o código..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                className="pl-10 transition-colors"
+                style={searchFocused ? { borderColor: "#16a34a", boxShadow: "0 0 0 1px #16a34a33" } : {}}
+              />
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[200px] hidden sm:flex">
+                <ArrowUpDown className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name-asc">Nombre A-Z</SelectItem>
+                <SelectItem value="price-asc">Precio: menor a mayor</SelectItem>
+                <SelectItem value="price-desc">Precio: mayor a menor</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Category filters */}
@@ -122,32 +189,43 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
               }`}
               style={categoryFilter === "all" ? { backgroundColor: "#16a34a" } : {}}
             >
-              Todos
+              Todos ({parts.length})
             </button>
             {activeCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setCategoryFilter(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors flex items-center gap-1.5 ${
                   categoryFilter === cat.id
                     ? "text-white border-transparent"
                     : "bg-white border-gray-200 hover:bg-gray-50"
                 }`}
                 style={
                   categoryFilter === cat.id
-                    ? { backgroundColor: cat.color || "#16a34a" }
-                    : { color: cat.color || "#374151" }
+                    ? { backgroundColor: "#16a34a" }
+                    : {}
                 }
               >
-                {cat.name}
+                <span
+                  className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: cat.color || "#6b7280" }}
+                />
+                {cat.name} ({cat.count})
               </button>
             ))}
           </div>
         </div>
       </div>
 
+      {/* Mobile result count */}
+      <div className="container mx-auto px-4 pt-4 sm:hidden">
+        <p className="text-xs text-muted-foreground">
+          Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+
       {/* Grid */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-5">
         {filtered.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <Package className="h-12 w-12 mx-auto mb-3 opacity-40" />
@@ -155,17 +233,17 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
             <p className="text-sm">Probá con otro término de búsqueda o categoría</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 justify-items-center">
             {filtered.map((part) => {
               const cat = part.category_id ? categoryMap[part.category_id] : null;
               return (
                 <div
                   key={part.id}
-                  onClick={() => setSelectedPartId(part.id)}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                  className="group w-full max-w-[280px] bg-white rounded-xl border border-gray-100 overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg relative"
+                  onClick={() => handleSelectPart(part.id)}
                 >
                   {/* Image */}
-                  <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <div className="relative h-[160px] bg-gray-50 flex items-center justify-center overflow-hidden">
                     {part.image_url ? (
                       <img
                         src={part.image_url}
@@ -173,29 +251,33 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Package className="h-16 w-16 text-gray-300" />
+                      <Package className="h-14 w-14 text-gray-200" />
+                    )}
+                    {/* Category badge over image */}
+                    {cat && (
+                      <span
+                        className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-md text-white"
+                        style={{ backgroundColor: cat.color || "#6b7280" }}
+                      >
+                        {cat.name}
+                      </span>
                     )}
                   </div>
 
                   {/* Info */}
-                  <div className="p-4 space-y-2">
-                    <h3 className="font-bold text-sm line-clamp-2 leading-tight">
+                  <div className="p-3.5 space-y-1.5">
+                    <h3 className="font-semibold text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
                       {part.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground">Cód: {part.code}</p>
+                    <p className="text-[11px] text-muted-foreground">Cód: {part.code}</p>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {cat && (
-                        <Badge
-                          className="text-[10px] border"
-                          style={{
-                            backgroundColor: (cat.color || "#6b7280") + "18",
-                            color: cat.color || "#6b7280",
-                            borderColor: (cat.color || "#6b7280") + "40",
-                          }}
-                        >
-                          {cat.name}
-                        </Badge>
+                    <div className="flex items-center justify-between pt-1">
+                      {part.price != null ? (
+                        <p className="text-base font-bold" style={{ color: "#16a34a" }}>
+                          ${part.price.toLocaleString("es-AR")}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Consultar</p>
                       )}
                       {part.stock > 0 ? (
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>
@@ -207,12 +289,16 @@ const SparePartsStore = ({ onBack }: SparePartsStoreProps) => {
                         </span>
                       )}
                     </div>
+                  </div>
 
-                    {part.price != null && (
-                      <p className="text-lg font-bold" style={{ color: "#16a34a" }}>
-                        ${part.price.toLocaleString("es-AR")}
-                      </p>
-                    )}
+                  {/* Hover button */}
+                  <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                    <button
+                      className="w-full py-2.5 text-sm font-semibold text-white"
+                      style={{ backgroundColor: "#16a34a" }}
+                    >
+                      Solicitar
+                    </button>
                   </div>
                 </div>
               );
