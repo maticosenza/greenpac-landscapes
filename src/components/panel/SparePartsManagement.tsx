@@ -29,6 +29,7 @@ import {
 import { exportSparePartsPDF, exportSuppliersPDF } from "@/lib/generateSparePartsPDF";
 import SuppliersManagement from "./SuppliersManagement";
 import SparePartCategoriesManager from "./SparePartCategoriesManager";
+import CombosManagement from "./CombosManagement";
 import type { Supplier } from "./SuppliersManagement";
 import type { SparePartCategory } from "./SparePartCategoriesManager";
 
@@ -275,6 +276,7 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
             <TabsTrigger value="list" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Wrench className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Repuestos</TabsTrigger>
             <TabsTrigger value="categories" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Categorías</TabsTrigger>
             <TabsTrigger value="suppliers" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Proveedores</TabsTrigger>
+            <TabsTrigger value="combos" className="gap-1 text-xs sm:text-sm px-2.5 sm:px-3"><Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Combos</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
             <DropdownMenu>
@@ -558,6 +560,10 @@ const SparePartsManagement = ({ searchTerm }: SparePartsManagementProps) => {
 
         <TabsContent value="suppliers" className="mt-6">
           <SuppliersManagement />
+        </TabsContent>
+
+        <TabsContent value="combos" className="mt-6">
+          <CombosManagement />
         </TabsContent>
       </Tabs>
 

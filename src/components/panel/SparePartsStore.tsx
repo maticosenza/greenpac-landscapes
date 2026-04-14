@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, ArrowLeft, ArrowUpDown } from "lucide-react";
+import { Search, Package, ArrowLeft, ArrowUpDown, Tag, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SparePartStoreDetail from "./SparePartStoreDetail";
@@ -80,6 +80,32 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
       return data as StoreCategory[];
     },
   });
+
+  const { data: combos = [] } = useQuery({
+    queryKey: ["store-combos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("spare_part_combos" as any)
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as any[]).filter((c: any) => !c.valid_until || new Date(c.valid_until) >= new Date());
+    },
+  });
+
+  const { data: comboItems = [] } = useQuery({
+    queryKey: ["store-combo-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("combo_spare_part_items" as any)
+        .select("combo_id, spare_part_id");
+      if (error) throw error;
+      return (data as any[]) as { combo_id: string; spare_part_id: string }[];
+    },
+  });
+
+  const [comboScroll, setComboScroll] = useState(0);
 
   const categoryMap = useMemo(() => {
     const map: Record<string, StoreCategory> = {};
@@ -223,6 +249,104 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
           Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
         </p>
       </div>
+
+      {/* Combos & Ofertas */}
+      {combos.length > 0 && (
+        <div className="container mx-auto px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Tag className="h-5 w-5" style={{ color: "#16a34a" }} />
+              <h2 className="text-lg font-bold">Combos y Ofertas</h2>
+            </div>
+            {combos.length > 2 && (
+              <div className="flex gap-1">
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setComboScroll(Math.max(0, comboScroll - 1))}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setComboScroll(Math.min(combos.length - 1, comboScroll + 1))}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
+            {combos.map((combo: any) => {
+              const itemPartIds = comboItems.filter((ci) => ci.combo_id === combo.id).map((ci) => ci.spare_part_id);
+              const itemParts = parts.filter((p) => itemPartIds.includes(p.id));
+              return (
+                <div
+                  key={combo.id}
+                  className="flex-shrink-0 w-[340px] sm:w-[400px] border rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow snap-start"
+                >
+                  <div className="flex h-full">
+                    {/* Image */}
+                    <div className="w-[120px] sm:w-[140px] flex-shrink-0 bg-gray-50 flex items-center justify-center overflow-hidden">
+                      {combo.image_url ? (
+                        <img src={combo.image_url} alt={combo.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Package className="h-10 w-10 text-gray-200" />
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="flex-1 p-3 flex flex-col justify-between min-h-[160px]">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Badge
+                            className="text-[10px] px-1.5 py-0"
+                            style={
+                              combo.combo_type === "combo"
+                                ? { backgroundColor: "#dbeafe", color: "#1e40af", border: "1px solid #bfdbfe" }
+                                : { backgroundColor: "#ffedd5", color: "#c2410c", border: "1px solid #fed7aa" }
+                            }
+                          >
+                            {combo.combo_type === "combo" ? "Combo" : "Oferta"}
+                          </Badge>
+                          {combo.discount_percentage > 0 && (
+                            <Badge className="text-[10px] px-1.5 py-0" style={{ backgroundColor: "#fee2e2", color: "#dc2626", border: "1px solid #fecaca" }}>
+                              -{combo.discount_percentage}%
+                            </Badge>
+                          )}
+                        </div>
+                        <h3 className="font-semibold text-sm leading-tight line-clamp-2">{combo.name}</h3>
+                        <div className="mt-1.5 space-y-0.5">
+                          {itemParts.slice(0, 3).map((p) => (
+                            <p key={p.id} className="text-[11px] text-muted-foreground truncate">• {p.name}</p>
+                          ))}
+                          {itemParts.length > 3 && (
+                            <p className="text-[10px] text-muted-foreground">+{itemParts.length - 3} más</p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-xs text-muted-foreground line-through">${combo.original_price?.toLocaleString("es-AR")}</span>
+                          <span className="text-base font-bold" style={{ color: "#16a34a" }}>${combo.combo_price?.toLocaleString("es-AR")}</span>
+                        </div>
+                        {combo.valid_until && (
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Válido hasta {new Date(combo.valid_until).toLocaleDateString("es-AR")}
+                          </p>
+                        )}
+                        <Button
+                          size="sm"
+                          className="w-full mt-2 text-xs h-8 text-white"
+                          style={{ backgroundColor: "#16a34a" }}
+                          onClick={() => {
+                            // Open detail of first part or handle combo request
+                            if (itemParts.length > 0) handleSelectPart(itemParts[0].id);
+                          }}
+                        >
+                          Solicitar cotización
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Grid */}
       <div className="container mx-auto px-4 py-5">

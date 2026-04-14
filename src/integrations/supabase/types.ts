@@ -115,6 +115,42 @@ export type Database = {
         }
         Relationships: []
       }
+      combo_spare_part_items: {
+        Row: {
+          combo_id: string
+          created_at: string
+          id: string
+          spare_part_id: string
+        }
+        Insert: {
+          combo_id: string
+          created_at?: string
+          id?: string
+          spare_part_id: string
+        }
+        Update: {
+          combo_id?: string
+          created_at?: string
+          id?: string
+          spare_part_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "combo_spare_part_items_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "spare_part_combos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "combo_spare_part_items_spare_part_id_fkey"
+            columns: ["spare_part_id"]
+            isOneToOne: false
+            referencedRelation: "spare_parts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_inquiries: {
         Row: {
           created_at: string
@@ -541,6 +577,51 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      spare_part_combos: {
+        Row: {
+          combo_price: number
+          combo_type: string
+          created_at: string
+          description: string | null
+          discount_percentage: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          original_price: number
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          combo_price?: number
+          combo_type?: string
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          original_price?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          combo_price?: number
+          combo_type?: string
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          original_price?: number
+          updated_at?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
