@@ -81,6 +81,32 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
     },
   });
 
+  const { data: combos = [] } = useQuery({
+    queryKey: ["store-combos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("spare_part_combos" as any)
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as any[]).filter((c: any) => !c.valid_until || new Date(c.valid_until) >= new Date());
+    },
+  });
+
+  const { data: comboItems = [] } = useQuery({
+    queryKey: ["store-combo-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("combo_spare_part_items" as any)
+        .select("combo_id, spare_part_id");
+      if (error) throw error;
+      return (data as any[]) as { combo_id: string; spare_part_id: string }[];
+    },
+  });
+
+  const [comboScroll, setComboScroll] = useState(0);
+
   const categoryMap = useMemo(() => {
     const map: Record<string, StoreCategory> = {};
     categories.forEach((c) => (map[c.id] = c));
