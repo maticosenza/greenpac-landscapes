@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare } from "lucide-react";
+import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/greenpac-logo.png";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 import QuotationDetailDialog from "@/components/panel/QuotationDetailDialog";
+import SparePartsStore from "@/components/panel/SparePartsStore";
 
 const CustomerPanel = () => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [detailQuotationId, setDetailQuotationId] = useState<string | null>(null);
+  const [showStore, setShowStore] = useState(false);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["customer-quotations", user?.id],
