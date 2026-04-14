@@ -93,10 +93,16 @@ const CustomerPanel = () => {
         return <Badge variant="outline">Compra</Badge>;
       case "deposit":
         return <Badge variant="outline">Seña</Badge>;
+      case "spare_part":
+        return <Badge variant="outline" className="border-emerald-300 text-emerald-700 bg-emerald-50">Repuesto</Badge>;
       default:
         return <Badge variant="outline">Consulta</Badge>;
     }
   };
+
+  if (showStore) {
+    return <SparePartsStore onBack={() => setShowStore(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-muted">
