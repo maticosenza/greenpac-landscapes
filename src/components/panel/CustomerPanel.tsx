@@ -164,6 +164,26 @@ const CustomerPanel = () => {
           </Card>
         </div>
 
+        {/* Store CTA */}
+        <Card
+          className="mb-8 cursor-pointer hover:shadow-md transition-shadow border-emerald-200"
+          style={{ backgroundColor: "#f0fdf4" }}
+          onClick={() => setShowStore(true)}
+        >
+          <CardContent className="flex items-center gap-4 py-5">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#dcfce7" }}>
+              <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-sm">Tienda de Repuestos</h3>
+              <p className="text-xs text-muted-foreground">Explorá nuestro catálogo y solicitá cotización</p>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>
+              Ver catálogo →
+            </span>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Mis Solicitudes</CardTitle>
