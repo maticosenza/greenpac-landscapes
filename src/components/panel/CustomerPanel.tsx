@@ -21,6 +21,7 @@ const CustomerPanel = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [detailQuotationId, setDetailQuotationId] = useState<string | null>(null);
   const [showStore, setShowStore] = useState(false);
+  const [showProductStore, setShowProductStore] = useState(false);
   const [storeInitialCategory, setStoreInitialCategory] = useState<string | undefined>();
 
   // Handle redirect from auth with tab=tienda-repuestos
