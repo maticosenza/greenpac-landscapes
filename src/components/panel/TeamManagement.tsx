@@ -63,7 +63,7 @@ type AppRole = "customer" | "employee" | "admin" | "vendedor";
 type BadgeVariant = "destructive" | "default" | "secondary" | "outline";
 
 const TOOL_LABELS: Record<string, string> = {
-  products: "Productos",
+  products: "Maquinaria",
   quotations: "Cotizaciones",
   clients: "Clientes",
   contact_inquiries: "Consultas de contacto",
