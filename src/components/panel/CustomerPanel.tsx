@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare, Package, ChevronRight } from "lucide-react";
+import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare, Package, ChevronRight, Cog } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -256,6 +256,41 @@ const CustomerPanel = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Product Catalog CTA */}
+        <Card className="overflow-hidden border-0 shadow-sm" style={{ backgroundColor: "#eff6ff" }}>
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-11 w-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#dbeafe" }}>
+                  <Cog className="h-5 w-5" style={{ color: "#2563eb" }} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm">Catálogo de Maquinaria</h3>
+                  <p className="text-xs text-muted-foreground">Conocé nuestra línea de productos</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="text-white hidden sm:flex"
+                style={{ backgroundColor: "#2563eb" }}
+                onClick={() => setShowProductStore(true)}
+              >
+                Ver catálogo
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+            <Button
+              size="sm"
+              className="w-full text-white sm:hidden"
+              style={{ backgroundColor: "#2563eb" }}
+              onClick={() => setShowProductStore(true)}
+            >
+              Ver catálogo
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Store CTA - enhanced */}
         <Card className="overflow-hidden border-0 shadow-sm" style={{ backgroundColor: "#f0fdf4" }}>
