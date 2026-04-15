@@ -594,8 +594,14 @@ const ClientZonalReports = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} placeholder="Desde" className="w-full" />
-              <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} placeholder="Hasta" className="w-full" />
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Desde</label>
+                <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full h-10" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Hasta</label>
+                <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full h-10" />
+              </div>
             </div>
           </CardContent>
         )}
