@@ -297,7 +297,7 @@ const Hero = () => {
                     href="#productos"
                     className="flex-1 flex items-center justify-center h-[40px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[12px] shadow-lg transition-all duration-300"
                   >
-                    {ctaProducts}
+                    Productos
                   </a>
                   <button
                     onClick={handleVerRepuestos}
