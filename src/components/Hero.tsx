@@ -329,7 +329,7 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-            </div>
+          </EditableSection>
           </EditableSection>
         </div>
       </div>
