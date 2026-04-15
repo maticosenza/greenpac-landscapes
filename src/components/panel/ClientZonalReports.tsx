@@ -596,11 +596,11 @@ const ClientZonalReports = () => {
               </Select>
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Desde</label>
-                <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full h-10" />
+                <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full h-9 text-sm" />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Hasta</label>
-                <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full h-10" />
+                <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full h-9 text-sm" />
               </div>
             </div>
           </CardContent>
