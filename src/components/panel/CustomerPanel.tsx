@@ -11,6 +11,7 @@ import logo from "@/assets/greenpac-logo.png";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 import QuotationDetailDialog from "@/components/panel/QuotationDetailDialog";
 import SparePartsStore, { getRecentlyViewed } from "@/components/panel/SparePartsStore";
+import ProductsStore from "@/components/panel/ProductsStore";
 import { toast } from "sonner";
 
 const CustomerPanel = () => {
