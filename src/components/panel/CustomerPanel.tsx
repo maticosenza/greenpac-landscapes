@@ -246,13 +246,22 @@ const CustomerPanel = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="col-span-2 md:col-span-1">
+          <Card
+            className="col-span-2 md:col-span-1 cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setShowChangePassword(true)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Mi Perfil</CardTitle>
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{profile?.phone || "Sin teléfono"}</p>
+            <CardContent className="space-y-1">
+              <p className="text-sm font-medium">{profile?.full_name}</p>
+              <p className="text-xs text-muted-foreground">{profile?.email}</p>
+              <p className="text-xs text-muted-foreground">{profile?.phone || "Sin teléfono"}</p>
+              {profile?.company && (
+                <p className="text-xs text-muted-foreground">{profile.company}</p>
+              )}
+              <p className="text-xs text-primary font-medium mt-1">Editar perfil →</p>
             </CardContent>
           </Card>
         </div>
