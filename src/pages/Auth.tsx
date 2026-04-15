@@ -48,10 +48,17 @@ const Auth = () => {
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectParam = searchParams.get("redirect");
+
   // Redirect to panel only when user is logged in AND doesn't need password setup
   useEffect(() => {
     if (user && !authLoading && !needsPasswordSetup) {
-      navigate("/panel");
+      if (redirectParam) {
+        navigate(`/panel?tab=${redirectParam}`);
+      } else {
+        navigate("/panel");
+      }
     }
   }, [user, authLoading, navigate, needsPasswordSetup]);
 
