@@ -247,8 +247,8 @@ const Hero = () => {
             <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align).replace('items-', '')} space-y-2 sm:space-y-5 lg:space-y-7`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
-                <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase">
+                <Leaf className="h-3.5 w-3.5 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
+                <p className="text-primary font-semibold text-[9px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase whitespace-nowrap">
                   {kicker}
                 </p>
               </div>
