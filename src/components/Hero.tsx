@@ -231,8 +231,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: centered-high, sm+: centered */}
-      <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pt-[clamp(11rem,38vw,16rem)] sm:pt-32 pb-10 sm:pb-20 lg:pb-24 sm:mt-0">
+      <div className="relative z-10 flex flex-col justify-center greenpac-container" style={{ minHeight: "100svh" }}>
+        <div className="max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px] pb-20 sm:pb-20 lg:pb-24 pt-20 sm:pt-32">
           {/* Single unified block: text + CTAs always together */}
           <EditableSection
             sectionId="Hero Textos"
@@ -267,48 +267,60 @@ const Hero = () => {
                 </h1>
               </div>
 
-              {/* Subtitle */}
-              <div className="w-full relative">
+              {/* Subtitle — hidden on mobile */}
+              <div className="w-full relative hidden sm:block">
                 {isEditMode && (
                   <div className="absolute -top-8 left-0 z-20">
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[clamp(0.85rem,3.2vw,1.05rem)] sm:text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
-                  <span className="hidden sm:inline">
-                    {subtitleLine1}
-                    {subtitleLine2 ? (
-                      <>
-                        <br />
-                        {subtitleLine2}
-                      </>
-                    ) : null}
-                  </span>
-                  <span className="sm:hidden">
-                    Equipos listos para trabajar, asesoramiento experto. Cotizaciones en minutos.
-                  </span>
+                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
+                  {subtitleLine1}
+                  {subtitleLine2 ? (
+                    <>
+                      <br />
+                      {subtitleLine2}
+                    </>
+                  ) : null}
                 </p>
-                {/* Mobile-only CTA */}
-                <a
-                  href="#cotizacion"
-                  className="sm:hidden inline-block mt-4 w-fit border border-white/80 text-white text-sm font-medium px-5 py-2 rounded-md hover:bg-white/10 transition-colors"
-                >
-                  Solicitar Cotización
-                </a>
               </div>
 
-              {/* CTA buttons — always immediately below text */}
+              {/* CTA buttons — mobile: vertical column, desktop: horizontal row */}
+              {/* Mobile buttons */}
+              <div className="flex sm:hidden flex-col gap-[10px] w-full max-w-[320px] pt-4">
+                <a
+                  href="#cotizacion"
+                  className="flex items-center justify-center h-[48px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-base transition-all duration-300"
+                >
+                  {ctaQuote}
+                </a>
+                <a
+                  href="#productos"
+                  className="flex items-center justify-center h-[52px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-base shadow-lg transition-all duration-300"
+                >
+                  {ctaProducts}
+                </a>
+                <button
+                  onClick={handleVerRepuestos}
+                  className="flex items-center justify-center gap-2 h-[48px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-base transition-all duration-300"
+                >
+                  <Wrench className="h-5 w-5" />
+                  Ver Repuestos
+                </button>
+              </div>
+
+              {/* Desktop buttons */}
               <div className="relative w-full">
-                <div className={`hidden sm:flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 pt-2 sm:pt-3 w-full ${justifyClass(h1Align)}`}>
-                  <Button variant="heroOutline" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
+                <div className={`hidden sm:flex flex-row gap-4 lg:gap-5 pt-3 w-full ${justifyClass(h1Align)}`}>
+                  <Button variant="heroOutline" size="lg" className="w-auto h-[50px] lg:h-[54px] text-base lg:text-lg px-10 lg:px-12" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="hero" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
+                  <Button variant="hero" size="lg" className="w-auto h-[50px] lg:h-[54px] text-base lg:text-lg px-10 lg:px-12" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12 border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="w-auto h-[50px] lg:h-[54px] text-base lg:text-lg px-10 lg:px-12 border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
                     <Wrench className="h-5 w-5 mr-1.5" />
@@ -316,6 +328,7 @@ const Hero = () => {
                   </Button>
                 </div>
               </div>
+            </div>
             </div>
           </EditableSection>
         </div>
