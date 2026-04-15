@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { LogOut, FileText, User, ArrowLeft, Clock, UserCircle, MessageSquare, Package, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,14 +11,32 @@ import logo from "@/assets/greenpac-logo.png";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
 import QuotationDetailDialog from "@/components/panel/QuotationDetailDialog";
 import SparePartsStore, { getRecentlyViewed } from "@/components/panel/SparePartsStore";
+import { toast } from "sonner";
 
 const CustomerPanel = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, profile, signOut } = useAuth();
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [detailQuotationId, setDetailQuotationId] = useState<string | null>(null);
   const [showStore, setShowStore] = useState(false);
   const [storeInitialCategory, setStoreInitialCategory] = useState<string | undefined>();
+
+  // Handle redirect from auth with tab=tienda-repuestos
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "tienda-repuestos") {
+      setShowStore(true);
+      searchParams.delete("tab");
+      setSearchParams(searchParams, { replace: true });
+      // Show welcome toast on first visit
+      const welcomeKey = `greenpac-store-welcome-${user?.id}`;
+      if (user?.id && !localStorage.getItem(welcomeKey)) {
+        localStorage.setItem(welcomeKey, "1");
+        toast.success("¡Bienvenido a la Tienda de Repuestos de Greenpac! Explorá el catálogo y solicitá tu cotización.", { duration: 5000 });
+      }
+    }
+  }, [searchParams, setSearchParams, user?.id]);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["customer-quotations", user?.id],

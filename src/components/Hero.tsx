@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf } from "lucide-react";
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
 import DraggableHeroBlock from "@/components/DraggableHeroBlock";
 import HeroAlignmentToggle from "@/components/HeroAlignmentToggle";
+import { useAuth } from "@/hooks/useAuth";
 import heroImageDefault from "@/assets/hero-banner-greenpac-v6.jpg";
 import heroMobileDefault from "@/assets/hero-banner-mobile-v2.jpg";
 
@@ -163,6 +165,16 @@ const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
 const Hero = () => {
   const { getText, getAsset, updateText } = useSiteContent();
   const { isEditMode } = useEditMode();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleVerRepuestos = useCallback(() => {
+    if (user) {
+      navigate("/panel?tab=tienda-repuestos");
+    } else {
+      navigate("/auth?redirect=tienda-repuestos");
+    }
+  }, [user, navigate]);
 
   const heroAsset = getAsset("hero-banner", heroImageDefault, "Campo argentino con silobolsas");
   const heroMobileAsset = getAsset("hero-banner-mobile", heroMobileDefault, "Hero móvil");
@@ -293,6 +305,14 @@ const Hero = () => {
                   </Button>
                   <Button variant="hero" size="lg" className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12" asChild>
                     <a href="#productos">{ctaProducts}</a>
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto h-[54px] sm:h-[50px] lg:h-[54px] text-base lg:text-lg sm:px-10 lg:px-12 border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    onClick={handleVerRepuestos}
+                  >
+                    <Wrench className="h-5 w-5 mr-1.5" />
+                    Ver Repuestos
                   </Button>
                 </div>
               </div>
