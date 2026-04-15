@@ -183,7 +183,7 @@ const Hero = () => {
   const subtitleLine1 = getText("hero-subtitle-line1", "Equipos listos para trabajar, con asesoramiento experto.");
   const subtitleLine2 = getText("hero-subtitle-line2", "Cotizá en minutos y coordinamos entrega a todo el país.");
   const ctaQuote = getText("hero-cta-primary", "Solicitar Cotización");
-  const ctaProducts = getText("hero-cta-secondary", "Ver Productos");
+  const ctaProducts = getText("hero-cta-secondary", "Ver Maquinaria");
   
 
   const h1Align = getText("hero-h1-align", "left");
@@ -241,7 +241,7 @@ const Hero = () => {
               { key: "hero-subtitle-line1", label: "Subtítulo — Línea 1", type: "text", fallback: "Equipos listos para trabajar, con asesoramiento experto." },
               { key: "hero-subtitle-line2", label: "Subtítulo — Línea 2", type: "text", fallback: "Cotizá en minutos y coordinamos entrega a todo el país." },
               { key: "hero-cta-primary", label: "Botón primario", type: "text", fallback: "Solicitar Cotización" },
-              { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Productos" },
+              { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
             <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align).replace('items-', '')} space-y-2 sm:space-y-5 lg:space-y-7`}>
@@ -297,7 +297,7 @@ const Hero = () => {
                     href="#productos"
                     className="flex-1 flex items-center justify-center h-[40px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[12px] shadow-lg transition-all duration-300"
                   >
-                    Productos
+                    Maquinaria
                   </a>
                   <button
                     onClick={handleVerRepuestos}
