@@ -260,7 +260,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[28px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
                   <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
                   <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
@@ -288,23 +288,25 @@ const Hero = () => {
               <div className="flex sm:hidden flex-col items-start gap-2 pt-3">
                 <a
                   href="#cotizacion"
-                  className="flex items-center justify-center h-[42px] px-5 rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[13px] transition-all duration-300"
+                  className="flex items-center justify-center w-full h-[42px] px-5 rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[13px] transition-all duration-300"
                 >
                   {ctaQuote}
                 </a>
-                <a
-                  href="#productos"
-                  className="flex items-center justify-center h-[44px] px-5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[13px] shadow-lg transition-all duration-300"
-                >
-                  {ctaProducts}
-                </a>
-                <button
-                  onClick={handleVerRepuestos}
-                  className="flex items-center justify-center gap-1.5 h-[42px] px-5 rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[13px] transition-all duration-300"
-                >
-                  <Wrench className="h-4 w-4" />
-                  Ver Repuestos
-                </button>
+                <div className="flex items-start gap-2 w-full">
+                  <a
+                    href="#productos"
+                    className="flex-1 flex items-center justify-center h-[40px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[12px] shadow-lg transition-all duration-300"
+                  >
+                    {ctaProducts}
+                  </a>
+                  <button
+                    onClick={handleVerRepuestos}
+                    className="flex-1 flex items-center justify-center gap-1.5 h-[40px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[12px] transition-all duration-300"
+                  >
+                    <Wrench className="h-3.5 w-3.5" />
+                    Repuestos
+                  </button>
+                </div>
               </div>
 
               {/* Desktop buttons */}
