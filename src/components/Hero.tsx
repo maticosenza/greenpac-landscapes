@@ -301,9 +301,8 @@ const Hero = () => {
                   </a>
                   <button
                     onClick={handleVerRepuestos}
-                    className="flex-1 flex items-center justify-center gap-1.5 h-[40px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[12px] transition-all duration-300"
+                    className="flex-1 flex items-center justify-center h-[40px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[12px] transition-all duration-300"
                   >
-                    <Wrench className="h-3.5 w-3.5" />
                     Repuestos
                   </button>
                 </div>
