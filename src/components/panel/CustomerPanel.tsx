@@ -171,6 +171,14 @@ const CustomerPanel = () => {
     }
   };
 
+  if (showProductStore) {
+    return (
+      <ProductsStore
+        onBack={() => setShowProductStore(false)}
+      />
+    );
+  }
+
   if (showStore) {
     return (
       <SparePartsStore
