@@ -232,7 +232,7 @@ const Hero = () => {
 
       {/* Content — mobile: centered-high, sm+: centered */}
       <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-28 sm:pt-32" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[280px] sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
+        <div className="max-w-[320px] sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
