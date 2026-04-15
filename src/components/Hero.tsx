@@ -248,7 +248,7 @@ const Hero = () => {
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
                 <Leaf className="h-3.5 w-3.5 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[9px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.2em] uppercase whitespace-nowrap">
+                <p className="text-primary font-semibold text-[10.5px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.25em] uppercase whitespace-nowrap">
                   {kicker}
                 </p>
               </div>
