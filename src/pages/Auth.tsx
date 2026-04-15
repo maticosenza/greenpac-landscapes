@@ -82,7 +82,11 @@ const Auth = () => {
       }
     } else {
       toast.success("¡Bienvenido!");
-      navigate("/panel");
+      if (redirectParam) {
+        navigate(`/panel?tab=${redirectParam}`);
+      } else {
+        navigate("/panel");
+      }
     }
   };
 
@@ -202,15 +206,17 @@ const Auth = () => {
               Panel de Usuario
             </h1>
             <p className="text-muted-foreground mt-2">
-              Accedé a tu cuenta o registrate
+              {redirectParam === "tienda-repuestos"
+                ? "Registrate o iniciá sesión para acceder a la Tienda de Repuestos"
+                : "Accedé a tu cuenta o registrate"}
             </p>
           </div>
 
           <div className="bg-card rounded-xl p-6 shadow-lg">
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
-                <TabsTrigger value="signup">Registrarse</TabsTrigger>
+                <TabsTrigger value="login">Ya tengo cuenta</TabsTrigger>
+                <TabsTrigger value="signup">Registrarme</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
@@ -348,6 +354,12 @@ const Auth = () => {
                       )}
                       Crear Cuenta
                     </Button>
+
+                    {redirectParam === "tienda-repuestos" && (
+                      <p className="text-xs text-muted-foreground text-center mt-3">
+                        Al registrarte podrás ver el catálogo completo de repuestos y solicitar cotizaciones
+                      </p>
+                    )}
                   </form>
                 </Form>
               </TabsContent>
