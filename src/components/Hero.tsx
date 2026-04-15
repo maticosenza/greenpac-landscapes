@@ -330,7 +330,6 @@ const Hero = () => {
               </div>
             </div>
           </EditableSection>
-          </EditableSection>
         </div>
       </div>
 
