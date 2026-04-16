@@ -19,10 +19,10 @@ const StoresSection = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="machinery-store">
-          <ProductsStore />
+          <ProductsStore onBack={() => {}} />
         </TabsContent>
         <TabsContent value="spare-parts-store">
-          <SparePartsStore />
+          <SparePartsStore onBack={() => {}} />
         </TabsContent>
       </Tabs>
     </div>
