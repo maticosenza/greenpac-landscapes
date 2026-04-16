@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, UserCircle, MapPin, Wrench, AlertTriangle } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, Settings, Shield, MessageSquare, Package, UserCircle, MapPin, Wrench, AlertTriangle, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import ProductManagement from "./ProductManagement";
 import SparePartsManagement from "./SparePartsManagement";
 import ZonalReports from "./ZonalReports";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
+import StoresSection from "./StoresSection";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -194,7 +195,7 @@ const AdminPanel = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="bg-card rounded-xl border shadow-sm p-1.5 sm:p-2 mb-6">
             {/* Desktop */}
-            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg hidden sm:grid sm:grid-cols-7 gap-1">
+            <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-lg hidden sm:grid sm:grid-cols-8 gap-1">
               <TabsTrigger value="quotations" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <FileText className="h-4 w-4 shrink-0" />
                 Cotizaciones
@@ -227,6 +228,10 @@ const AdminPanel = () => {
               <TabsTrigger value="zones" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
                 <MapPin className="h-4 w-4 shrink-0" />
                 Zonas
+              </TabsTrigger>
+              <TabsTrigger value="stores" className="text-sm px-3 py-2.5 min-h-[40px] rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all">
+                <Store className="h-4 w-4 shrink-0" />
+                Tiendas
               </TabsTrigger>
             </TabsList>
             {/* Mobile: 2-row grid */}
@@ -264,6 +269,10 @@ const AdminPanel = () => {
                 <MapPin className="h-[18px] w-[18px]" />
                 <span>Zonas</span>
               </TabsTrigger>
+              <TabsTrigger value="stores" className="text-[11px] px-2 py-2 min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/40 data-[state=active]:text-foreground transition-all">
+                <Store className="h-[18px] w-[18px]" />
+                <span>Tiendas</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -293,6 +302,10 @@ const AdminPanel = () => {
 
           <TabsContent value="zones">
             <ZonalReports />
+          </TabsContent>
+
+          <TabsContent value="stores">
+            <StoresSection />
           </TabsContent>
         </Tabs>
 
