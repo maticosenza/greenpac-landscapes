@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare, UserCircle, Package, MapPin } from "lucide-react";
+import { LogOut, FileText, Users, Plus, ArrowLeft, Search, MessageSquare, UserCircle, Package, MapPin, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import CreateQuotationDialog from "./CreateQuotationDialog";
 import ProductManagement from "./ProductManagement";
 import ZonalReports from "./ZonalReports";
 import AccountSettingsDialog from "@/components/auth/AccountSettingsDialog";
+import StoresSection from "./StoresSection";
 
 const EmployeePanel = () => {
   const navigate = useNavigate();
@@ -82,6 +83,7 @@ const EmployeePanel = () => {
     if (enabledTools.products) tabs.push({ value: "products", label: "Maquinaria", shortLabel: "Maq.", icon: Package });
     if (enabledTools.clients) tabs.push({ value: "customers", label: "Clientes", shortLabel: "Client.", icon: Users });
     if (enabledTools.zonas) tabs.push({ value: "zones", label: "Zonas", shortLabel: "Zonas", icon: MapPin });
+    tabs.push({ value: "stores", label: "Tiendas", shortLabel: "Tiendas", icon: Store });
     return tabs;
   }, [enabledTools]);
 
@@ -228,6 +230,10 @@ const EmployeePanel = () => {
 
             <TabsContent value="zones">
               <ZonalReports />
+            </TabsContent>
+
+            <TabsContent value="stores">
+              <StoresSection />
             </TabsContent>
           </Tabs>
         ) : (
