@@ -152,7 +152,7 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="pt-20">
+      <main className="pt-24 sm:pt-20">
         {/* Breadcrumb */}
         <section className="bg-muted py-4">
           <div className="greenpac-container">
