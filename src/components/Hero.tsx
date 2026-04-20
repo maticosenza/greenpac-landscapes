@@ -232,7 +232,7 @@ const Hero = () => {
 
       {/* Content — mobile: centered-high, sm+: centered */}
       <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-40 sm:pt-32" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-full sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
+        <div className="w-full max-w-[360px] sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -260,7 +260,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[44px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[38px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
                   <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
                   <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
