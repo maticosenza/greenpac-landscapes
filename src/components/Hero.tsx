@@ -232,7 +232,7 @@ const Hero = () => {
 
       {/* Content — mobile: centered-high, sm+: centered */}
       <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-40 sm:pt-32" style={{ minHeight: "100svh" }}>
-        <div className="max-w-[320px] sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
+        <div className="w-full max-w-full sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -247,8 +247,8 @@ const Hero = () => {
             <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align).replace('items-', '')} space-y-2 sm:space-y-5 lg:space-y-7`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
-                <Leaf className="h-3.5 w-3.5 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[10px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.15em] sm:tracking-[0.25em] uppercase whitespace-nowrap">
+                <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
+                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.18em] sm:tracking-[0.25em] uppercase whitespace-nowrap">
                   {kicker}
                 </p>
               </div>
@@ -260,7 +260,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[38px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[44px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
                   <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
                   <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
                 </h1>
@@ -285,23 +285,23 @@ const Hero = () => {
               </div>
 
               {/* Mobile buttons — compact, left-aligned */}
-              <div className="flex sm:hidden flex-col items-stretch gap-2 pt-3 w-full">
+              <div className="flex sm:hidden flex-col items-stretch gap-2.5 pt-3 w-full">
                 <a
                   href="#cotizacion"
-                  className="flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[13px] transition-all duration-300"
+                  className="flex items-center justify-center h-[48px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[15px] transition-all duration-300"
                 >
                   {ctaQuote}
                 </a>
-                <div className="flex gap-2 w-full">
+                <div className="flex gap-2.5 w-full">
                   <a
                     href="#productos"
-                    className="flex-1 flex items-center justify-center h-[40px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[12px] shadow-lg transition-all duration-300"
+                    className="flex-1 flex items-center justify-center h-[46px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[14px] shadow-lg transition-all duration-300"
                   >
                     Maquinaria
                   </a>
                   <button
                     onClick={handleVerRepuestos}
-                    className="flex-1 flex items-center justify-center h-[40px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[12px] transition-all duration-300"
+                    className="flex-1 flex items-center justify-center h-[46px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
                   >
                     Repuestos
                   </button>
