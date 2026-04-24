@@ -54,7 +54,7 @@ const SparePartStoreDetail = ({ part, category, open, onOpenChange }: Props) => 
         client_email: profile.email,
         client_phone: profile.phone || null,
         company: profile.company || null,
-        quotation_type: "spare_part",
+        quotation_type: "quote",
         spare_part_id: part.id,
         spare_part_quantity: quantity,
         message: message.trim() || `Solicitud de repuesto: ${part.name} (${part.code}) x${quantity}`,
@@ -63,9 +63,11 @@ const SparePartStoreDetail = ({ part, category, open, onOpenChange }: Props) => 
       if (error) throw error;
       setSubmitted(true);
       queryClient.invalidateQueries({ queryKey: ["customer-quotations"] });
+      queryClient.invalidateQueries({ queryKey: ["quotations"] });
       toast.success("Solicitud enviada correctamente");
     } catch (e: any) {
-      toast.error("Error al enviar la solicitud");
+      console.error("Error creating spare part quotation:", e);
+      toast.error(e?.message || "Error al enviar la solicitud");
     } finally {
       setSubmitting(false);
     }
