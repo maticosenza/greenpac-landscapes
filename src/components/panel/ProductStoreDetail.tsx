@@ -92,10 +92,10 @@ const ProductStoreDetail = ({ product, open, onOpenChange }: Props) => {
         </DialogHeader>
 
         {/* Image gallery */}
-        <div className="relative aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+        <div className="relative w-full h-56 sm:h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
           {allImages.length > 0 ? (
             <>
-              <img src={allImages[imageIndex]} alt={product.name} className="w-full h-full object-cover" />
+              <img src={allImages[imageIndex]} alt={product.name} className="max-w-full max-h-full object-contain" />
               {allImages.length > 1 && (
                 <>
                   <button
