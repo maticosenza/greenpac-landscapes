@@ -94,9 +94,9 @@ const SparePartStoreDetail = ({ part, category, open, onOpenChange }: Props) => 
         </DialogHeader>
 
         {/* Image */}
-        <div className="aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+        <div className="w-full h-56 sm:h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
           {part.image_url ? (
-            <img src={part.image_url} alt={part.name} className="w-full h-full object-cover" />
+            <img src={part.image_url} alt={part.name} className="max-w-full max-h-full object-contain" />
           ) : (
             <Package className="h-20 w-20 text-gray-300" />
           )}
