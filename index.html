@@ -13,17 +13,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://fonts.cdnfonts.com" />
     
-    <!-- Load fonts with display=swap for better performance -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <!-- Load primary font synchronously with swap so text paints immediately with correct family -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+    <!-- Ethnocentric is decorative/secondary, keep deferred -->
     <link rel="preload" as="style" href="https://fonts.cdnfonts.com/css/ethnocentric" />
     <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/ethnocentric" media="print" onload="this.media='all'" />
-    
-    <!-- Fallback for browsers without JS -->
     <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
       <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/ethnocentric" />
     </noscript>
+
+    <!-- Preload critical above-the-fold images so the hero banner & logo paint with the first frame -->
+    <link rel="preload" as="image" href="/src/assets/hero-banner-greenpac-v6.jpg" media="(min-width: 640px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/src/assets/hero-banner-mobile-v2.jpg" media="(max-width: 639px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/src/assets/greenpac-logo-new.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/src/assets/greenpac-text.png" fetchpriority="high" />
 
     <meta property="og:title" content="Greenpac - Maquinaria Agrícola" />
     <meta property="og:description" content="Líderes en importación de maquinaria para la conservación de forrajes en Argentina" />
