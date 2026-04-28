@@ -872,7 +872,7 @@ const QuotationDetailDialog = ({
 
               {/* Input area */}
               <div className="border-t p-2 flex gap-1.5 items-end">
-                <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple onChange={handleFileUpload} className="hidden" />
+                <input ref={fileInputRef} type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/jpeg,image/png,.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple onChange={handleFileUpload} className="hidden" />
                 <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
                 </Button>
