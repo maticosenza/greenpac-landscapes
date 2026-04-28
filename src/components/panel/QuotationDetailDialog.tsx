@@ -8,6 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -155,6 +161,7 @@ const QuotationDetailDialog = ({
   });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
 
   const { data: quotation } = useQuery({
     queryKey: ["quotation-detail", quotationId],
@@ -461,6 +468,7 @@ const QuotationDetailDialog = ({
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (mediaInputRef.current) mediaInputRef.current.value = "";
     }
   };
 
@@ -872,10 +880,25 @@ const QuotationDetailDialog = ({
 
               {/* Input area */}
               <div className="border-t p-2 flex gap-1.5 items-end">
-                <input ref={fileInputRef} type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/jpeg,image/png,.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple onChange={handleFileUpload} className="hidden" />
-                <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
-                </Button>
+                <input ref={fileInputRef} type="file" accept="application/pdf,.pdf,application/msword,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,application/vnd.ms-excel,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx" multiple onChange={handleFileUpload} className="hidden" />
+                <input ref={mediaInputRef} type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple onChange={handleFileUpload} className="hidden" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8" disabled={uploading} aria-label="Adjuntar archivo">
+                      {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      PDF o documento
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => mediaInputRef.current?.click()}>
+                      <Paperclip className="h-4 w-4 mr-2" />
+                      Imagen
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Textarea
                   placeholder="Escribí un mensaje..."
                   value={chatMessage}
