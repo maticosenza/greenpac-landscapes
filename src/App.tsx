@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { EditModeProvider } from "@/hooks/useEditMode";
+import { CartProvider } from "@/hooks/useCart";
+import CartSheet from "@/components/panel/CartSheet";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -28,23 +30,26 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <EditModeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/panel" element={<Panel />} />
-                <Route path="/productos/:id" element={<ProductDetail />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <CartSheet />
+            <BrowserRouter>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/panel" element={<Panel />} />
+                  <Route path="/productos/:id" element={<ProductDetail />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CartProvider>
       </EditModeProvider>
     </AuthProvider>
   </QueryClientProvider>
