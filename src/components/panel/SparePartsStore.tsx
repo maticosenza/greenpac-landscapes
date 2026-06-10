@@ -193,10 +193,12 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
               <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
               <h1 className="text-xl font-bold">Tienda de Repuestos</h1>
             </div>
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
-            </span>
-            <CartButton />
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
+              </span>
+              <CartButton />
+            </div>
           </div>
 
           {/* Search + Sort row */}
