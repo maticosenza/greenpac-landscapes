@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCart } from "@/hooks/useCart";
 
 interface Product {
   id: string;
@@ -32,6 +33,7 @@ interface Props {
 const ProductStoreDetail = ({ product, open, onOpenChange }: Props) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  const { addItem, openCart } = useCart();
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -190,14 +192,34 @@ const ProductStoreDetail = ({ product, open, onOpenChange }: Props) => {
             </div>
           </div>
         ) : (
-          <Button
-            className="w-full text-white"
-            style={{ backgroundColor: "#16a34a" }}
-            onClick={() => setShowForm(true)}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Solicitar cotización
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                addItem({
+                  type: "product",
+                  id: product.id,
+                  name: product.name,
+                  price: product.price ?? null,
+                  image_url: product.image_url ?? null,
+                });
+                toast.success(`${product.name} agregado al carrito`);
+                onOpenChange(false);
+                setTimeout(() => openCart(), 150);
+              }}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Agregar al carrito
+            </Button>
+            <Button
+              className="flex-1 text-white"
+              style={{ backgroundColor: "#16a34a" }}
+              onClick={() => setShowForm(true)}
+            >
+              Solicitar sólo este
+            </Button>
+          </div>
         )}
       </DialogContent>
     </Dialog>
