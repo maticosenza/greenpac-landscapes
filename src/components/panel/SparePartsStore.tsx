@@ -439,14 +439,18 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
                     </div>
                   </div>
 
-                  {/* Hover button */}
-                  <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-                    <button
-                      className="w-full py-2.5 text-sm font-semibold text-white"
+                  {/* Add to cart */}
+                  <div className="px-3.5 pb-3.5">
+                    <Button
+                      size="sm"
+                      className="w-full text-white text-xs h-8"
                       style={{ backgroundColor: "#16a34a" }}
+                      onClick={(e) => handleAddToCart(e, part)}
+                      disabled={part.stock <= 0}
                     >
-                      Solicitar
-                    </button>
+                      <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                      {part.stock > 0 ? "Agregar al carrito" : "Sin stock"}
+                    </Button>
                   </div>
                 </div>
               );
