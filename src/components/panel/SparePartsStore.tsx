@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SparePartStoreDetail from "./SparePartStoreDetail";
 import { useAuth } from "@/hooks/useAuth";
+import CartButton from "./CartButton";
+import { useCart } from "@/hooks/useCart";
+import { ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
 
 interface StoreSparePart {
   id: string;
@@ -106,6 +110,23 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
   });
 
   const [comboScroll, setComboScroll] = useState(0);
+  const { addItem } = useCart();
+
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent, part: StoreSparePart) => {
+      e.stopPropagation();
+      addItem({
+        type: "spare",
+        id: part.id,
+        name: part.name,
+        code: part.code,
+        price: part.price ?? null,
+        image_url: part.image_url ?? null,
+      });
+      toast.success(`${part.name} agregado al carrito`);
+    },
+    [addItem]
+  );
 
   const categoryMap = useMemo(() => {
     const map: Record<string, StoreCategory> = {};
@@ -172,9 +193,12 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
               <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
               <h1 className="text-xl font-bold">Tienda de Repuestos</h1>
             </div>
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Mostrando {filtered.length} repuesto{filtered.length !== 1 ? "s" : ""}
+              </span>
+              <CartButton />
+            </div>
           </div>
 
           {/* Search + Sort row */}
@@ -415,14 +439,18 @@ const SparePartsStore = ({ onBack, initialCategory }: SparePartsStoreProps) => {
                     </div>
                   </div>
 
-                  {/* Hover button */}
-                  <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-                    <button
-                      className="w-full py-2.5 text-sm font-semibold text-white"
+                  {/* Add to cart */}
+                  <div className="px-3.5 pb-3.5">
+                    <Button
+                      size="sm"
+                      className="w-full text-white text-xs h-8"
                       style={{ backgroundColor: "#16a34a" }}
+                      onClick={(e) => handleAddToCart(e, part)}
+                      disabled={part.stock <= 0}
                     >
-                      Solicitar
-                    </button>
+                      <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                      {part.stock > 0 ? "Agregar al carrito" : "Sin stock"}
+                    </Button>
                   </div>
                 </div>
               );

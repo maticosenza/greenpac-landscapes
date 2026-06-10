@@ -6,6 +6,10 @@ import { Search, Package, ArrowLeft, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProductStoreDetail from "./ProductStoreDetail";
+import CartButton from "./CartButton";
+import { useCart } from "@/hooks/useCart";
+import { ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
 
 interface StoreProduct {
   id: string;
@@ -30,6 +34,22 @@ const ProductsStore = ({ onBack, initialCategory }: ProductsStoreProps) => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>("name-asc");
   const [searchFocused, setSearchFocused] = useState(false);
+  const { addItem } = useCart();
+
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent, product: StoreProduct) => {
+      e.stopPropagation();
+      addItem({
+        type: "product",
+        id: product.id,
+        name: product.name,
+        price: product.price ?? null,
+        image_url: product.image_url ?? null,
+      });
+      toast.success(`${product.name} agregado al carrito`);
+    },
+    [addItem]
+  );
 
   const { data: products = [] } = useQuery({
     queryKey: ["store-products"],
@@ -100,9 +120,12 @@ const ProductsStore = ({ onBack, initialCategory }: ProductsStoreProps) => {
               <Package className="h-6 w-6" style={{ color: "#16a34a" }} />
               <h1 className="text-xl font-bold">Catálogo de Maquinaria</h1>
             </div>
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Mostrando {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Mostrando {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
+              </span>
+              <CartButton />
+            </div>
           </div>
 
           {/* Search + Sort row */}
@@ -225,6 +248,15 @@ const ProductsStore = ({ onBack, initialCategory }: ProductsStoreProps) => {
                       <p className="text-sm text-muted-foreground">Consultar precio</p>
                     )}
                   </div>
+                  <Button
+                    size="sm"
+                    className="w-full mt-2 text-white text-xs h-8"
+                    style={{ backgroundColor: "#16a34a" }}
+                    onClick={(e) => handleAddToCart(e, product)}
+                  >
+                    <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                    Agregar al carrito
+                  </Button>
                 </div>
               </div>
             ))}
