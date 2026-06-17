@@ -816,6 +816,64 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                 </div>
               </div>
 
+              {/* Brochure / Ficha técnica PDF */}
+              <div className="space-y-3">
+                <Label>Brochure / Ficha técnica (PDF)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Subí un archivo PDF para que los clientes lo puedan descargar desde la página del producto.
+                </p>
+                {formData.brochure_url && !brochureFile && (
+                  <div className="flex items-center justify-between bg-muted px-3 py-2 rounded">
+                    <span className="text-sm truncate">
+                      Archivo actual cargado
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setFormData({ ...formData, brochure_url: null })}
+                    >
+                      <X className="h-4 w-4 mr-1" /> Quitar
+                    </Button>
+                  </div>
+                )}
+                {brochureFile && (
+                  <div className="flex items-center justify-between bg-muted px-3 py-2 rounded">
+                    <span className="text-sm truncate">{brochureFile.name}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setBrochureFile(null)}
+                    >
+                      <X className="h-4 w-4 mr-1" /> Cancelar
+                    </Button>
+                  </div>
+                )}
+                <Input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 20 * 1024 * 1024) {
+                        toast({
+                          title: "Archivo demasiado grande",
+                          description: "El PDF debe pesar 20MB o menos.",
+                          variant: "destructive",
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      setBrochureFile(file);
+                    }
+                    e.target.value = "";
+                  }}
+                  className="cursor-pointer"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="description">Descripción *</Label>
                 <Textarea
