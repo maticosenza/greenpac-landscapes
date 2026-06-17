@@ -560,7 +560,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       is_active: product.is_active ?? true,
       sort_order: product.sort_order?.toString() || "0",
       technical_specs: specs,
-      brochure_url: product.brochure_url ?? null,
+      brochure_url: (product as any).brochure_url ?? null,
     });
     // Load existing images
     const productImages = product.images || (product.image_url ? [product.image_url] : []);
