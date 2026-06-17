@@ -59,6 +59,7 @@ interface Product {
   price: number | null;
   is_active: boolean | null;
   sort_order: number | null;
+  brochure_url: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   technical_specs: any;
 }
@@ -72,6 +73,7 @@ interface ProductFormData {
   is_active: boolean;
   sort_order: string;
   technical_specs: TechnicalSpec[];
+  brochure_url: string | null;
 }
 
 const emptyFormData: ProductFormData = {
@@ -83,6 +85,7 @@ const emptyFormData: ProductFormData = {
   is_active: true,
   sort_order: "0",
   technical_specs: [],
+  brochure_url: null,
 };
 
 interface ProductManagementProps {
@@ -310,6 +313,8 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newSpec, setNewSpec] = useState({ label: "", value: "" });
   const [newFeature, setNewFeature] = useState("");
+  const [brochureFile, setBrochureFile] = useState<File | null>(null);
+  const [uploadingBrochure, setUploadingBrochure] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -369,6 +374,24 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     return Promise.all(uploadPromises);
   };
 
+  const uploadBrochure = async (file: File, productId: string): Promise<string> => {
+    const fileExt = file.name.split(".").pop() || "pdf";
+    const filePath = `${productId}_${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("product-brochures")
+      .upload(filePath, file, { upsert: true, contentType: file.type || "application/pdf" });
+    if (uploadError) throw uploadError;
+    return filePath;
+  };
+
+  const removeStoredBrochure = async (path: string) => {
+    try {
+      await supabase.storage.from("product-brochures").remove([path]);
+    } catch (e) {
+      // ignore — file may already be gone
+    }
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
       const featuresArray = data.features.filter((f) => f.trim());
@@ -406,6 +429,15 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
           .eq("id", newProduct.id);
       }
 
+      // Upload brochure if any
+      if (brochureFile && newProduct) {
+        const path = await uploadBrochure(brochureFile, newProduct.id);
+        await supabase
+          .from("products")
+          .update({ brochure_url: path } as any)
+          .eq("id", newProduct.id);
+      }
+
       return newProduct;
     },
     onSuccess: () => {
@@ -435,6 +467,18 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         allImages = [...allImages, ...newImageUrls];
       }
 
+      let brochurePath: string | null = data.brochure_url;
+      const existingBrochure = (editingProduct as any)?.brochure_url as string | null | undefined;
+      if (brochureFile) {
+        if (existingBrochure && existingBrochure !== brochurePath) {
+          await removeStoredBrochure(existingBrochure);
+        }
+        brochurePath = await uploadBrochure(brochureFile, id);
+      } else if (existingBrochure && !data.brochure_url) {
+        await removeStoredBrochure(existingBrochure);
+        brochurePath = null;
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateData: any = {
         name: data.name,
@@ -447,6 +491,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         technical_specs: data.technical_specs,
         images: allImages,
         image_url: allImages[0] || null,
+        brochure_url: brochurePath,
       };
 
       const { error } = await supabase
@@ -496,6 +541,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     setImageFiles([]);
     setImagePreviews([]);
     setExistingImages([]);
+    setBrochureFile(null);
     setIsDialogOpen(false);
   };
 
@@ -513,12 +559,14 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       is_active: product.is_active ?? true,
       sort_order: product.sort_order?.toString() || "0",
       technical_specs: specs,
+      brochure_url: (product as any).brochure_url ?? null,
     });
     // Load existing images
     const productImages = product.images || (product.image_url ? [product.image_url] : []);
     setExistingImages(productImages);
     setImagePreviews([]);
     setImageFiles([]);
+    setBrochureFile(null);
     setIsDialogOpen(true);
   };
 
@@ -765,6 +813,64 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
                     placeholder="ej: embolsadoras, extractores"
                   />
                 </div>
+              </div>
+
+              {/* Brochure / Ficha técnica PDF */}
+              <div className="space-y-3">
+                <Label>Brochure / Ficha técnica (PDF)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Subí un archivo PDF para que los clientes lo puedan descargar desde la página del producto.
+                </p>
+                {formData.brochure_url && !brochureFile && (
+                  <div className="flex items-center justify-between bg-muted px-3 py-2 rounded">
+                    <span className="text-sm truncate">
+                      Archivo actual cargado
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setFormData({ ...formData, brochure_url: null })}
+                    >
+                      <X className="h-4 w-4 mr-1" /> Quitar
+                    </Button>
+                  </div>
+                )}
+                {brochureFile && (
+                  <div className="flex items-center justify-between bg-muted px-3 py-2 rounded">
+                    <span className="text-sm truncate">{brochureFile.name}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setBrochureFile(null)}
+                    >
+                      <X className="h-4 w-4 mr-1" /> Cancelar
+                    </Button>
+                  </div>
+                )}
+                <Input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 20 * 1024 * 1024) {
+                        toast({
+                          title: "Archivo demasiado grande",
+                          description: "El PDF debe pesar 20MB o menos.",
+                          variant: "destructive",
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      setBrochureFile(file);
+                    }
+                    e.target.value = "";
+                  }}
+                  className="cursor-pointer"
+                />
               </div>
 
               <div className="space-y-2">

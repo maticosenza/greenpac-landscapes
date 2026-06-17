@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -25,6 +26,7 @@ interface Product {
   features: string[] | null;
   category: string | null;
   price: number | null;
+  brochure_url: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   technical_specs: any;
 }
@@ -41,6 +43,8 @@ const fallbackImages: Record<string, string> = {
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [downloadingBrochure, setDownloadingBrochure] = useState(false);
+  const { toast } = useToast();
 
   // Scroll to top when component mounts or id changes
   useEffect(() => {
@@ -62,6 +66,26 @@ const ProductDetail = () => {
     },
     enabled: !!id,
   });
+
+  const handleDownloadBrochure = async () => {
+    if (!product?.brochure_url) return;
+    setDownloadingBrochure(true);
+    try {
+      const { data, error } = await supabase.storage
+        .from("product-brochures")
+        .createSignedUrl(product.brochure_url, 60);
+      if (error || !data?.signedUrl) throw error || new Error("No se pudo generar el enlace");
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      toast({
+        title: "No se pudo descargar el brochure",
+        description: err instanceof Error ? err.message : "Intentá nuevamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingBrochure(false);
+    }
+  };
 
   const { data: relatedProducts } = useQuery({
     queryKey: ["related-products", product?.category],
@@ -306,15 +330,18 @@ const ProductDetail = () => {
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild className="flex-1">
-                    <a
-                      href={`https://wa.me/5491112345678?text=Hola! Estoy interesado en el producto: ${product.name}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {product.brochure_url && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handleDownloadBrochure}
+                      disabled={downloadingBrochure}
                     >
-                      Consultar por WhatsApp
-                    </a>
-                  </Button>
+                      <Download className="mr-2 h-5 w-5" />
+                      {downloadingBrochure ? "Generando..." : "Descargar Brochure"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
