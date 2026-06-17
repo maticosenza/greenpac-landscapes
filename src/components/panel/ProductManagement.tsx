@@ -468,15 +468,14 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       }
 
       let brochurePath: string | null = data.brochure_url;
+      const existingBrochure = (editingProduct as any)?.brochure_url as string | null | undefined;
       if (brochureFile) {
-        // Remove previous brochure if it existed
-        if (editingProduct?.brochure_url && editingProduct.brochure_url !== brochurePath) {
-          await removeStoredBrochure(editingProduct.brochure_url);
+        if (existingBrochure && existingBrochure !== brochurePath) {
+          await removeStoredBrochure(existingBrochure);
         }
         brochurePath = await uploadBrochure(brochureFile, id);
-      } else if (editingProduct?.brochure_url && !data.brochure_url) {
-        // User removed brochure
-        await removeStoredBrochure(editingProduct.brochure_url);
+      } else if (existingBrochure && !data.brochure_url) {
+        await removeStoredBrochure(existingBrochure);
         brochurePath = null;
       }
 
