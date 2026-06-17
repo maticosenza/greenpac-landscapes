@@ -59,6 +59,7 @@ interface Product {
   price: number | null;
   is_active: boolean | null;
   sort_order: number | null;
+  brochure_url: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   technical_specs: any;
 }
@@ -72,6 +73,7 @@ interface ProductFormData {
   is_active: boolean;
   sort_order: string;
   technical_specs: TechnicalSpec[];
+  brochure_url: string | null;
 }
 
 const emptyFormData: ProductFormData = {
@@ -83,6 +85,7 @@ const emptyFormData: ProductFormData = {
   is_active: true,
   sort_order: "0",
   technical_specs: [],
+  brochure_url: null,
 };
 
 interface ProductManagementProps {
@@ -310,6 +313,8 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newSpec, setNewSpec] = useState({ label: "", value: "" });
   const [newFeature, setNewFeature] = useState("");
+  const [brochureFile, setBrochureFile] = useState<File | null>(null);
+  const [uploadingBrochure, setUploadingBrochure] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -369,6 +374,24 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     return Promise.all(uploadPromises);
   };
 
+  const uploadBrochure = async (file: File, productId: string): Promise<string> => {
+    const fileExt = file.name.split(".").pop() || "pdf";
+    const filePath = `${productId}_${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("product-brochures")
+      .upload(filePath, file, { upsert: true, contentType: file.type || "application/pdf" });
+    if (uploadError) throw uploadError;
+    return filePath;
+  };
+
+  const removeStoredBrochure = async (path: string) => {
+    try {
+      await supabase.storage.from("product-brochures").remove([path]);
+    } catch (e) {
+      // ignore — file may already be gone
+    }
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
       const featuresArray = data.features.filter((f) => f.trim());
@@ -406,6 +429,15 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
           .eq("id", newProduct.id);
       }
 
+      // Upload brochure if any
+      if (brochureFile && newProduct) {
+        const path = await uploadBrochure(brochureFile, newProduct.id);
+        await supabase
+          .from("products")
+          .update({ brochure_url: path } as any)
+          .eq("id", newProduct.id);
+      }
+
       return newProduct;
     },
     onSuccess: () => {
@@ -435,6 +467,19 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         allImages = [...allImages, ...newImageUrls];
       }
 
+      let brochurePath: string | null = data.brochure_url;
+      if (brochureFile) {
+        // Remove previous brochure if it existed
+        if (editingProduct?.brochure_url && editingProduct.brochure_url !== brochurePath) {
+          await removeStoredBrochure(editingProduct.brochure_url);
+        }
+        brochurePath = await uploadBrochure(brochureFile, id);
+      } else if (editingProduct?.brochure_url && !data.brochure_url) {
+        // User removed brochure
+        await removeStoredBrochure(editingProduct.brochure_url);
+        brochurePath = null;
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateData: any = {
         name: data.name,
@@ -447,6 +492,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
         technical_specs: data.technical_specs,
         images: allImages,
         image_url: allImages[0] || null,
+        brochure_url: brochurePath,
       };
 
       const { error } = await supabase
@@ -496,6 +542,7 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
     setImageFiles([]);
     setImagePreviews([]);
     setExistingImages([]);
+    setBrochureFile(null);
     setIsDialogOpen(false);
   };
 
@@ -513,12 +560,14 @@ const ProductManagement = ({ searchTerm }: ProductManagementProps) => {
       is_active: product.is_active ?? true,
       sort_order: product.sort_order?.toString() || "0",
       technical_specs: specs,
+      brochure_url: product.brochure_url ?? null,
     });
     // Load existing images
     const productImages = product.images || (product.image_url ? [product.image_url] : []);
     setExistingImages(productImages);
     setImagePreviews([]);
     setImageFiles([]);
+    setBrochureFile(null);
     setIsDialogOpen(true);
   };
 
