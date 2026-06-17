@@ -285,6 +285,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brochure_url: string | null
           category: string | null
           created_at: string
           description: string
@@ -300,6 +301,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brochure_url?: string | null
           category?: string | null
           created_at?: string
           description: string
@@ -315,6 +317,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brochure_url?: string | null
           category?: string | null
           created_at?: string
           description?: string
