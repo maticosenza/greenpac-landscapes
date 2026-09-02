@@ -309,20 +309,20 @@ const Hero = () => {
                   </div>
                 </div>
 
-                {/* Desktop/tablet CTAs — left column grid */}
-                <div className="hidden sm:grid grid-cols-2 gap-3 lg:gap-4 w-full">
-                  <Button variant="heroOutline" size="lg" className="col-span-2 h-[50px] lg:h-[54px] text-base lg:text-lg w-full" asChild>
+                {/* Tablet/desktop CTAs */}
+                <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-2 w-full">
+                  <Button variant="heroOutline" size="lg" className="col-span-2 lg:col-span-1 h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[54px] text-base lg:text-lg w-full" asChild>
+                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="h-[50px] lg:h-[54px] text-base lg:text-lg w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
-                    <Wrench className="h-5 w-5 mr-1.5" />
+                    <Wrench className="h-5 w-5 mr-1.5 lg:hidden" />
                     Ver Repuestos
                   </Button>
                 </div>
