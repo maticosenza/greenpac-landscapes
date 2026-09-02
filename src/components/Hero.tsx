@@ -230,9 +230,9 @@ const Hero = () => {
       {/* Banner edit */}
       {isEditMode && <HeroBannerEditor />}
 
-      {/* Content — mobile: centered-high, sm+: centered */}
-      <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-40 sm:pt-32" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-[360px] sm:max-w-[560px] md:max-w-[640px] lg:max-w-[760px] xl:max-w-[860px]">
+      {/* Content — mobile: top, sm+: left column */}
+      <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-28 sm:pt-32" style={{ minHeight: "100svh" }}>
+        <div className="w-full max-w-[360px] sm:max-w-[540px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -244,7 +244,7 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align).replace('items-', '')} space-y-2 sm:space-y-5 lg:space-y-7`}>
+            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-6`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
                 <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
@@ -253,16 +253,15 @@ const Hero = () => {
                 </p>
               </div>
 
-              {/* H1 — smaller on mobile */}
+              {/* H1 — editable, constrained to left column */}
               <div className="w-full relative">
                 {isEditMode && (
                   <div className="absolute -top-8 left-0 z-20">
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[38px] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[clamp(3rem,4.6vw,5.1rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align).replace('text-', '')}`}>
-                  <span className="hidden sm:inline">Tecnología y<br />potencia para el<br />campo argentino</span>
-                  <span className="sm:hidden">Tecnología y<br />potencia para el<br />campo argentino</span>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[clamp(2.6rem,3.6vw,3.8rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                  {h1Text}
                 </h1>
               </div>
 
@@ -273,7 +272,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.4vw,1.45rem)] max-w-[52ch] leading-relaxed ${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.3vw,1.35rem)] max-w-[48ch] leading-relaxed ${alignClass(subAlign)}`}>
                   {subtitleLine1}
                   {subtitleLine2 ? (
                     <>
@@ -284,42 +283,43 @@ const Hero = () => {
                 </p>
               </div>
 
-              {/* Mobile buttons — compact, left-aligned */}
-              <div className="flex sm:hidden flex-col items-stretch gap-2.5 pt-3 w-full">
-                <a
-                  href="#cotizacion"
-                  className="flex items-center justify-center h-[48px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[15px] transition-all duration-300"
-                >
-                  {ctaQuote}
-                </a>
-                <div className="flex gap-2.5 w-full">
+              {/* CTAs */}
+              <div className="w-full pt-2 sm:pt-3">
+                {/* Mobile CTAs */}
+                <div className="flex sm:hidden flex-col items-stretch gap-2.5 w-full">
                   <a
-                    href="#productos"
-                    className="flex-1 flex items-center justify-center h-[46px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[14px] shadow-lg transition-all duration-300"
+                    href="#cotizacion"
+                    className="flex items-center justify-center h-[44px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[15px] transition-all duration-300"
                   >
-                    Maquinaria
+                    {ctaQuote}
                   </a>
-                  <button
-                    onClick={handleVerRepuestos}
-                    className="flex-1 flex items-center justify-center h-[46px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
-                  >
-                    Repuestos
-                  </button>
+                  <div className="flex gap-2.5 w-full">
+                    <a
+                      href="#productos"
+                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[14px] shadow-lg transition-all duration-300"
+                    >
+                      Maquinaria
+                    </a>
+                    <button
+                      onClick={handleVerRepuestos}
+                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
+                    >
+                      Repuestos
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Desktop buttons */}
-              <div className="relative w-full">
-                <div className={`hidden sm:flex flex-row gap-4 lg:gap-5 pt-3 w-full ${justifyClass(h1Align)}`}>
-                  <Button variant="heroOutline" size="lg" className="w-auto h-[50px] lg:h-[54px] text-base lg:text-lg px-10 lg:px-12" asChild>
+                {/* Desktop/tablet CTAs — left column grid */}
+                <div className="hidden sm:grid grid-cols-2 gap-3 lg:gap-4 w-full">
+                  <Button variant="heroOutline" size="lg" className="col-span-2 h-[50px] lg:h-[54px] text-base lg:text-lg w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="hero" size="lg" className="w-auto h-[50px] lg:h-[54px] text-base lg:text-lg px-10 lg:px-12" asChild>
+                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[54px] text-base lg:text-lg w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="w-auto h-[50px] lg:h-[54px] text-base lg:text-lg px-10 lg:px-12 border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[50px] lg:h-[54px] text-base lg:text-lg w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
                     <Wrench className="h-5 w-5 mr-1.5" />
