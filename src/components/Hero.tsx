@@ -244,7 +244,7 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-6`}>
+            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-5`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
                 <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
@@ -260,7 +260,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[clamp(2.6rem,3.6vw,3.8rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[2.5rem] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
