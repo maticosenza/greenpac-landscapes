@@ -284,19 +284,19 @@ const Hero = () => {
               </div>
 
               {/* CTAs */}
-              <div className="w-full pt-2 sm:pt-3">
+              <div className="w-full pt-1.5 sm:pt-2">
                 {/* Mobile CTAs */}
                 <div className="flex sm:hidden flex-col items-stretch gap-2.5 w-full">
                   <a
                     href="#cotizacion"
-                    className="flex items-center justify-center h-[44px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[15px] transition-all duration-300"
+                    className="flex items-center justify-center h-[44px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[15px] shadow-lg transition-all duration-300"
                   >
                     {ctaQuote}
                   </a>
                   <div className="flex gap-2.5 w-full">
                     <a
                       href="#productos"
-                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[14px] shadow-lg transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
                     >
                       Maquinaria
                     </a>
@@ -309,20 +309,36 @@ const Hero = () => {
                   </div>
                 </div>
 
-                {/* Tablet/desktop CTAs */}
-                <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-2 w-full">
-                  <Button variant="heroOutline" size="lg" className="col-span-2 lg:col-span-1 h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
+                {/* Tablet CTAs — quote full row, other two below */}
+                <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3 w-full">
+                  <Button variant="hero" size="lg" className="col-span-2 h-[48px] text-base w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
+                  <Button variant="heroOutline" size="lg" className="h-[46px] text-base w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[46px] text-base w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
-                    <Wrench className="h-5 w-5 mr-1.5 lg:hidden" />
+                    Ver Repuestos
+                  </Button>
+                </div>
+
+                {/* Desktop CTAs — one compact row, three buttons */}
+                <div className="hidden lg:flex items-center gap-3 w-fit">
+                  <Button variant="hero" size="lg" className="h-[46px] text-sm px-6 w-auto whitespace-nowrap" asChild>
+                    <a href="#cotizacion">{ctaQuote}</a>
+                  </Button>
+                  <Button variant="heroOutline" size="lg" className="h-[46px] text-sm px-6 w-auto whitespace-nowrap" asChild>
+                    <a href="#productos">{ctaProducts}</a>
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="h-[46px] text-sm px-6 w-auto whitespace-nowrap border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    onClick={handleVerRepuestos}
+                  >
                     Ver Repuestos
                   </Button>
                 </div>
