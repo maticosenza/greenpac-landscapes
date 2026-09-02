@@ -230,7 +230,7 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-36 sm:pt-28 lg:pt-40" style={{ minHeight: "100svh" }}>
+      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-36 sm:pt-32 lg:pt-40" style={{ minHeight: "100svh" }}>
         <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[640px]">
           <EditableSection
             sectionId="Hero Textos"
@@ -258,7 +258,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.06] tracking-tight text-[36px] sm:text-[2.75rem] lg:text-[clamp(3.25rem,3.9vw,3.5rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.06] tracking-tight text-[36px] sm:text-[clamp(2.75rem,5vw,3.125rem)] lg:text-[clamp(3.25rem,3.9vw,3.5rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
@@ -301,17 +301,17 @@ const Hero = () => {
                   </div>
                 </div>
 
-                {/* Tablet CTAs — quote full row, other two below */}
-                <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3 w-full">
-                  <Button variant="hero" size="lg" className="col-span-2 h-[48px] text-base w-full" asChild>
+                {/* Tablet CTAs — portrait: quote full row + two below; landscape: one row of three */}
+                <div className="hidden sm:grid lg:hidden grid-cols-2 landscape:grid-cols-3 gap-3 w-full">
+                  <Button variant="hero" size="lg" className="col-span-2 landscape:col-span-1 h-[48px] landscape:h-[44px] text-base landscape:text-sm w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="heroOutline" size="lg" className="h-[46px] text-base w-full" asChild>
+                  <Button variant="heroOutline" size="lg" className="h-[46px] landscape:h-[44px] text-base landscape:text-sm w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="h-[46px] text-base w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[46px] landscape:h-[44px] text-base landscape:text-sm w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
                     Ver Repuestos
