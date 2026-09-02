@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf, Wrench } from "lucide-react";
+import { ChevronDown, Pencil, Upload, Save, X, Loader2, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -231,8 +231,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-28 sm:pt-32 lg:pt-36" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[460px]">
+      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-24 sm:pt-28 lg:pt-32" style={{ minHeight: "100svh" }}>
+        <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[640px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -244,11 +244,11 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-5`}>
+            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-2.5 sm:space-y-4 lg:space-y-5`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
-                <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.18em] sm:tracking-[0.25em] uppercase whitespace-nowrap">
+                <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.8rem,1.1vw,0.95rem)] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
                   {kicker}
                 </p>
               </div>
@@ -260,23 +260,23 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[2.5rem] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.06] tracking-tight text-[36px] sm:text-[2.75rem] lg:text-[clamp(3.25rem,3.9vw,3.5rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
 
-              {/* Subtitle — hidden on mobile */}
-              <div className="w-full relative hidden sm:block">
+              {/* Subtitle — short on mobile, compact on desktop */}
+              <div className="w-full relative">
                 {isEditMode && (
                   <div className="absolute -top-8 left-0 z-20">
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.3vw,1.35rem)] max-w-[48ch] leading-relaxed ${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[13px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
                   {subtitleLine1}
                   {subtitleLine2 ? (
                     <>
-                      <br />
+                      {" "}
                       {subtitleLine2}
                     </>
                   ) : null}
@@ -284,19 +284,19 @@ const Hero = () => {
               </div>
 
               {/* CTAs */}
-              <div className="w-full pt-2 sm:pt-3">
+              <div className="w-full pt-1.5 sm:pt-2">
                 {/* Mobile CTAs */}
                 <div className="flex sm:hidden flex-col items-stretch gap-2.5 w-full">
                   <a
                     href="#cotizacion"
-                    className="flex items-center justify-center h-[44px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[15px] transition-all duration-300"
+                    className="flex items-center justify-center h-[44px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[15px] shadow-lg transition-all duration-300"
                   >
                     {ctaQuote}
                   </a>
                   <div className="flex gap-2.5 w-full">
                     <a
                       href="#productos"
-                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[14px] shadow-lg transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
                     >
                       Maquinaria
                     </a>
@@ -309,20 +309,36 @@ const Hero = () => {
                   </div>
                 </div>
 
-                {/* Tablet/desktop CTAs */}
-                <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-2 w-full">
-                  <Button variant="heroOutline" size="lg" className="col-span-2 lg:col-span-1 h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
+                {/* Tablet CTAs — quote full row, other two below */}
+                <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3 w-full">
+                  <Button variant="hero" size="lg" className="col-span-2 h-[48px] text-base w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
+                  <Button variant="heroOutline" size="lg" className="h-[46px] text-base w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[46px] text-base w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
-                    <Wrench className="h-5 w-5 mr-1.5 lg:hidden" />
+                    Ver Repuestos
+                  </Button>
+                </div>
+
+                {/* Desktop CTAs — one compact row, three buttons */}
+                <div className="hidden lg:flex items-center gap-3 w-fit">
+                  <Button variant="hero" size="lg" className="h-[46px] text-sm px-6 w-auto whitespace-nowrap" asChild>
+                    <a href="#cotizacion">{ctaQuote}</a>
+                  </Button>
+                  <Button variant="heroOutline" size="lg" className="h-[46px] text-sm px-6 w-auto whitespace-nowrap" asChild>
+                    <a href="#productos">{ctaProducts}</a>
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="h-[46px] text-sm px-6 w-auto whitespace-nowrap border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    onClick={handleVerRepuestos}
+                  >
                     Ver Repuestos
                   </Button>
                 </div>
