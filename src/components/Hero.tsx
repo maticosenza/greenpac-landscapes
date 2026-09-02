@@ -231,8 +231,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-28 sm:pt-32 lg:pt-36" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[460px]">
+      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-24 sm:pt-28 lg:pt-32" style={{ minHeight: "100svh" }}>
+        <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[640px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
