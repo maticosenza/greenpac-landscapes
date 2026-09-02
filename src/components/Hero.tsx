@@ -209,7 +209,7 @@ const Hero = () => {
         <img
           src={heroMobileAsset.url}
           alt={heroMobileAsset.alt}
-          className="w-full h-full object-cover sm:hidden"
+          className="w-full h-full object-cover object-[50%_60%] sm:hidden"
           loading="eager"
           fetchPriority="high"
           decoding="async"
