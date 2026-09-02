@@ -301,17 +301,17 @@ const Hero = () => {
                   </div>
                 </div>
 
-                {/* Tablet CTAs — quote full row, other two below */}
-                <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3 w-full">
-                  <Button variant="hero" size="lg" className="col-span-2 h-[48px] text-base w-full" asChild>
+                {/* Tablet CTAs — portrait: quote full row + two below; landscape: one row of three */}
+                <div className="hidden sm:grid lg:hidden grid-cols-2 landscape:grid-cols-3 gap-3 w-full">
+                  <Button variant="hero" size="lg" className="col-span-2 landscape:col-span-1 h-[48px] landscape:h-[44px] text-base landscape:text-sm w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="heroOutline" size="lg" className="h-[46px] text-base w-full" asChild>
+                  <Button variant="heroOutline" size="lg" className="h-[46px] landscape:h-[44px] text-base landscape:text-sm w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="h-[46px] text-base w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[46px] landscape:h-[44px] text-base landscape:text-sm w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
                     Ver Repuestos
