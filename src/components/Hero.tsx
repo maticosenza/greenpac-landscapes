@@ -231,8 +231,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start sm:justify-center greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-28 sm:pt-32" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-[360px] sm:max-w-[540px]">
+      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-28 sm:pt-32 lg:pt-36" style={{ minHeight: "100svh" }}>
+        <div className="w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[460px]">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -244,7 +244,7 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-6`}>
+            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-5`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
                 <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
@@ -260,7 +260,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[clamp(2.6rem,3.6vw,3.8rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[2.5rem] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
@@ -309,20 +309,20 @@ const Hero = () => {
                   </div>
                 </div>
 
-                {/* Desktop/tablet CTAs — left column grid */}
-                <div className="hidden sm:grid grid-cols-2 gap-3 lg:gap-4 w-full">
-                  <Button variant="heroOutline" size="lg" className="col-span-2 h-[50px] lg:h-[54px] text-base lg:text-lg w-full" asChild>
+                {/* Tablet/desktop CTAs */}
+                <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-2 w-full">
+                  <Button variant="heroOutline" size="lg" className="col-span-2 lg:col-span-1 h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
                     <a href="#cotizacion">{ctaQuote}</a>
                   </Button>
-                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[54px] text-base lg:text-lg w-full" asChild>
+                  <Button variant="hero" size="lg" className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full" asChild>
                     <a href="#productos">{ctaProducts}</a>
                   </Button>
                   <Button
                     size="lg"
-                    className="h-[50px] lg:h-[54px] text-base lg:text-lg w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
+                    className="h-[50px] lg:h-[44px] text-base lg:text-sm px-2 w-full border-2 border-white/80 text-white bg-transparent hover:bg-white hover:text-foreground font-display font-semibold transition-all duration-300"
                     onClick={handleVerRepuestos}
                   >
-                    <Wrench className="h-5 w-5 mr-1.5" />
+                    <Wrench className="h-5 w-5 mr-1.5 lg:hidden" />
                     Ver Repuestos
                   </Button>
                 </div>
