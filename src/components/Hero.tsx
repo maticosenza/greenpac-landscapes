@@ -244,11 +244,11 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 lg:space-y-5`}>
+            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-2.5 sm:space-y-4 lg:space-y-5`}>
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
-                <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.85rem,1.1vw,1rem)] tracking-[0.18em] sm:tracking-[0.25em] uppercase whitespace-nowrap">
+                <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.8rem,1.1vw,0.95rem)] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
                   {kicker}
                 </p>
               </div>
@@ -260,23 +260,23 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.08] tracking-tight text-[32px] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[2.5rem] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.06] tracking-tight text-[36px] sm:text-[2.75rem] lg:text-[clamp(3.5rem,4.4vw,4rem)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
 
-              {/* Subtitle — hidden on mobile */}
-              <div className="w-full relative hidden sm:block">
+              {/* Subtitle — short on mobile, compact on desktop */}
+              <div className="w-full relative">
                 {isEditMode && (
                   <div className="absolute -top-8 left-0 z-20">
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[clamp(0.95rem,1.3vw,1.35rem)] max-w-[48ch] leading-relaxed ${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[13px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
                   {subtitleLine1}
                   {subtitleLine2 ? (
                     <>
-                      <br />
+                      {" "}
                       {subtitleLine2}
                     </>
                   ) : null}
