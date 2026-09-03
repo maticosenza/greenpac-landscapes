@@ -269,7 +269,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[13px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[16px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
                   {subtitleLine1}
                 </p>
               </div>
