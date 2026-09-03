@@ -230,7 +230,7 @@ const Hero = () => {
 
       {/* Content — mobile: top, sm+: left column */}
       <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-[180px] sm:pt-32 lg:pt-40" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[760px]">
+        <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[760px] mx-auto sm:mx-0">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -241,9 +241,9 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-start sm:${itemsClass(h1Align)} space-y-2.5 sm:space-y-4 lg:space-y-5`}>
+            <div className={`animate-slide-up flex flex-col items-center sm:${itemsClass(h1Align)} space-y-2.5 sm:space-y-4 lg:space-y-5`}>
               {/* Kicker with leaf icon */}
-              <div className="flex items-center gap-2 sm:gap-2.5 w-fit">
+              <div className="flex items-center justify-center gap-2 sm:gap-2.5 w-fit mx-auto sm:mx-0">
                 <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                 <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.8rem,1.1vw,0.95rem)] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
                   {kicker}
@@ -257,8 +257,13 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[40px] max-w-[320px] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] sm:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
-                  {h1Text}
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[40px] max-w-[320px] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] sm:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-center sm:${alignClass(h1Align)} mx-auto sm:mx-0`}>
+                  <span className="sm:hidden">
+                    Tecnología y<br />
+                    potencia para el<br />
+                    campo argentino
+                  </span>
+                  <span className="hidden sm:inline">{h1Text}</span>
                 </h1>
               </div>
 
@@ -269,7 +274,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[16px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[16px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-center sm:${alignClass(subAlign)} mx-auto sm:mx-0`}>
                   {subtitleLine1}
                 </p>
               </div>
@@ -277,10 +282,10 @@ const Hero = () => {
               {/* CTAs */}
               <div className="w-full pt-1.5 sm:pt-2">
                 {/* Mobile CTAs */}
-                <div className="flex sm:hidden flex-col items-stretch gap-2.5 w-full">
+                <div className="flex sm:hidden flex-col items-center gap-2.5 w-full">
                   <a
                     href="#cotizacion"
-                    className="flex items-center justify-center h-[56px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[17px] shadow-lg transition-all duration-300"
+                    className="flex items-center justify-center w-full h-[56px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[17px] shadow-lg transition-all duration-300"
                   >
                     {ctaQuote}
                   </a>
