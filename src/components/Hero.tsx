@@ -280,20 +280,20 @@ const Hero = () => {
                 <div className="flex sm:hidden flex-col items-stretch gap-2.5 w-full">
                   <a
                     href="#cotizacion"
-                    className="flex items-center justify-center h-[44px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[15px] shadow-lg transition-all duration-300"
+                    className="flex items-center justify-center h-[56px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[17px] shadow-lg transition-all duration-300"
                   >
                     {ctaQuote}
                   </a>
                   <div className="flex gap-2.5 w-full">
                     <a
                       href="#productos"
-                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[56px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[17px] transition-all duration-300"
                     >
                       Maquinaria
                     </a>
                     <button
                       onClick={handleVerRepuestos}
-                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[56px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[17px] transition-all duration-300"
                     >
                       Repuestos
                     </button>
