@@ -14,7 +14,6 @@ import {
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
-import DraggableHeroBlock from "@/components/DraggableHeroBlock";
 import HeroAlignmentToggle from "@/components/HeroAlignmentToggle";
 import { useAuth } from "@/hooks/useAuth";
 const heroImageDefault = "/__l5e/assets-v1/51c50412-94a8-41da-a3ef-11e4a58c0fed/greenpac-hero-desktop-final.png";
@@ -230,7 +229,7 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-40 min-[400px]:pt-[120px] sm:pt-32 lg:pt-40" style={{ minHeight: "100svh" }}>
+      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-40 sm:pt-32 lg:pt-40" style={{ minHeight: "100svh" }}>
         <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[760px]">
           <EditableSection
             sectionId="Hero Textos"
