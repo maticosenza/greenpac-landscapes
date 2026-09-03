@@ -281,6 +281,7 @@ const Hero = () => {
                   <span className="hidden sm:inline">{subtitleLine1}</span>
                 </p>
               </div>
+              </div>
 
               {/* CTAs */}
               <div className="w-full pt-1.5 sm:pt-2">
