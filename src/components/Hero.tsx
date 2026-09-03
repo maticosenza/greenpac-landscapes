@@ -229,7 +229,7 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-40 sm:pt-32 lg:pt-40" style={{ minHeight: "100svh" }}>
+      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-[180px] sm:pt-32 lg:pt-40" style={{ minHeight: "100svh" }}>
         <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[760px]">
           <EditableSection
             sectionId="Hero Textos"
@@ -257,7 +257,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[36px] max-w-[300px] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] sm:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[40px] max-w-[320px] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] sm:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
@@ -269,7 +269,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[13px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
+                <p className={`text-primary-foreground/85 text-[16px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-left sm:${alignClass(subAlign)}`}>
                   {subtitleLine1}
                 </p>
               </div>
@@ -280,20 +280,20 @@ const Hero = () => {
                 <div className="flex sm:hidden flex-col items-stretch gap-2.5 w-full">
                   <a
                     href="#cotizacion"
-                    className="flex items-center justify-center h-[44px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[15px] shadow-lg transition-all duration-300"
+                    className="flex items-center justify-center h-[56px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[17px] shadow-lg transition-all duration-300"
                   >
                     {ctaQuote}
                   </a>
                   <div className="flex gap-2.5 w-full">
                     <a
                       href="#productos"
-                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[56px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[17px] transition-all duration-300"
                     >
                       Maquinaria
                     </a>
                     <button
                       onClick={handleVerRepuestos}
-                      className="flex-1 flex items-center justify-center h-[42px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[14px] transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[56px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[17px] transition-all duration-300"
                     >
                       Repuestos
                     </button>
