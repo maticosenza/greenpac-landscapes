@@ -243,7 +243,7 @@ const Hero = () => {
           >
             <div className={`animate-slide-up flex flex-col items-center sm:${itemsClass(h1Align)} space-y-2.5 sm:space-y-4 lg:space-y-5`}>
               {/* Kicker with leaf icon */}
-              <div className="flex items-center gap-2 sm:gap-2.5 w-full max-w-[52ch] mx-auto sm:mx-0 md:w-fit md:max-w-none md:self-start md:mx-0 md:text-left">
+              <div className="flex items-center gap-2 sm:gap-2.5 w-full justify-center text-center self-center mx-auto sm:justify-start sm:text-left sm:self-start sm:mx-0 md:w-fit md:max-w-none">
                 <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                 <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.8rem,1.1vw,0.95rem)] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
                   {kicker}
