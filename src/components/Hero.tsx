@@ -14,7 +14,6 @@ import {
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
-import DraggableHeroBlock from "@/components/DraggableHeroBlock";
 import HeroAlignmentToggle from "@/components/HeroAlignmentToggle";
 import { useAuth } from "@/hooks/useAuth";
 const heroImageDefault = "/__l5e/assets-v1/51c50412-94a8-41da-a3ef-11e4a58c0fed/greenpac-hero-desktop-final.png";
