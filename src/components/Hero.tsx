@@ -261,9 +261,9 @@ const Hero = () => {
                 )}
                 <h1 className={`text-primary-foreground font-extrabold tracking-tight text-[36px] leading-[1.08] w-full max-w-[52ch] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] md:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-center sm:${alignClass(h1Align)} mx-auto sm:mx-0`}>
                   <span className="sm:hidden">
-                    <span className="block">Tecnología y</span>
-                    <span className="block">potencia para el</span>
-                    <span className="block whitespace-nowrap">campo argentino</span>
+                  <span className="block tracking-[0.123em]">Tecnología y</span>
+                  <span className="block">potencia para el</span>
+                  <span className="block whitespace-nowrap">campo argentino</span>
                   </span>
                   <span className="hidden sm:inline">{h1Text}</span>
                 </h1>
