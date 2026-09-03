@@ -275,7 +275,8 @@ const Hero = () => {
                   </div>
                 )}
                 <p className={`text-primary-foreground/85 text-[16px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[52ch] leading-snug sm:leading-relaxed text-center sm:${alignClass(subAlign)} mx-auto sm:mx-0`}>
-                  {subtitleLine1}
+                  <span className="sm:hidden">Equipos listos para trabajar, con asesoramiento experto.</span>
+                  <span className="hidden sm:inline">{subtitleLine1}</span>
                 </p>
               </div>
 
