@@ -257,7 +257,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[40px] max-w-[300px] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] sm:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
+                <h1 className={`text-primary-foreground font-extrabold leading-[1.05] tracking-tight text-[40px] max-w-[320px] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] sm:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-left sm:${alignClass(h1Align)}`}>
                   {h1Text}
                 </h1>
               </div>
