@@ -16,8 +16,8 @@ import { useEditMode } from "@/hooks/useEditMode";
 import EditableSection from "@/components/EditableSection";
 import HeroAlignmentToggle from "@/components/HeroAlignmentToggle";
 import { useAuth } from "@/hooks/useAuth";
-const heroImageDefault = "/__l5e/assets-v1/51c50412-94a8-41da-a3ef-11e4a58c0fed/greenpac-hero-desktop-final.png";
-const heroMobileDefault = "/__l5e/assets-v1/4aaeb193-33bf-4bd4-8582-6b61c64fad72/greenpac-hero-mobile-final.png";
+const heroImageDefault = "/__l5e/assets-v1/daa25e4a-2d1e-4ad4-91a4-361970765f2c/greenpac-hero-desktop.png";
+const heroMobileDefault = "/__l5e/assets-v1/ffed0012-7b0b-4043-9ec4-7a8468c79672/greenpac-hero-mobile.png";
 
 const HeroBannerEditor = ({ onSaved }: { onSaved?: () => void }) => {
   const { updateAsset } = useSiteContent();
