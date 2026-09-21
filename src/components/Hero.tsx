@@ -229,8 +229,8 @@ const Hero = () => {
       {isEditMode && <HeroBannerEditor />}
 
       {/* Content — mobile: top, sm+: left column */}
-      <div className="relative z-10 flex flex-col justify-start greenpac-container pb-20 sm:pb-20 lg:pb-24 pt-[180px] sm:pt-40 lg:pt-48" style={{ minHeight: "100svh" }}>
-        <div className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[760px] mx-auto sm:mx-0">
+      <div className="relative z-10 flex flex-col justify-start greenpac-container px-4 sm:px-8 md:px-12 lg:px-16 pb-20 sm:pb-20 lg:pb-24 pt-[180px] sm:pt-40 lg:pt-48" style={{ minHeight: "100svh" }}>
+        <div className="w-full max-w-[400px] sm:max-w-[480px] lg:max-w-[760px] mx-auto sm:mx-0">
           <EditableSection
             sectionId="Hero Textos"
             fields={[
@@ -241,13 +241,13 @@ const Hero = () => {
               { key: "hero-cta-secondary", label: "Botón secundario", type: "text", fallback: "Ver Maquinaria" },
             ]}
           >
-            <div className={`animate-slide-up flex flex-col items-center sm:${itemsClass(h1Align)} space-y-2.5 sm:space-y-4 lg:space-y-5`}>
+            <div className={`animate-slide-up flex flex-col items-center sm:${itemsClass(h1Align)} space-y-3 sm:space-y-5 md:space-y-6 lg:space-y-5`}>
               {/* Mobile: text block wrapper matches CTAs width */}
-              <div className="w-full sm:contents flex flex-col items-center space-y-2.5">
+              <div className="w-full sm:contents flex flex-col items-center space-y-3">
               {/* Kicker with leaf icon */}
               <div className="flex items-center gap-2 sm:gap-2.5 w-full justify-center text-center self-center mx-auto sm:justify-start sm:text-left sm:self-start sm:mx-0 md:w-fit md:max-w-none">
                 <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <p className="text-primary font-semibold text-[11px] sm:text-[clamp(0.8rem,1.1vw,0.95rem)] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
+                <p className="text-primary font-semibold text-[clamp(11px,3vw,12px)] sm:text-[clamp(0.8rem,1.1vw,0.95rem)] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
                   {kicker}
                 </p>
               </div>
@@ -259,7 +259,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-h1-align" defaultAlign="left" />
                   </div>
                 )}
-                <h1 className={`text-primary-foreground font-extrabold tracking-tight text-[36px] leading-[1.08] w-full max-w-[52ch] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.05] md:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-center sm:${alignClass(h1Align)} mx-auto sm:mx-0`}>
+                <h1 className={`text-primary-foreground font-extrabold tracking-tight text-[clamp(2.05rem,10.25vw,2.5rem)] leading-[1.06] w-full max-w-[52ch] sm:text-[clamp(3rem,6vw,3.5rem)] sm:leading-[1.1] md:max-w-[460px] lg:text-[clamp(4rem,5.2vw,4.5rem)] lg:leading-[1.04] lg:max-w-[9.7em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] sm:drop-shadow-none text-center sm:${alignClass(h1Align)} mx-auto sm:mx-0`}>
                   <span className="sm:hidden">
                   <span className="block tracking-[0.110em]">Tecnología y</span>
                   <span className="block">potencia para el</span>
@@ -276,7 +276,7 @@ const Hero = () => {
                     <HeroAlignmentToggle alignKey="hero-sub-align" defaultAlign="left" />
                   </div>
                 )}
-                <p className={`text-primary-foreground/85 text-[16px] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[286px] sm:max-w-[52ch] leading-snug sm:leading-relaxed text-center sm:${alignClass(subAlign)} mx-auto sm:mx-0 translate-x-1 sm:translate-x-0`}>
+                <p className={`text-primary-foreground/85 text-[clamp(15px,4.2vw,17px)] sm:text-[clamp(0.95rem,1.2vw,1.15rem)] max-w-[330px] sm:max-w-[52ch] leading-snug sm:leading-relaxed text-center sm:${alignClass(subAlign)} mx-auto sm:mx-0`}>
                   <span className="sm:hidden">Equipos listos para trabajar, con asesoramiento experto.</span>
                   <span className="hidden sm:inline">{subtitleLine1}</span>
                 </p>
@@ -289,20 +289,20 @@ const Hero = () => {
                 <div className="flex sm:hidden flex-col items-center gap-2.5 w-full">
                   <a
                     href="#cotizacion"
-                    className="flex items-center justify-center w-full h-[56px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[17px] shadow-lg transition-all duration-300"
+                    className="flex items-center justify-center w-full h-[58px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold text-[clamp(16px,4.4vw,18px)] shadow-lg transition-all duration-300"
                   >
                     {ctaQuote}
                   </a>
                   <div className="flex gap-2.5 w-full">
                     <a
                       href="#productos"
-                      className="flex-1 flex items-center justify-center h-[56px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[17px] transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[58px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[clamp(16px,4.4vw,18px)] transition-all duration-300"
                     >
                       Maquinaria
                     </a>
                     <button
                       onClick={handleVerRepuestos}
-                      className="flex-1 flex items-center justify-center h-[56px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[17px] transition-all duration-300"
+                      className="flex-1 flex items-center justify-center h-[58px] rounded-lg border-2 border-white/80 text-white bg-transparent hover:bg-white/10 font-display font-semibold text-[clamp(16px,4.4vw,18px)] transition-all duration-300"
                     >
                       Repuestos
                     </button>
