@@ -144,7 +144,7 @@ const Header = () => {
         }`}
       >
         <div className="greenpac-container flex items-center justify-between py-4">
-          <LogoBlock iconClass="h-8" textClass="h-16 -ml-1" />
+          <LogoBlock iconClass="h-12 md:h-14 scale-y-105" textClass="h-24 md:h-[6.5rem] -ml-1" />
           <button className="text-primary-foreground p-2" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
             <X className="h-6 w-6" />
           </button>
